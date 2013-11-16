@@ -1,0 +1,91 @@
+/////////////////////////////////////////////////////////////////
+//
+// camera.h
+// Camera class
+//
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
+#ifndef __CAMERA_H__
+#define __CAMERA_H__
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
+// Engine Includes
+#include <dj2d.h>
+/////////////////////////////////////////////////////////////////
+// Game Includes
+#include "gamedef.h"
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
+DJ_FILE_START();
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
+#define RUNNER_PADDING					DJVector2(0.18f, 0.425f)
+#define CAMERA_VELOCITY_CATCHUP_TIME	DJVector2(0.5f, 0.4f)
+#define CAMERA_POSITION_CATCHUP_TIME	DJVector2(0.2f, 0.1f)
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
+DJ_FILE_START();
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
+class Camera
+{
+protected:
+	DJVector2		m_vPos;
+	DJVector2		m_vPrevTargetPos;
+	DJVector2		m_vSpanVel;
+
+	// Camera shaking
+	DJVector2		m_vDir;
+	djfloat			m_fShakingTime;
+
+	djfloat			m_fPaddingOffsetX;
+	djfloat			m_fPaddingDesiredOffsetX;
+	djfloat			m_fPaddingSpeedXFactor;
+
+	djfloat			m_fPaddingOffsetY;
+	djfloat			m_fPaddingDesiredOffsetY;
+	djfloat			m_fPaddingSpeedYFactor;
+public:
+	Camera();
+	~Camera();
+
+	void Reset();
+	
+	void SetPosition(const DJVector2 &vPos);
+
+	const DJVector2 &GetPosition() { return m_vPos; }
+
+	void OnUpdate(float fDeltaTime, const DJVector2 &vTargetPos, const DJVector2 &vYRestriction);
+	
+	DJMatrix2D GetTransform();
+	
+	DJMatrix2D GetTransform(const DJVector2 &vDriftRatio);
+
+	void SetCameraShaking(const DJVector2 &vDir)		{ m_fShakingTime = 0.0f; m_vDir = vDir;}
+	void SetPaddingOffsetX(djfloat fOffsetX, djfloat fFactor = 1.0f)	{ m_fPaddingDesiredOffsetX = fOffsetX; m_fPaddingSpeedXFactor = fFactor;}
+	djfloat GetPaddingOffsetX()							{ return m_fPaddingOffsetX;}
+
+	void SetPaddingOffsetY(djfloat fOffsetY, djfloat fFactor = 1.0f)	
+	{ 
+		m_fPaddingDesiredOffsetY = fOffsetY; 
+		m_fPaddingSpeedXFactor = fFactor;
+	}
+	djfloat GetPaddingOffsetY()							
+	{ 
+		return m_fPaddingOffsetY;
+	}
+};
+
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
+DJ_FILE_END();
+/////////////////////////////////////////////////////////////////
+
+#endif//__CAMERA_H__

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+**
+** Copyright 2009, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License"); 
+** you may not use this file except in compliance with the License. 
+** You may obtain a copy of the License at 
+**
+**     http://www.apache.org/licenses/LICENSE-2.0 
+**
+** Unless required by applicable law or agreed to in writing, software 
+** distributed under the License is distributed on an "AS IS" BASIS, 
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+** See the License for the specific language governing permissions and 
+** limitations under the License.
+*/
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.funkoi.monkeykingrhythm"
+    android:versionCode="100"
+    android:versionName="1.00"
+    android:installLocation="preferExternal"
+    >
+    <application
+            android:label="@string/djjni_activity"
+            android:debuggable="true"
+			android:icon="@drawable/icon">
+
+            <provider android:authorities="com.funkoi.monkeykingrhythm.provider.ZipFileContentProvider" android:name="com.djengine.djos.ZipFileContentProvider"></provider>
+            <!-- <provider android:authorities="com.djengine.djos.provider.ZipFileContentProvider" android:name="com.djengine.djos.ZipFileContentProvider"></provider> -->
+
+        <activity android:name="com.djengine.djos.SplashActivity"
+                  android:label="@string/app_name"
+                  android:launchMode="singleTask"
+                  android:screenOrientation="landscape"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+<!--
+        <activity
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:name="com.djengine.djos.FunkoiDownloaderActivity" >
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+-->
+        
+        <activity android:name="com.djengine.djos.DJJNIActivity"
+                  android:label="@string/app_name"
+                  android:launchMode="singleTask"
+                  android:screenOrientation="landscape"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        </activity>
+
+        <activity android:name="com.scoreloop.client.android.core.ui.ProxyActivity" android:configChanges="orientation|keyboard|keyboardHidden|screenSize|smallestScreenSize"/>
+
+        <!--
+         In order to start the service, it must be uniquely registered with
+         the package manager here. 
+        -->
+        <service android:name="com.djengine.djos.FunkoiDownloaderService" />
+
+        <!--
+         In order for the alarm manager to contact the downloader script, the receiver
+         must be uniquely registered with the package manager here. 
+        -->
+        <receiver android:name="com.djengine.djos.FunkoiAlarmReceiver" />
+    </application>
+    <uses-feature android:glEsVersion="0x00020000"/>
+    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="15"/>
+
+    <!-- MODIFY_AUDIO_SETTINGS is needed to use audio effects such as environmental reverb -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"></uses-permission>
+    
+    <!-- Required to use Scoreloop -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />    
+    <!-- Required to access Android Market Licensing -->
+    <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
+    <!-- Required to download files from Android Market and for Scoreloop -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required to keep CPU alive while downloading files (NOT to keep screen awake) -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Required to poll the state of the network connection and respond to changes -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Required to check whether Wi-Fi is enabled -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <!-- Required to read and write the expansion files on shared storage -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+</manifest>

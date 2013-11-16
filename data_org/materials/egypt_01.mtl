@@ -1,0 +1,28 @@
+Material
+{
+	TextureSampler T1
+	{
+		Texture 		"textures/egypt.png"
+		AddressV		CLAMP
+		MinFilter		LINEAR
+		MagFilter		LINEAR
+		MipFilter		NEAREST
+		Stage			0
+	}
+	
+	Mode "default"
+	{
+		Shader 	"background"
+		
+		Blend		SRC_ALPHA	INV_SRC_ALPHA
+		Flags		DOUBLESIDED NOZCOMPARE
+		
+		Attribute	VEC3			POSITION 	"pos_attr"
+		Attribute	VEC4 			COLOR		"col_attr"
+		Attribute	VEC2			UV 			"uv_attr"
+
+		Uniform	MAT44		TOTAL_TRANSFORM	"g_mTransform"
+		Uniform	TEXTURE		T1				"g_texture"
+		Global		VEC4	AMBIENT			"g_cAmbient"
+	}
+}

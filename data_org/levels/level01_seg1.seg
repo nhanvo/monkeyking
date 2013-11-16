@@ -1,0 +1,8 @@
+MUSIC_SEGMENT
+{
+	FILE "levels/level01_seg1.wav"
+	
+	#MARKER 1.0 	"MARKER001"
+	#MARKER 2.0	"MARKER002"
+	#MARKER 3.0	"MARKER003"
+}

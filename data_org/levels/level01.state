@@ -1,0 +1,82 @@
+STATEMACHINE
+{
+	# Signals
+	#
+	# MARKER_REACHED	= Transition when music marker is reached
+	# MARKER_WITHIN		= Transition when time is within marker limits
+	# MARKER_ENDED		= Transition when marker ends without correct input
+	# INPUT_INSIDE		= Correct input performed inside marker
+	# INPUT_OUTSIDE		= Correct input performed outside marker
+
+	# Commands
+	#
+	# ENABLE_TARGET		= Enable a target for enemy
+	# ENABLE_TARGETS	= Enable all targets for enemy
+	# DISABLE_TARGET	= Disable a target for enemy
+	# DISABLE_TARGETS	= Disable all targets for enemy
+	# ENABLE_GUN		= Enable gun for enemy
+	# DISABLE_GUN		= Disable gun for enemy
+	# ENABLE_GUNS		= Enable all guns for enemy
+	# DISABLE_GUNS		= Disable all guns for enemy
+	# FIRE_GUN			= Fires specified gun (if not already firing)
+	# FIRE_GUNS			= Fires all guns (if not already firing)
+	# PLAY_ANIMATION [ID] [NODE] [NAME]	[[SPEED]] = Play named animation on specified node and call it ID for future reference. Optional speed factor.
+	# STOP_ANIMATION [ID] = Stop animation with specified ID.
+	# PATH_TELEPORT	[ID]	= Teleport to new path
+	# PATH_RESET		= Reset path transform
+	# PATH_ROTATE		= Set path rotation (degrees)
+	# PATH_RANDOM_ROT	= Set random path rotation
+	# PATH_OFFSET		= Set path offset
+
+	# Transitions
+	# TRANSITION [STATE] [SIGNAL] [PARAMS]		= Specify way to transition to another state
+
+	# Variables
+	# PATH [ID]			= Path ID (specified in level file)
+	# CAN_FIRE [YES/NO]	= Allow enabled guns to fire or not
+	# ROT [MODE]		= Set rotation mode for enemy (PATH, CENTER, PLAYER, ...)
+
+	INITIAL_STATE	initial
+
+	VARIABLES
+	{
+		GAMEPLAY	BOOL
+	}
+
+	COMMANDS
+	{
+		SET_SCENE		STRING
+	}
+
+	SIGNALS
+	{
+		INPUT_INSIDE		STRING
+		INPUT_OUTSIDE		STRING
+		MARKER_REACHED		STRING
+		MARKER_WITHIN		STRING
+		MARKER_ENDED		STRING
+		SEGMENT_ENDED		STRING
+	}
+
+	# Initial state
+	STATE initial
+	{
+		#INIT
+		#{
+		#}
+		TRANSITION	test	SEGMENT_ENDED	"intro1"
+	}
+	
+	# Show targets
+	STATE test
+	{
+		#INIT
+		#{
+		#}
+		
+		#TERM
+		#{
+		#}
+		#TRANSITION	path_1	PATH_MARKER		1.0
+	}
+}

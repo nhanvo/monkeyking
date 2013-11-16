@@ -1,0 +1,10 @@
+SHEET
+{
+	FILE "sprites/monkey_civilians_standing.png" 
+	
+	GROUP "monkey_civilians_standing"
+	{
+		FRAMES	[0 0]	[50 50]	[25 25] [11 1]		
+	}	
+}
+

@@ -1,0 +1,12 @@
+
+stick_gold.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+stick_gold
+  rotate: false
+  xy: 2, 2
+  size: 51, 240
+  orig: 53, 240
+  offset: 2, 0
+  index: -1

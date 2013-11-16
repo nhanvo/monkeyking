@@ -1,0 +1,101 @@
+Monkey King Level Format
+
+Criteras:
+- Simple and easy to understand and extend
+- Fast to load, reload and parse
+- Not resolution dependent
+- Not aspect ratio dependent
+- Support control paths (multiple endings, multiple difficulties, with or without intro path)
+- Support mixing
+- Scripting(?)
+
+LEVEL
+{
+	# Level name string
+	LEVEL_NAME 				"LEVEL_1_NAME"
+	# Level description string
+	LEVEL_DESC				"LEVEL_1_DESC"
+
+	# The virtual screen size we assume, note that you can draw outside
+	# and some devices will show more because of aspect ratio, so take 
+	# this into account when making the graphics. 
+	# Aspect ratio range is 1:1 to 16:10
+	VIRTUAL_SCREEN_SIZE 	1024 768
+
+	# A scene describes one scene of the level, scenes set up all images and sprites
+	SCENE "SCENE1"
+	{
+		# Camera definition (position)
+		CAMERA [0 0]
+		
+		# An image <ID> <TEXTURE_FILENAME> <POSITION> [<SIZE>]
+		# Images are by default set to have their hotspot in the center
+		IMAGE "background" "levels/level01.tga" [0 0] [1024 768]
+		
+		# A sprite <ID> <POSITION> <LAYER> [<SCALE>]
+		SPRITE "monkeyking" [-100 0] 0 [1 1]
+
+		# A sprite <ID> <POSITION> <LAYER> [<SCALE>]
+		SPRITE "demon" [100 0] 0 [1 1]
+
+		# A sprite <ID> <POSITION> <LAYER> [<SCALE>]
+		SPRITE "bigking" [-512 384] 0 [1 1]
+	}
+
+	# A state describes one state in the gameplay state machine
+	STATE "INTRO"
+	{
+		# Set starting animations / show or hide sprites and images / etc
+		# SHOW_NODE "background"
+		# HIDE_NODE "monkeyking"
+		# PLAY_ANIM "monkeyking" "level01/monkeyking"
+	}
+
+}
+
+1. Intro music
+2. Show beat
+3. Play beat with signal interval where we player must perform action
+4A If player performs action, just continue playing, noting accuracy
+4B If player miss action or perform incorrect action, mix error note, send signal
+5. Play outro
+
+So: 
+Music player needs to be able to seamlessly mix or concatenate music together
+with no hickups.
+It also needs to send syncing signals
+Music player is a state machine that sends and receives signals from the graphics state machine
+Music player needs to support layered music
+Layers need to sync too? Most likely
+
+Steps:
+Implement music player that can play any wav files we throw at it, support timing, mixing, looping and concatenation
+
+Functions:
+PlaySegment("wavfile", bOverride, bLooped)
+
+A segment plays once unless looped.
+A looped segment plays until another segment is played on the same layer.
+When playing a segment without override set, the current segment will finish playing and then the new one will play.
+
+We need an editor or visualizer so we can test the music engine
+
+Any music segment should have markers inside a description file with exact time when the marker should trigger.
+These triggers can be used to calculate gameplay elements and mix other segments or samples on top.
+
+MUSIC_SEGMENT
+{
+	FILE "levels/level01_seg1.wav"
+	MARKER 1.0 	"MARKER001"
+	MARKER 2.0	"MARKER002"
+	MARKER 3.0	"MARKER003"
+}
+
+
+
+
+
+
+
+
+

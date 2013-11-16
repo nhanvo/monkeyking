@@ -1,0 +1,26 @@
+
+monkey_jump.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+monkey_jump
+  rotate: false
+  xy: 2, 2
+  size: 74, 77
+  orig: 74, 77
+  offset: 0, 0
+  index: -1
+monkey_jump_2
+  rotate: false
+  xy: 78, 2
+  size: 74, 77
+  orig: 74, 77
+  offset: 0, 0
+  index: -1
+monkey_stand
+  rotate: false
+  xy: 154, 3
+  size: 72, 76
+  orig: 74, 77
+  offset: 1, 0
+  index: -1

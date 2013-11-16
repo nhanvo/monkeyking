@@ -1,0 +1,25 @@
+ANIMATIONS
+{
+	SHEETS
+	{
+		PLAYERSHEET "sprites/monkey_civilians_standing.sheet"
+	}
+	
+	ANIMATION "monkey_civilians_standing"
+	{
+		LOOPING 		1
+		FRAMERATE 		11
+		SHEET PLAYERSHEET
+		FRAME monkey_civilians_standing 1 1
+		FRAME monkey_civilians_standing 2 1
+		FRAME monkey_civilians_standing 3 1
+		FRAME monkey_civilians_standing 4 1
+		FRAME monkey_civilians_standing 5 1
+		FRAME monkey_civilians_standing 6 1
+		FRAME monkey_civilians_standing 7 1
+		FRAME monkey_civilians_standing 8 1
+		FRAME monkey_civilians_standing 9 1
+		FRAME monkey_civilians_standing 10 1
+		FRAME monkey_civilians_standing 11 1		
+	}
+}

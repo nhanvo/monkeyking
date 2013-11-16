@@ -1,0 +1,20 @@
+ANIMATIONS
+{
+	SHEETS
+	{
+		PLAYERSHEET "sprites/monkeyking.sheet"
+	}
+	
+	ANIMATION "monkey"
+	{
+		LOOPING 		1
+		FRAMERATE 		6
+		SHEET PLAYERSHEET
+		FRAME monkey 1 1
+		FRAME monkey 2 1
+		FRAME monkey 3 1
+		FRAME monkey 4 1
+		FRAME monkey 5 1
+		FRAME monkey 6 1
+	}
+}

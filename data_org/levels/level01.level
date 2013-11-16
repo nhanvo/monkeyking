@@ -1,0 +1,49 @@
+LEVEL
+{
+	# Level name string
+	LEVEL_NAME 				"LEVEL_1_NAME"
+	# Level description string
+	LEVEL_DESC				"LEVEL_1_DESC"
+
+	# The virtual screen size we assume, note that you can draw outside
+	# and some devices will show more because of aspect ratio, so take 
+	# this into account when making the graphics. 
+	# Aspect ratio range is 1:1 to 16:10
+	VIRTUAL_SCREEN_SIZE 	1024 768
+
+	# A scene describes one scene of the level, scenes set up all images and sprites
+	SCENE "SCENE1"
+	{
+		# Camera definition (position) <CAMERA_POS> <ROTATION> <CAMERA_ZOOM>
+		CAMERA [0 0] 0 0
+		
+		# An image <ID> <BG_CONFIG_FILENAME> <POSITION> [<SIZE>]
+		# Images are by default set to have their hotspot in the center
+		BG_IMAGE "BG_CONFIG" "backgrounds/backgrounds.cfg" 
+		
+		# A sprite <ID> <ANIMATION_FILE> <POSITION> <LAYER> [<SCALE>]
+		#SPRITE "monkeyking" "monkey_jump"  [512 384] 1 [3 3]
+		
+		# Ball <ID> <POSITION> <SIZE> <SPRITE> 
+		BALL  0 [100 100] [100 100] "sprites/ball.png"
+
+		# Player <ID> <POSITION> <SIZE> <ANIMATION_FILE>
+		PLAYER 				"ID_NINJA" 			[595 703] [132 132] "monkey_king"
+
+		#StickGold <POSITION>   <ATLAST_FILE> 			<ANIMATION_NAME>
+		STICKGOLD   [512 768] 	"sprites/stick_gold" 	"stand"
+
+		# monnkey civilians     <ID>                   <POSITION>		<STATE_JUMP_1>
+		MONKEY_CIVILIANS		"ID_MONKEY_CIV_01"		[275 427]		0  #STANDING]
+		#MONKEY_CIVILIANS		"ID_MONKEY_CIV_02"		[226 553]		1  #WALKING
+		#MONKEY_CIVILIANS		"ID_MONKEY_CIV_03"		[275 553]		2  #TREAMBING
+	}
+	# A state describes one state in the gameplay state machine
+	STATE "INTRO"
+	{
+		# Set starting animations / show or hide sprites and images / etc
+		# SHOW_NODE "background"
+		# HIDE_NODE "monkeyking"
+		# PLAY_ANIM "monkeyking" "level01/monkeyking"
+	}
+}

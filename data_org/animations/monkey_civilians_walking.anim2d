@@ -1,0 +1,24 @@
+ANIMATIONS
+{
+	SHEETS
+	{
+		PLAYERSHEET "sprites/monkey_civilians_walking.sheet"
+	}
+	
+	ANIMATION "monkey_civilians_walking"
+	{
+		LOOPING 		1
+		FRAMERATE 		10
+		SHEET PLAYERSHEET
+		FRAME monkey_civilians_walking 1 1
+		FRAME monkey_civilians_walking 2 1
+		FRAME monkey_civilians_walking 3 1
+		FRAME monkey_civilians_walking 4 1
+		FRAME monkey_civilians_walking 5 1
+		FRAME monkey_civilians_walking 6 1
+		FRAME monkey_civilians_walking 7 1
+		FRAME monkey_civilians_walking 8 1
+		FRAME monkey_civilians_walking 9 1
+		FRAME monkey_civilians_walking 10 1		
+	}
+}

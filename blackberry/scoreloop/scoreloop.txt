@@ -1,0 +1,9 @@
+Platforms	Android, BlackBerry
+Game ID	f09d8473-32e2-4c12-afd0-18c4fff46adf
+Game Secret	dEZrqlrprGq8HfpdFM9+lfXuz0lrsXZjwL+uayY0jvpueacZ8Dddwg==
+Game Currency Code	JLC
+
+Game mode 1 = Campaign 1 score
+Game mode 2 = Campaign 2 score
+
+#Achievement 1 - com.funkoi.monkeykingrhythm.finishfirstlevel

@@ -1,0 +1,20 @@
+ANIMATIONS
+{
+	SHEETS
+	{
+		PLAYERSHEET "sprites/monkey_civilians_treambing.sheet"
+	}
+	
+	ANIMATION "monkey_civilians_treambing"
+	{
+		LOOPING 		1
+		FRAMERATE 		6
+		SHEET PLAYERSHEET
+		FRAME monkey_civilians_treambing 1 1
+		FRAME monkey_civilians_treambing 2 1
+		FRAME monkey_civilians_treambing 3 1
+		FRAME monkey_civilians_treambing 4 1
+		FRAME monkey_civilians_treambing 5 1
+		FRAME monkey_civilians_treambing 6 1		
+	}
+}
