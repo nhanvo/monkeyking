@@ -65,11 +65,11 @@ void FillQuadVertices(RectVertex *pVertices,
 DJVector2 const GetSizeFromSpine(const char *strName,const DJ2DSkeletonNode* pNode)
 {
 	DJVector2 vSize;
-	Slot* pSlot = pNode->FindSlot(strName);
+	spSlot* pSlot = pNode->FindSlot(strName);
 	DJAssert(pSlot != NULL);
 	if(pSlot)
 	{
-		RegionAttachment* patt = (RegionAttachment*)pSlot->attachment;
+		spRegionAttachment* patt = (spRegionAttachment*)pSlot->attachment;
 		vSize.e[0] = patt->width;
 		vSize.e[1] = patt->height;			
 	}

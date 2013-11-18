@@ -10,6 +10,7 @@
 #include <djuinode.h>
 #include <djosdatastorage.h>
 #include <djsounddevice.h>
+#include <djgamesounds.h>
 #include <djfont.h>
 #include <dj2dutil.h>
 #include <spine/Bone.h>
@@ -255,7 +256,7 @@ djbool MonkeyCivilians::Init(DJString id, DJVector2 vpos, djint32 nState)
 void MonkeyCivilians::Update(djfloat fDeltaTime)
 {
 	// update position of object
-	Bone* bone = m_pSkeletonNode->FindBone("root");
+	spBone* bone = m_pSkeletonNode->FindBone("root");
 	DJVector2 vPos = m_vOrgPos;
 	vPos.e[0] += bone->x;
 	vPos.e[1] -= bone->y;
@@ -270,7 +271,7 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 	DJRECT box;
 	MakeBox(&box, vPos, m_vSize.e[0], m_vSize.e[1]);
 	theBoundingBoxCollection.QueueBoundingBox(box);
-	DJInfo("%d, %d", m_rectBoxHit.nX, m_rectBoxHit.nY);
+	//DJInfo("%d, %d", m_rectBoxHit.nX, m_rectBoxHit.nY);
 #endif 
 
 	// Check state then change animation for monkey civilians
@@ -282,12 +283,15 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 			{
 				m_pSkeletonNode->SetAnimation("monkey_stand", DJTRUE);
 			}
-			m_fTimeToJump += pTheApp->GetDeltaAppTime();
-			if(m_fTimeToJump >= 2.0f)
+			if(pTheSoundDevice->GetMusicPos() >= 12139)
 			{
-				m_uState = STATE_MC_JUMP;
-				m_fTimeToJump = 0.0f;
-				m_pSkeletonNode->ClearAnimation();
+				m_fTimeToJump += pTheApp->GetDeltaAppTime();
+				if(m_fTimeToJump >= 2.0f)
+				{					 				
+					m_uState = STATE_MC_JUMP;
+					m_fTimeToJump = 0.0f;
+					m_pSkeletonNode->ClearAnimation();
+				}
 			}
 		}
 		break;
@@ -324,6 +328,15 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 			{
 				m_pSkeletonNode->SetAnimation("monkey_hitjump", DJTRUE);
 			}
+
+			// Finish hit jump
+			m_fTimeToJump += pTheApp->GetDeltaAppTime();
+			if(m_fTimeToJump >= 0.6666)
+			{
+				m_uState = STATE_MC_STANDING;
+				m_fTimeToJump = 0.0f;
+				m_pSkeletonNode->ClearAnimation();
+			}
 		}
 		break;
 
@@ -331,7 +344,16 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 		{
 			if(!m_pSkeletonNode->IsAnyAnimationRunning())
 			{
-				m_pSkeletonNode->SetAnimation("monkey_stand", DJTRUE);
+				m_pSkeletonNode->SetAnimation("monkey_treamble", DJTRUE);
+			}
+
+			// Finish treambing
+			m_fTimeToJump += pTheApp->GetDeltaAppTime();
+			if(m_fTimeToJump >= 0.6666)
+			{
+				m_uState = STATE_MC_STANDING;
+				m_fTimeToJump = 0.0f;
+				m_pSkeletonNode->ClearAnimation();
 			}
 		}
 		break;
@@ -393,7 +415,7 @@ djbool MonkeyCivilians::OnHit(const DJRECT &box)
 /// Define 
 ///
 const char* STR_STICKGOLD_SLOTNAME = "stickgold";
-const char* STR_STICKGOLD_BONENAME = "root";
+const char* STR_STICKGOLD_BONENAME = "stick_gold";
 ///
 /// Construction
 ///
@@ -449,7 +471,7 @@ djbool StickGold::Init(DJVector2 vPos, DJString strAtlastFile, DJString strAnimN
 ///
 void StickGold::Update(djfloat fDeltaTime)
 {
-	Bone* bone = m_pSkeletonNode->FindBone(STR_STICKGOLD_BONENAME);
+	spBone* bone = m_pSkeletonNode->FindBone(STR_STICKGOLD_BONENAME);
 	DJVector2 vPos = m_vOrgPos;
 	vPos.e[0] += bone->x;
 	vPos.e[1] -= bone->y;

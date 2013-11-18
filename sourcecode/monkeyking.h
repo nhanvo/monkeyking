@@ -33,20 +33,6 @@ DJ_FILE_START();
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
-// Sound enum
-enum
-{
-	// ZAP sound effect
-	SOUND_ZAP = 0,
-	// Tick sound effect
-	SOUND_TICK,
-
-	// Number of sound effects
-	SOUND_COUNT
-};
-
-
-/////////////////////////////////////////////////////////////////
 class DJMonkeyKingApplication : public DJApplication
 {
 	IMPLEMENT_INTERFACE(MonkeyKingApplication, Application)

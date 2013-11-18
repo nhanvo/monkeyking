@@ -39,6 +39,7 @@
 #include "camera.h"
 #include "player.h"
 #include "debug.h"
+#include "musichandler.h"
 
 /////////////////////////////////////////////////////////////////
 // Name of the game module
@@ -138,13 +139,6 @@ extern BoundingBoxCollection theBoundingBoxCollection;
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
-// List of sounds to load
-static const char *l_szSoundFiles[SOUND_COUNT] =
-{
-	"sound/zap1.wav",
-	"sound/tick.wav",
-};
-/////////////////////////////////////////////////////////////////
 
 extern const char*		g_szApplicationName;
 extern const djwchar*	g_szApplicationNameW;
@@ -161,7 +155,7 @@ DJCamera*					g_pCamera				= NULL;
 LevelManager*				g_pLevelManager			= NULL;
 Player*						g_pPlayer; 
 DJVector2					g_vScaleScreen			= DJVector2(1.0f);
-
+float						g_fGameTimeScale		= 1.0f;
 
 // only background layer(HD - No HD)
 djbool						g_bRemoveOneLayerInBG = DJFALSE;
@@ -637,6 +631,8 @@ void DJMonkeyKingApplication::OnTerm()
 void DJMonkeyKingApplication::OnUpdate()
 {
 	DJTrace("%s",__FUNCTION__); 
+
+	SetAppTimeScale(g_fGameTimeScale);
 	// Deactivate sound if we are minimized or hidden
 	if (theDeviceManager.IsMinimized() || theDeviceManager.IsHidden())
 	{
@@ -649,8 +645,10 @@ void DJMonkeyKingApplication::OnUpdate()
 	{
 		pTheSoundDevice->Activate();
 	}
-	if(!theMusicHandler.IsPlaying("music/ingame.mp3"))
-		theMusicHandler.PlayMusic("music/ingame.mp3", DJTRUE, 3.0f);
+	if(!theMusicHandler.IsPlaying("music/monkey_jump.mp3"))
+	{
+		theMusicHandler.PlayMusic("music/monkey_jump.mp3", DJTRUE, 3.0f);
+	}
 	
 	// Update sprite engine
 	theSpriteEngine.OnUpdate();
@@ -769,12 +767,23 @@ djint32 DJMonkeyKingApplication::OnButtonUp(djint32 nKey)
 ///
 djint32 DJMonkeyKingApplication::OnKeyDown( djint32 nKey)
 {
-		if (nKey == DJKEY_B)
-		{
 #ifdef _DEV
-			theBoundingBoxCollection.Toggle();
-			return 1;
+	if (nKey == DJKEY_B)
+	{
+		theBoundingBoxCollection.Toggle();
+		return 1;
+	}
+	if(nKey == DJKEY_SPACE)
+	{
+		if(g_fGameTimeScale != 0.1f)
+		{
+			g_fGameTimeScale = 0.1f;
 		}
+		else
+		{
+			g_fGameTimeScale = 1.0f;
+		}
+	}
 #endif //_DEV
 }
 
