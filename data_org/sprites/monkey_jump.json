@@ -3,11 +3,13 @@
 	{ "name": "root", "x": 0.0, "y": 0.0 }
 ],
 "slots": [
-	{ "name": "monkey_jump", "bone": "root", "attachment": "monkey_hitjump" }
+	{ "name": "monkey_jump", "bone": "root", "attachment": "monkey_die" }
 ],
 "skins": {
 	"default": {
 		"monkey_jump": {
+			"monkey_die": { "x": -0.27, "width": 74, "height": 77 },
+			"monkey_finish": { "x": 0.99, "width": 74, "height": 77 },
 			"monkey_hitjump": { "width": 74, "height": 77 },
 			"monkey_jump": { "x": -9.68, "y": 37.79, "width": 74, "height": 77 },
 			"monkey_stand": { "y": 39.74, "width": 74, "height": 77 },
@@ -17,6 +19,66 @@
 },
 "events": {},
 "animations": {
+	"monkey_die": {
+		"bones": {
+			"root": {
+				"translate": [
+					{ "time": 0, "x": 520.61, "y": -350.15, "curve": "stepped" },
+					{ "time": 0.1666, "x": 520.61, "y": -350.15, "curve": "stepped" },
+					{ "time": 0.3333, "x": 520.61, "y": -350.15, "curve": "stepped" },
+					{ "time": 0.5, "x": 520.61, "y": -350.15, "curve": "stepped" },
+					{ "time": 0.6666, "x": 520.61, "y": -350.15 }
+				],
+				"scale": [
+					{ "time": 0.1666, "x": 1.05, "y": 1.05 },
+					{ "time": 0.3333, "x": 1, "y": 1 },
+					{ "time": 0.5, "x": 1.05, "y": 1.05 },
+					{ "time": 0.6666, "x": 1, "y": 1 }
+				]
+			}
+		},
+		"slots": {
+			"monkey_jump": {
+				"attachment": [
+					{ "time": 0, "name": "monkey_die" },
+					{ "time": 0.1666, "name": "monkey_die" },
+					{ "time": 0.3333, "name": "monkey_die" },
+					{ "time": 0.5, "name": "monkey_die" },
+					{ "time": 0.6666, "name": "monkey_die" }
+				]
+			}
+		}
+	},
+	"monkey_finish": {
+		"bones": {
+			"root": {
+				"translate": [
+					{ "time": 0, "x": 516.61, "y": -0.15, "curve": "stepped" },
+					{ "time": 0.1666, "x": 516.61, "y": -0.15, "curve": "stepped" },
+					{ "time": 0.3333, "x": 516.61, "y": -0.15, "curve": "stepped" },
+					{ "time": 0.5, "x": 516.61, "y": -0.15, "curve": "stepped" },
+					{ "time": 0.6666, "x": 516.61, "y": -0.15 }
+				],
+				"scale": [
+					{ "time": 0.1666, "x": 1.05, "y": 1.05 },
+					{ "time": 0.3333, "x": 1, "y": 1 },
+					{ "time": 0.5, "x": 1.05, "y": 1.05 },
+					{ "time": 0.6666, "x": 1, "y": 1 }
+				]
+			}
+		},
+		"slots": {
+			"monkey_jump": {
+				"attachment": [
+					{ "time": 0, "name": "monkey_finish" },
+					{ "time": 0.1666, "name": "monkey_finish" },
+					{ "time": 0.3333, "name": "monkey_finish" },
+					{ "time": 0.5, "name": "monkey_finish" },
+					{ "time": 0.6666, "name": "monkey_finish" }
+				]
+			}
+		}
+	},
 	"monkey_hitjump": {
 		"bones": {
 			"root": {

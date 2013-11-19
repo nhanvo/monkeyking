@@ -14,8 +14,8 @@
 /////////////////////////////////////////////////////////////////
 // Game Includes
 #include "gamedef.h"
-#include "ball.h"
 #include "player.h"
+#include "monkeycilivians.h"
 
 /////////////////////////////////////////////////////////////////
 DJ_FILE_START();
@@ -25,20 +25,11 @@ class LevelBackground;
 class LevelScene
 {
 public:
-	struct BallData
+	struct MonkeyCiviliansData
 	{
 		djint32		id;
 		DJVector2	vpos;
-		DJVector2	vSize;
-		DJString	strSprite;
-	};
-
-	struct MonkeyCiviliansData
-	{
-		DJString	id;
-		DJVector2	vpos;
-		DJVector2	vsize;
-		djint32		nState;
+		djint32		nBeatsTimeGroup;
 	};
 
 	struct PlayerData
@@ -55,6 +46,13 @@ public:
 		DJVector2 vSize;
 		DJString  strAtlastFile;
 		DJString  strAnimationName;
+	};
+
+	struct BeatsData
+	{
+		djint32		nID;
+		djint32		uCountNumber;
+		DJVector2	vTimesDistance;
 	};
 protected:
 	// Scene name
@@ -75,9 +73,6 @@ protected:
 	// Scene camera zoom factor
 	float m_fCameraZoom;
 
-	//Ball data
-	BallData	m_BallData;
-
 	// Player data
 	PlayerData	m_PlayerData;
 
@@ -86,6 +81,9 @@ protected:
 
 	// Stick gold data
 	StickGoldData		m_StickGoldData;
+
+	// Beats data 
+	DJLinkedList<BeatsData>		m_listBeatsData;
 
 	// background image
 	DJString m_sBackgroundConfig;
@@ -113,9 +111,6 @@ public:
 	//Get sprite
 	DJ2DSprite* GetSprite() const {return m_pSprite;}
 
-	// Get ball data
-	BallData GetBallData() const {return m_BallData;}
-
 	// Get player data
 	PlayerData GetPlayerData() const {return m_PlayerData;}
 
@@ -124,6 +119,9 @@ public:
 
 	// Get data for stickgold 
 	StickGoldData GetStickGoldData()const {return m_StickGoldData;}
+
+	// Get data for beats time
+	DJLinkedList<BeatsData>& GetBeatsData() {return m_listBeatsData;}
 };
 /////////////////////////////////////////////////////////////////  
 
@@ -140,11 +138,11 @@ protected:
 	// List of all scenes in level
 	DJLinkedList<LevelScene> m_scenes;
 
-	// List ball
-	DJLinkedList<Ball> m_Ball;
-
 	// List monkey civinians
 	DJLinkedList<MonkeyCivilians> m_listMonkeyCivians;
+
+	// List beatstime
+	DJLinkedList<BeatsTime> m_listBeatsTime;
 
 	// Current scene
 	LevelScene*			m_pCurrentScene;

@@ -23,6 +23,7 @@
 /////////////////////////////////////////////////////////////////
 #include "level.h"
 #include "monkeyking.h"
+#include "monkeycilivians.h"
 #include "util.h"
 /////////////////////////////////////////////////////////////////
 DJ_FILE_START();
@@ -43,7 +44,7 @@ LevelScene::LevelScene()
 	m_pSprite			= NULL;
 	m_vCameraPos		= DJVector2(0,0);
 	m_fCameraRotation	= 0.0f;
-	m_fCameraZoom		= 1.0f;		
+	m_fCameraZoom		= 1.0f;
 }
 
 ///
@@ -145,28 +146,6 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 			{
 			}
 		}
-		else if(pLine->m_name == "BALL")
-		{
-			if(!pLine->GetArgInt(0,m_BallData.id))
-			{
-				DJWarning("Invalid ID from BALL tag");
-			}
-
-			if(!pLine->GetArgVector2(1, m_BallData.vpos))
-			{
-				DJWarning("Invalid POSITION from BALL tag");
-			}
-
-			if(!pLine->GetArgVector2(2, m_BallData.vSize))
-			{
-				DJWarning("Invalid SCALE from BALL tag");
-			}
-
-			if(!pLine->GetArgString(3, m_BallData.strSprite))
-			{
-				DJWarning("Invalid SPRITE from BALL tag");
-			} 
-		}
 		else if(pLine->m_name == "PLAYER")
 		{
 			if(!pLine->GetArgString(0, m_PlayerData.sID))
@@ -192,7 +171,7 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 		else if(pLine->m_name == "MONKEY_CIVILIANS")
 		{
 			MonkeyCiviliansData *pMonkeyCiviliansData = DJ_NEW(MonkeyCiviliansData);
-			if(!pLine->GetArgString(0,pMonkeyCiviliansData->id))
+			if(!pLine->GetArgInt(0,pMonkeyCiviliansData->id))
 			{
 				DJWarning("Invalid ID from MONKEY_CIVILIANS tag");
 			}
@@ -202,9 +181,9 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 				DJWarning("Invalid POSITION from MONKEY_CIVILIANS tag");
 			}
 
-			if(!pLine->GetArgInt(2, pMonkeyCiviliansData->nState))
+			if(!pLine->GetArgInt(2, pMonkeyCiviliansData->nBeatsTimeGroup))
 			{
-				DJWarning("Invalid STATE from MONKEY_CIVILIANS tag");			
+				DJWarning("Invalid <BEATS TIME GROUP> from MONKEY_CIVILIANS tag");			
 			}
 
 			m_listMonkeyCiviliansData.AddLast(pMonkeyCiviliansData);
@@ -223,6 +202,24 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 			{
 				DJWarning("Invalid ANIMATION_NAME from STICKGOLD tag");
 			}
+		}
+		else if(pLine->m_name == "BEATSTIME")
+		{
+			BeatsData *pBeatsData = DJ_NEW(BeatsData);
+			if(!pLine->GetArgInt(0, pBeatsData->nID))
+			{
+				DJWarning("Invalid ID from BEATSTIME tag");				
+			}
+			if(!pLine->GetArgInt(1, pBeatsData->uCountNumber))
+			{
+				DJWarning("Invalid NUMBER MONKEY from BEATSTIME tag");				
+			}
+
+			if(!pLine->GetArgVector2(2,pBeatsData->vTimesDistance))
+			{
+				DJWarning("Invalid 	(START,END) from BEATSTIME tag");								
+			}
+			m_listBeatsData.AddLast(pBeatsData);
 		}
 	}
 
@@ -328,11 +325,21 @@ djbool Level::Init(const char* szLevelFile)
 		// Init monkey civilians
 		DJLinkedListIter<LevelScene::MonkeyCiviliansData> iter( m_pCurrentScene->GetMonkeyCiviliansData());
 		LevelScene::MonkeyCiviliansData *pMCD;
-		while(pMCD = iter.GetStep())
+		while((pMCD = iter.GetStep()))
 		{
 			MonkeyCivilians *pMC = DJ_NEW(MonkeyCivilians);
-			pMC->Init(pMCD->id, pMCD->vpos, pMCD->nState);
+			pMC->Init(pMCD->id, pMCD->vpos, pMCD->nBeatsTimeGroup);
 			m_listMonkeyCivians.AddLast(pMC);
+		}
+
+		// Init beats time 
+		DJLinkedListIter<LevelScene::BeatsData> iter1( m_pCurrentScene->GetBeatsData());
+		LevelScene::BeatsData *pBD;
+		while(pBD = iter1.GetStep())
+		{
+			BeatsTime *pBT = DJ_NEW(BeatsTime);
+			pBT->Init(pBD->nID, pBD->uCountNumber, pBD->vTimesDistance);
+			m_listBeatsTime.AddLast(pBT);
 		}
 	}
 
@@ -374,12 +381,32 @@ void Level::Update(float fDeltaTime)
 
 	// update monkey cavilians
 	DJLinkedListIter<MonkeyCivilians> iter(m_listMonkeyCivians);
-	MonkeyCivilians *pMC;
+	MonkeyCivilians *pMC;  
 	while((pMC = iter.GetStep()))
 	{
-		pMC->Update(fDeltaTime);
+		if(pMC->GetIDBeatsTime() == -1)
+		{
+			DJWarning("Monkey cilivians %d invalid beats time", pMC->GetID());		
+			DJAssert((pMC->GetIDBeatsTime() != -1));
+		}
+		else
+		{
+			DJLinkedListIter<BeatsTime> iter2(m_listBeatsTime);
+			BeatsTime *pBT;
+			while((pBT = iter2.GetStep()))
+			{
+				if(pMC->GetIDBeatsTime() == pBT->GetID())
+				{
+					if(pTheSoundDevice->GetMusicPos() >= pBT->GetBeatsTime().e[0] && 
+						pTheSoundDevice->GetMusicPos() <= pBT->GetBeatsTime().e[1])
+					{
+					 	pMC->EnableJump();
+					}
+				}
+			}
+			pMC->Update(fDeltaTime);
+		}		
 	}
-
 	g_fRestrictionBottom = 1024.0f;
 	/*g_pCamera->SetLocalTransform(DJMatrix::Translate(DJVector3(-g_pPlayer->GetPosition().e[0],-g_pPlayer->GetPosition().e[1],0.0f)));
 	g_pCamera->UpdateTransforms();*/

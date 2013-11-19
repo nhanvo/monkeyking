@@ -183,10 +183,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\sourcecode\ball.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\sourcecode\camera.cpp"
 				>
 			</File>
@@ -195,7 +191,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\sourcecode\entity.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\sourcecode\level.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\sourcecode\monkeycilivians.cpp"
 				>
 			</File>
 			<File
@@ -220,10 +224,6 @@
 			Filter="h;hpp"
 			>
 			<File
-				RelativePath=".\sourcecode\ball.h"
-				>
-			</File>
-			<File
 				RelativePath=".\sourcecode\boundingbox.h"
 				>
 			</File>
@@ -232,7 +232,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\sourcecode\datatemp.h"
+				>
+			</File>
+			<File
 				RelativePath=".\sourcecode\debug.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sourcecode\entity.h"
 				>
 			</File>
 			<File
@@ -241,6 +249,10 @@
 			</File>
 			<File
 				RelativePath=".\sourcecode\level.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sourcecode\monkeycilivians.h"
 				>
 			</File>
 			<File

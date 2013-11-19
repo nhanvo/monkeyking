@@ -17,36 +17,16 @@
 /////////////////////////////////////////////////////////////////
 // Game Includes
 #include "level.h"
+#include "entity.h"
 /////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
+DJ_FILE_START();
+/////////////////////////////////////////////////////////////////
+
 class StickGold;
 class LevelScene;
-class Entity
-{
-protected:
-	DJVector2 m_vPos;
-	DJVector2 m_vOrgPos;
-	DJVector2 m_vSize;
-	DJVector2 m_vOrgSize;
-	DJVector2 m_vVelocity;
-	DJVector2 m_vAcceleration;
-public:
-	Entity(){}
-	virtual ~Entity()	{}
-public:
-	// Forces the entity to move in a direction
-	virtual void Move(const DJVector2 &vDelta);
 
-	// Something the entity is standing on is falling
-	virtual void Fall(const DJVector2 &vDelta);
-
-	// jump
-	virtual void Jump(const DJVector2 &vDelta);
-
-	virtual void SetPosition(const DJVector2 &vPos) { m_vPos = vPos; }
-	virtual const DJVector2 &GetPosition() const { return m_vPos; }	
-
-	virtual DJRECT* MakeBox(DJRECT *pRect, const DJVector2 &vPos, djint32 nWidth, djint32 nHeight) const;
-};
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
@@ -85,53 +65,6 @@ public:
 	djint32		OnTouchEnd( djint32 nDevice, djint32 nID, float fX, float fY );
 	// Touch cancel callback
 	djint32		OnTouchCancel( djint32 nDevice, djint32 nID, float fX, float fY );
-};
-/////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////
-class MonkeyCivilians : public Entity
-{
-public:
-	// state of monkey civilians
-	enum
-	{
-		STATE_MC_STANDING,
-		STATE_MC_WALKING,
-		STATE_MC_TREAMBING,
-		STATE_MC_JUMP,
-		STATE_MC_HITJUMP,
-		STATE_MC_GROUND,
-
-		STATE_COUNT
-	};
-
-	enum 
-	{
-		ANIM_01 = 0,
-		ANIM_02,
-		ANIM_03,
-		ANIM_04,
-		ANIM_05,
-		ANIM_06
-	};
-protected:
-	DJRECT				m_rectBoxHit;
-	DJString			m_sID;
-	DJ2DSkeletonNode*	m_pSkeletonNode;
-	djuint32			m_uState;
-	djfloat				m_fTimeToJump;
-public:
-	MonkeyCivilians();
-	~MonkeyCivilians();
-
-	djbool Init(DJString id, DJVector2 vpos, djint32 nState);
-	djbool OnHit(const DJRECT& box);
-	void SetState(djuint32 uState) {m_uState = uState;}
-	void Update(djfloat fDeltaTime);
-	void Term();
-	virtual void Move(const DJVector2 &vDelta);
-	virtual void Fall(const DJVector2 &vDelta);
-	virtual void Jump(const DJVector2 &vDelta);		
 };
 /////////////////////////////////////////////////////////////////
 

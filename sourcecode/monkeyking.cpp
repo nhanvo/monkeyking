@@ -645,16 +645,16 @@ void DJMonkeyKingApplication::OnUpdate()
 	{
 		pTheSoundDevice->Activate();
 	}
-	if(!theMusicHandler.IsPlaying("music/monkey_jump.mp3"))
+	if(!theMusicHandler.IsPlaying("music/level01.mp3"))
 	{
-		theMusicHandler.PlayMusic("music/monkey_jump.mp3", DJTRUE, 3.0f);
+		theMusicHandler.PlayMusic("music/level01.mp3", DJFALSE, 3.0f);
 	}
 	
 	// Update sprite engine
 	theSpriteEngine.OnUpdate();
 
 	// Update level 
-	if (g_pLevelManager->Update(m_fDeltaAppTime))
+	if (!g_pLevelManager->Update(m_fDeltaAppTime))
 		return;
 }
 

@@ -35,42 +35,6 @@ struct Bone;
 extern Player* g_pPlayer;
 
 /////////////////////////////////////////////////////////////////
-// Begin class Entity
-
-///
-void Entity::Move(const DJVector2 &vDelta)
-{
-	DJTrace("%s", __FUNCTION__);
-	m_vPos += vDelta;
-}
-
-///
-
-void Entity::Fall(const DJVector2 &vDelta)
-{
-	DJTrace("%s", __FUNCTION__);
-	m_vPos += vDelta;
-} 
-
-///
-
-void Entity::Jump(const DJVector2 &vDelta)
-{
-	DJTrace("%s", __FUNCTION__);	
-}
-
-DJRECT* Entity::MakeBox(DJRECT *pRect, const DJVector2 &vPos, djint32 nWidth, djint32 nHeight) const
-{
-	pRect->nX = djTruncToInt(vPos.e[0] - nWidth/2.0f);
-	pRect->nY = djTruncToInt(vPos.e[1] - nHeight);
-	pRect->nW = nWidth;
-	pRect->nH = nHeight;
-	return pRect;
-}
-// End class Entity
-/////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////
 // Begin class Player
 Player::Player()
 {
@@ -188,234 +152,15 @@ djint32 Player::OnTouchBegin( djint32 nDevice, djint32 nID, float fX, float fY )
 //}
 
 // End class Player
-/////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////
-// Begin class Monkey civilians
-
-/////////////////////////////////////////////////////////////////
-// Animation path of all monkey civilians
-
-/////////////////////////////////////////////////////////////////
-const char* l_szMonkeyCiviliansAnim[MAX_MONKEY_CIVILIANS] = 
-{
-	"monkey_civilians_01",
-	"monkey_civilians_02",
-	"monkey_civilians_03"
-};
-
-const char* STR_MONKEYCIV_SLOTNAME = "monkey_jump";
-///
-/// Constructor 
-///
-MonkeyCivilians::MonkeyCivilians()
-{
-	m_sID = "";	 
-	m_vSize = DJVector2(0.0f, 0.0f);
-	m_vOrgSize = DJVector2(0.0f, 0.0f);
-	m_vOrgPos = DJVector2(0.0f, 0.0f);
-	m_vPos = DJVector2(0.0f, 0.0f);
-	m_pSkeletonNode = NULL;
-	m_uState = STATE_MC_STANDING;
-	m_rectBoxHit = DJRECT(0,0,0,0);
-	m_fTimeToJump = 0.0f;
-}
-///
-///	Destructor
-///
-MonkeyCivilians::~MonkeyCivilians()
-{
-	Term();
-}
-///
-/// Initialize all value for object
-///
-djbool MonkeyCivilians::Init(DJString id, DJVector2 vpos, djint32 nState)
-{
-	m_sID = id;
-	m_vPos = vpos;
-	m_vOrgPos = vpos;
-	// Init skeleton animation
-	m_pSkeletonNode = DJ_NEW(DJ2DSkeletonNode);
-	m_pSkeletonNode->SetPosition(vpos);			
-	m_pSkeletonNode->Create("sprites/monkey_jump");
-	theSpriteEngine.AddActiveNode(m_pSkeletonNode);
-	theSpriteEngine.AddNode(m_pSkeletonNode, LAYER_SPRITES); 	
-
-	// get size for monkey cilivians
-	m_vSize = GetSizeFromSpine(STR_MONKEYCIV_SLOTNAME, m_pSkeletonNode);
-	m_vOrgSize = m_vSize;
-	// initialize box hit
-	m_rectBoxHit = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
-
-    return DJFALSE;
-}
-///
-/// Update object with applications delta time 
-///
-void MonkeyCivilians::Update(djfloat fDeltaTime)
-{
-	// update position of object
-	spBone* bone = m_pSkeletonNode->FindBone("root");
-	DJVector2 vPos = m_vOrgPos;
-	vPos.e[0] += bone->x;
-	vPos.e[1] -= bone->y;
-	m_vPos = vPos;
-	
-	DJVector2 vScale = DJVector2(bone->scaleX, bone->scaleY);
-	DJVector2 vSize = m_vOrgSize;
-	vSize = vSize & vScale;
-	m_vSize = vSize;
-	m_rectBoxHit = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
-#ifdef _DEV	 
-	DJRECT box;
-	MakeBox(&box, vPos, m_vSize.e[0], m_vSize.e[1]);
-	theBoundingBoxCollection.QueueBoundingBox(box);
-	//DJInfo("%d, %d", m_rectBoxHit.nX, m_rectBoxHit.nY);
-#endif 
-
-	// Check state then change animation for monkey civilians
-	switch(m_uState)
-	{
-		case STATE_MC_STANDING:
-		{
-			if(!m_pSkeletonNode->IsAnyAnimationRunning())
-			{
-				m_pSkeletonNode->SetAnimation("monkey_stand", DJTRUE);
-			}
-			if(pTheSoundDevice->GetMusicPos() >= 12139)
-			{
-				m_fTimeToJump += pTheApp->GetDeltaAppTime();
-				if(m_fTimeToJump >= 2.0f)
-				{					 				
-					m_uState = STATE_MC_JUMP;
-					m_fTimeToJump = 0.0f;
-					m_pSkeletonNode->ClearAnimation();
-				}
-			}
-		}
-		break;
-		case STATE_MC_JUMP:
-		{
-			if(!m_pSkeletonNode->IsAnyAnimationRunning())
-			{
-				m_pSkeletonNode->SetAnimation("monkey_jump", DJTRUE);
-			}
-
-			// Check hit
-			m_fTimeToJump += pTheApp->GetDeltaAppTime();
-			if(m_fTimeToJump >= 0.6666)
-			{
-				if(OnHit(g_pPlayer->GetStickGold()->GetRectBoxHit()))
-				{
-					m_uState = STATE_MC_HITJUMP;
-					m_pSkeletonNode->ClearAnimation();
-					m_fTimeToJump = 0.0f;
-				} 
-				else
-				{
-					m_uState = STATE_MC_TREAMBING;
-					m_pSkeletonNode->ClearAnimation();
-					m_fTimeToJump = 0.0f;
-				}
-			}
-		}
-		break;
-
-		case STATE_MC_HITJUMP:
-		{
-			if(!m_pSkeletonNode->IsAnyAnimationRunning())
-			{
-				m_pSkeletonNode->SetAnimation("monkey_hitjump", DJTRUE);
-			}
-
-			// Finish hit jump
-			m_fTimeToJump += pTheApp->GetDeltaAppTime();
-			if(m_fTimeToJump >= 0.6666)
-			{
-				m_uState = STATE_MC_STANDING;
-				m_fTimeToJump = 0.0f;
-				m_pSkeletonNode->ClearAnimation();
-			}
-		}
-		break;
-
-		case STATE_MC_TREAMBING:
-		{
-			if(!m_pSkeletonNode->IsAnyAnimationRunning())
-			{
-				m_pSkeletonNode->SetAnimation("monkey_treamble", DJTRUE);
-			}
-
-			// Finish treambing
-			m_fTimeToJump += pTheApp->GetDeltaAppTime();
-			if(m_fTimeToJump >= 0.6666)
-			{
-				m_uState = STATE_MC_STANDING;
-				m_fTimeToJump = 0.0f;
-				m_pSkeletonNode->ClearAnimation();
-			}
-		}
-		break;
-	};
-}
-///
-/// Term all pointer
-///
-void MonkeyCivilians::Term()
-{
-}
-///
-///	Move object delta distance
-///
-void MonkeyCivilians::Move(const DJVector2 &vDelta)
-{  	
-}
-///
-///
-///
-void MonkeyCivilians::Fall(const DJVector2 &vDelta)
-{		
-}
-///
-///
-///
-void MonkeyCivilians::Jump(const DJVector2 &vDelta)
-{
-
-}  
-///
-///
-///
-djbool MonkeyCivilians::OnHit(const DJRECT &box)
-{	
-	djint32 nPointDetectY = m_rectBoxHit.nY + m_rectBoxHit.nH;
-	if((box.nY - box.nH) - nPointDetectY <= 0)
-	{
-#ifdef _DEBUG
-		DJInfo("Hit:%d", (box.nY - box.nH) - nPointDetectY);
-#endif
-		m_pSkeletonNode->ClearAnimation();
-		m_fTimeToJump = 0.0f;
-		return DJTRUE;		
-	}
-	return DJFALSE;
-}
-//DJRECT* MonkeyCivilians::MakeBox(DJRECT *pRect, const DJVector2 &vBottom, djint32 nWidth, djint32 nHeight) const
-//{
-//	DJRECT* rect = Entity::MakeBox(pRect, vBottom, nWidth, nHeight);
-//	return rect;
-//}
-// End class Monkey civilians
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////	
 
 /////////////////////////////////////////////////////////////////
 // Begin StickGold class
 ///
 /// Define 
 ///
-const char* STR_STICKGOLD_SLOTNAME = "stickgold";
-const char* STR_STICKGOLD_BONENAME = "stick_gold";
+const char* STR_STICKGOLD_SLOTNAME = "stick_gold";
+const char* STR_STICKGOLD_BONENAME = "root";
 ///
 /// Construction
 ///
@@ -454,7 +199,7 @@ djbool StickGold::Init(DJVector2 vPos, DJString strAtlastFile, DJString strAnimN
 	m_pSkeletonNode->Create(strAtlastFile);
 	m_pSkeletonNode->SetAnimation(strAnimName, DJTRUE);
 	m_pSkeletonNode->SetMix("stand", "zoom_in", 0.1f);
-	m_pSkeletonNode->GetAnimationTimeScale();
+	m_pSkeletonNode->SetAnimationTimeScale(1.5f);
 	theSpriteEngine.AddActiveNode(m_pSkeletonNode);
 	theSpriteEngine.AddNode(m_pSkeletonNode, LAYER_SPRITES);
 
@@ -472,6 +217,7 @@ djbool StickGold::Init(DJVector2 vPos, DJString strAtlastFile, DJString strAnimN
 void StickGold::Update(djfloat fDeltaTime)
 {
 	spBone* bone = m_pSkeletonNode->FindBone(STR_STICKGOLD_BONENAME);
+	DJAssert(bone != NULL);
 	DJVector2 vPos = m_vOrgPos;
 	vPos.e[0] += bone->x;
 	vPos.e[1] -= bone->y;
@@ -504,7 +250,7 @@ void StickGold::Update(djfloat fDeltaTime)
 			if(!m_pSkeletonNode->IsAnyAnimationRunning())
 			{
 				m_pSkeletonNode->SetAnimation("zoom_in", DJTRUE);				
-				m_pSkeletonNode->SetAnimationTimeScale(0.6666f);
+				m_pSkeletonNode->SetAnimationTimeScale(0.6f);
 			}
 			m_fTimeChangeAnim += pTheApp->GetDeltaAppTime();
 			if(m_fTimeChangeAnim > m_pSkeletonNode->GetAnimationTimeScale())

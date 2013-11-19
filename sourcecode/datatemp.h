@@ -1,0 +1,1 @@
+const DJVector2 VPOS_TEMP_MC =	DJVector2(275.0f, 427.0f); // Template position of Monkey cilivians get from first monkey on level01
