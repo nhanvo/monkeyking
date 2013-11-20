@@ -32,6 +32,7 @@ public:
 	enum
 	{
 		STATE_MC_STANDING,
+		STATE_MC_WALKING,		
 		STATE_MC_JUMP,
 		STATE_MC_HITJUMP,
 		STATE_MC_TREAMBING,
@@ -64,7 +65,10 @@ public:
 
 	djbool Init(djint32 id, DJVector2 vpos, djint32 nBeatsTime);
 	djbool OnHit(const DJRECT& box);
+
+	// Set get state
 	void SetState(djuint32 uState) {m_uState = uState;}
+	djuint32 GetState() const {return m_uState;}
 
 	// Set and get beats time
 	void SetIDBeatsTime(djuint32 nID) {m_nIDBeatsTime = nID;}
@@ -78,6 +82,7 @@ public:
 	void FinishJump() {m_bEnableJump = DJFALSE;}
 
 	void Update(djfloat fDeltaTime);
+	void Reset();
 	void Term();
 	virtual void Move(const DJVector2 &vDelta);
 	virtual void Fall(const DJVector2 &vDelta);

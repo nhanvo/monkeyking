@@ -153,6 +153,9 @@ protected:
 	// Current city
 	djint32				m_nCurrentCity;
 
+	// Finish level
+	djbool				m_bFinishLevel;
+
 public:
 	// Constructor
 	Level();
@@ -161,6 +164,10 @@ public:
 
 	// Initialize level
 	djbool Init(const char* szLevelFile);
+
+	// Reset level
+	void Reset();
+
 	// Terminate
 	void Term();
 

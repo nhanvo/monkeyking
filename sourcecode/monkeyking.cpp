@@ -644,11 +644,7 @@ void DJMonkeyKingApplication::OnUpdate()
 	else if (!pTheSoundDevice->IsActive())
 	{
 		pTheSoundDevice->Activate();
-	}
-	if(!theMusicHandler.IsPlaying("music/level01.mp3"))
-	{
-		theMusicHandler.PlayMusic("music/level01.mp3", DJFALSE, 3.0f);
-	}
+	} 
 	
 	// Update sprite engine
 	theSpriteEngine.OnUpdate();

@@ -25,6 +25,7 @@
 #include "monkeyking.h"
 #include "monkeycilivians.h"
 #include "util.h"
+#include "musichandler.h"
 /////////////////////////////////////////////////////////////////
 DJ_FILE_START();
 /////////////////////////////////////////////////////////////////
@@ -36,6 +37,7 @@ extern Player* g_pPlayer;
 extern djbool g_bRemoveOneLayerInBG;
 extern DJColor			g_cModColor;
 extern djfloat			g_fRestrictionBottom;
+extern DJMusicHandler theMusicHandler;
 
 /////////////////////////////////////////////////////////////////
 LevelScene::LevelScene()
@@ -260,6 +262,7 @@ Level::Level()
 	m_pCurrentScene = NULL;
 	m_pLevelBackground = NULL;
 	m_nCurrentCity = 0;
+	m_bFinishLevel = DJFALSE;
 }
 
 ///
@@ -359,7 +362,7 @@ djbool Level::Init(const char* szLevelFile)
 	//g_pCamera->SetupOrthoCamera(m_pCurrentScene->GetCameraPosition().e[0], m_pCurrentScene->GetCameraPosition().e[1], g_nScreenWidth, g_nScreenHeight, 0.0f, 0.0f);
 	//g_pCamera->SetLocalTransform(DJMatrix::Translate(DJVector3(0, 0, 0)));
 	//g_pCamera->UpdateTransforms();
-
+	Reset();
 	return DJTRUE;
 }
 
@@ -375,7 +378,22 @@ void Level::Term()
 ///
 
 void Level::Update(float fDeltaTime)
-{
+{ 
+	if(m_bFinishLevel)
+	{	
+	    if(theMusicHandler.IsPlaying("music/level01.mp3"))
+		{
+			theMusicHandler.StopMusic(0.7f);
+		}
+		return;
+	}
+	else
+	{
+		if(!theMusicHandler.IsPlaying("music/level01.mp3"))
+		{
+			theMusicHandler.PlayMusic("music/level01.mp3");
+		}
+	}
 	// update player
 	g_pPlayer->Update(fDeltaTime);
 
@@ -404,8 +422,16 @@ void Level::Update(float fDeltaTime)
 					}
 				}
 			}
-			pMC->Update(fDeltaTime);
-		}		
+			pMC->Update(fDeltaTime);	
+			if(pMC == m_listMonkeyCivians.GetLast() &&
+			   (m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_DIE ||
+			   m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_FINISH))
+			{
+				m_bFinishLevel = DJTRUE;			
+				Reset();			
+			}
+		}
+		
 	}
 	g_fRestrictionBottom = 1024.0f;
 	/*g_pCamera->SetLocalTransform(DJMatrix::Translate(DJVector3(-g_pPlayer->GetPosition().e[0],-g_pPlayer->GetPosition().e[1],0.0f)));
@@ -422,6 +448,23 @@ void Level::Update(float fDeltaTime)
 void Level::PrePaint()
 {
 	//m_pLevelBackground->OnPaint();
+}
+
+///
+
+void Level::Reset()
+{
+	DJLinkedListIter<MonkeyCivilians> iter(m_listMonkeyCivians);
+	MonkeyCivilians *pMC;  
+	while((pMC = iter.GetStep()))
+	{
+		pMC->Reset(); 
+		if(pMC == m_listMonkeyCivians.GetLast() &&
+			m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_STANDING)
+		{
+			m_bFinishLevel = DJFALSE;
+		}
+	} 	
 }
 /////////////////////////////////////////////////////////////////
 

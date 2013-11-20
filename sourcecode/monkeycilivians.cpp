@@ -107,11 +107,7 @@ djbool MonkeyCivilians::Init(djint32 id, DJVector2 vpos, djint32 nBeatsTime)
 void MonkeyCivilians::Update(djfloat fDeltaTime)
 {
 	// update position of object
-	spBone* bone = m_pSkeletonNode->FindBone("root");
-	if(m_bEnableJump)
-	{
-		m_vOrgPos = VPOS_TEMP_MC;
-	}
+	spBone* bone = m_pSkeletonNode->FindBone("root");  	
 	DJVector2 vPos = m_vOrgPos;
 	vPos.e[0] += bone->x;
 	vPos.e[1] -= bone->y;
@@ -142,8 +138,24 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 			// Enable jump
 			if(m_bEnableJump)
 			{	  				
-				SetState(STATE_MC_JUMP);
+				SetState(STATE_MC_WALKING);
 				m_pSkeletonNode->ClearAnimation();
+			}
+		}
+		break;
+		case STATE_MC_WALKING:
+		{
+			if(!m_pSkeletonNode->IsAnyAnimationRunning())
+			{
+				djresult result;
+				m_pSkeletonNode->SetAnimation("monkey_walk", DJTRUE);  				
+			}
+			m_fTimeToJump += pTheApp->GetDeltaAppTime();
+			if(m_fTimeToJump >= 0.3333)
+			{
+				m_uState = STATE_MC_JUMP;
+				m_pSkeletonNode->ClearAnimation();
+				m_fTimeToJump = 0.0f;
 			}
 		}
 		break;
@@ -156,7 +168,7 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 
 			// Check hit
 			m_fTimeToJump += pTheApp->GetDeltaAppTime();
-			if(m_fTimeToJump >= 0.6666)
+			if(m_fTimeToJump >= 0.3333)
 			{
 				if(OnHit(g_pPlayer->GetStickGold()->GetRectBoxHit()))
 				{
@@ -269,6 +281,19 @@ djbool MonkeyCivilians::OnHit(const DJRECT &box)
 		return DJTRUE;		
 	}
 	return DJFALSE;
+}
+
+///
+///
+///
+void MonkeyCivilians::Reset()
+{	 
+	m_vPos = m_vOrgPos;
+	m_pSkeletonNode->SetPosition(m_vOrgPos);
+	m_pSkeletonNode->ClearAnimation();
+	m_uState = STATE_MC_STANDING;
+	m_bEnableJump = DJFALSE;
+	m_fTimeToJump = 0.0f;	
 }
 // End class Monkey civilians
 /////////////////////////////////////////////////////////////////
