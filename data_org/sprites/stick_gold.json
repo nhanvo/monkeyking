@@ -1,6 +1,6 @@
 {
 "bones": [
-	{ "name": "root",  "x": 0.49, "y": 2.99}
+	{ "name": "root","x": 0.0, "y": 0.0 }
 ],
 "slots": [
 	{ "name": "stick_gold", "bone": "root", "attachment": "stick_gold" }
@@ -19,17 +19,16 @@
 			"root": {
 				"translate": [
 					{ "time": 0, "x": 0, "y": 0, "curve": "stepped" },
-					{ "time": 0.1666, "x": 0, "y": 0, "curve": "stepped" },
-					{ "time": 0.3333, "x": 0, "y": 0, "curve": "stepped" },
-					{ "time": 0.5, "x": 0, "y": 0, "curve": "stepped" },
-					{ "time": 0.6666, "x": 0, "y": 0 }
+					{ "time": 0.1, "x": 0, "y": 0, "curve": "stepped" },
+					{ "time": 0.2, "x": 0, "y": 0, "curve": "stepped" },
+					{ "time": 0.3, "x": 0, "y": 0 }
 				],
 				"scale": [
 					{ "time": 0, "x": 1, "y": 1 },
-					{ "time": 0.1666, "x": 1.05, "y": 1.05 },
-					{ "time": 0.3333, "x": 1, "y": 1 },
-					{ "time": 0.5, "x": 1.05, "y": 1.05 },
-					{ "time": 0.6666, "x": 1, "y": 1 }
+					{ "time": 0.1, "x": 1.05, "y": 1.05 },
+					{ "time": 0.2, "x": 1, "y": 1 },
+					{ "time": 0.3, "x": 1.05, "y": 1.05 },
+					{ "time": 0.4, "x": 1, "y": 1 }
 				]
 			}
 		},
@@ -37,10 +36,10 @@
 			"stick_gold": {
 				"attachment": [
 					{ "time": 0, "name": "stick_gold" },
-					{ "time": 0.1666, "name": "stick_gold" },
-					{ "time": 0.3333, "name": "stick_gold" },
-					{ "time": 0.5, "name": "stick_gold" },
-					{ "time": 0.6666, "name": "stick_gold" }
+					{ "time": 0.1, "name": "stick_gold" },
+					{ "time": 0.2, "name": "stick_gold" },
+					{ "time": 0.3, "name": "stick_gold" },
+					{ "time": 0.4, "name": "stick_gold" }
 				]
 			}
 		}
@@ -53,12 +52,8 @@
 				],
 				"scale": [
 					{ "time": 0, "x": 1, "y": 1 },
-					{ "time": 0.1, "x": 1.599, "y": 1.599 },
-					{ "time": 0.2, "x": 1, "y": 1 },
-					{ "time": 0.3, "x": 1.599, "y": 1.599 },
-					{ "time": 0.4, "x": 1, "y": 1 },
-					{ "time": 0.5, "x": 1.599, "y": 1.599 },
-					{ "time": 0.6, "x": 1, "y": 1 }
+					{ "time": 0.1333, "x": 1.599, "y": 1.599 },
+					{ "time": 0.2666, "x": 1, "y": 1 }
 				]
 			}
 		},
@@ -66,10 +61,8 @@
 			"stick_gold": {
 				"attachment": [
 					{ "time": 0, "name": "stick_gold" },
-					{ "time": 0.1, "name": "stick_gold" },
-					{ "time": 0.3, "name": "stick_gold" },
-					{ "time": 0.5, "name": "stick_gold" },
-					{ "time": 0.6, "name": "stick_gold" }
+					{ "time": 0.1333, "name": "stick_gold" },
+					{ "time": 0.2666, "name": "stick_gold" }
 				]
 			}
 		}

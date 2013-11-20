@@ -84,6 +84,7 @@ protected:
 	djuint				m_uState;
 	djbool				m_bEnableTouch;
 	djfloat				m_fTimeChangeAnim;
+	djfloat				m_fTimeDuration;
 public:
 	StickGold();
 	~StickGold();

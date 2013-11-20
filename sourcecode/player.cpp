@@ -175,6 +175,7 @@ StickGold::StickGold()
 	m_uState			= STATE_SG_STAND;
 	m_bEnableTouch		= DJTRUE;
 	m_fTimeChangeAnim	= 0.0f;
+	m_fTimeDuration		= 0.0f;
 }
 
 ///
@@ -207,6 +208,9 @@ djbool StickGold::Init(DJVector2 vPos, DJString strAtlastFile, DJString strAnimN
 	m_vSize = GetSizeFromSpine(STR_STICKGOLD_SLOTNAME, m_pSkeletonNode);
 	m_vOrgSize = m_vSize;													
 	m_rectBoxHit = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
+
+	// set total time(duration) for one animation
+	m_fTimeDuration = GetTimeDurationOfAnimation(m_pSkeletonNode);
 
 	return DJTRUE;
 }
@@ -249,11 +253,10 @@ void StickGold::Update(djfloat fDeltaTime)
 		{  	
 			if(!m_pSkeletonNode->IsAnyAnimationRunning())
 			{
-				m_pSkeletonNode->SetAnimation("zoom_in", DJTRUE);				
-				m_pSkeletonNode->SetAnimationTimeScale(0.6f);
+				m_pSkeletonNode->SetAnimation("zoom_in", DJTRUE);								
 			}
 			m_fTimeChangeAnim += pTheApp->GetDeltaAppTime();
-			if(m_fTimeChangeAnim > m_pSkeletonNode->GetAnimationTimeScale())
+			if(m_fTimeChangeAnim > m_fTimeDuration/2.0f)
 			{
 			   m_uState = STATE_SG_STAND;
 			   m_fTimeChangeAnim = 0.0f;

@@ -52,6 +52,9 @@ void FillQuadVertices(RectVertex *pVertices,
 
 DJVector2 const GetSizeFromSpine(const char *strName,const DJ2DSkeletonNode* pNode);
 
+/// Get time animation duration from SPINE
+djfloat GetTimeDurationOfAnimation(DJ2DSkeletonNode *pSkeletonNode);
+
 /////////////////////////////////////////////////////////////////
 DJ_FILE_END();
 /////////////////////////////////////////////////////////////////

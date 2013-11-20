@@ -376,6 +376,7 @@ void Level::Term()
 }
 
 ///
+static float fTimeDelay = 0.0f;
 
 void Level::Update(float fDeltaTime)
 { 
@@ -383,12 +384,21 @@ void Level::Update(float fDeltaTime)
 	{	
 	    if(theMusicHandler.IsPlaying("music/level01.mp3"))
 		{
-			theMusicHandler.StopMusic(0.7f);
+			theMusicHandler.StopMusic(0.5f);
+		}
+		if(fTimeDelay <= 2.0f)
+		{
+			fTimeDelay += pTheApp->GetDeltaAppTime();			
+		}   
+		else
+		{
+			m_bFinishLevel = DJFALSE;
 		}
 		return;
 	}
 	else
-	{
+	{  
+		fTimeDelay = 0.0f;
 		if(!theMusicHandler.IsPlaying("music/level01.mp3"))
 		{
 			theMusicHandler.PlayMusic("music/level01.mp3");
@@ -423,6 +433,8 @@ void Level::Update(float fDeltaTime)
 				}
 			}
 			pMC->Update(fDeltaTime);	
+
+			// Reset level if monkey cilivians end is finish jump
 			if(pMC == m_listMonkeyCivians.GetLast() &&
 			   (m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_DIE ||
 			   m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_FINISH))
@@ -459,11 +471,11 @@ void Level::Reset()
 	while((pMC = iter.GetStep()))
 	{
 		pMC->Reset(); 
-		if(pMC == m_listMonkeyCivians.GetLast() &&
+		/*if(pMC == m_listMonkeyCivians.GetLast() &&
 			m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_STANDING)
 		{
 			m_bFinishLevel = DJFALSE;
-		}
+		}*/
 	} 	
 }
 /////////////////////////////////////////////////////////////////

@@ -14,6 +14,7 @@
 #include <spine/Skin.h>
 #include <spine/RegionAttachment.h>
 #include <spine/animation.h>
+#include <spine/animationstate.h>
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
@@ -74,6 +75,20 @@ DJVector2 const GetSizeFromSpine(const char *strName,const DJ2DSkeletonNode* pNo
 		vSize.e[1] = patt->height;			
 	}
 	return vSize;
+}
+
+///
+///
+///
+djfloat GetTimeDurationOfAnimation(DJ2DSkeletonNode *pSkeletonNode)
+{  	
+	spAnimationState* pAS = pSkeletonNode->GetAnimationState();
+	spAnimationStateData* pASD = pAS->data;
+	spSkeletonData* pSD = pASD->skeletonData;
+	spAnimation** pAnim = pSD->animations;
+	djfloat fDuration = (*pAnim)->duration;	
+
+	return fDuration;
 }
 /////////////////////////////////////////////////////////////////
 

@@ -59,6 +59,9 @@ protected:
 	djfloat				m_fTimeToJump;
 	djint32				m_nIDBeatsTime;
 	djbool				m_bEnableJump;
+
+	// Total time(duration)for one animation
+	djfloat				m_fTimeDurations;
 public:
 	MonkeyCivilians();
 	~MonkeyCivilians();

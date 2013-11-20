@@ -15,6 +15,7 @@
 #include <spine/Skin.h>
 #include <spine/RegionAttachment.h>
 #include <spine/animation.h>
+#include <spine/animationstate.h>
 /////////////////////////////////////////////////////////////////
 // Game Includes
 #include "monkeycilivians.h"
@@ -97,7 +98,10 @@ djbool MonkeyCivilians::Init(djint32 id, DJVector2 vpos, djint32 nBeatsTime)
 	m_vSize = GetSizeFromSpine(STR_MONKEYCIV_SLOTNAME, m_pSkeletonNode);
 	m_vOrgSize = m_vSize;
 	// initialize box hit
-	m_rectBoxHit = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
+	m_rectBoxHit = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y()); 
+
+	m_fTimeDurations = GetTimeDurationOfAnimation(m_pSkeletonNode);
+	DJAssert(m_fTimeDurations != 0.0f);
 
     return DJFALSE;
 }
@@ -137,7 +141,7 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 			
 			// Enable jump
 			if(m_bEnableJump)
-			{	  				
+			{	
 				SetState(STATE_MC_WALKING);
 				m_pSkeletonNode->ClearAnimation();
 			}
@@ -151,7 +155,7 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 				m_pSkeletonNode->SetAnimation("monkey_walk", DJTRUE);  				
 			}
 			m_fTimeToJump += pTheApp->GetDeltaAppTime();
-			if(m_fTimeToJump >= 0.3333)
+			if(m_fTimeToJump >= m_fTimeDurations)
 			{
 				m_uState = STATE_MC_JUMP;
 				m_pSkeletonNode->ClearAnimation();
@@ -168,7 +172,7 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 
 			// Check hit
 			m_fTimeToJump += pTheApp->GetDeltaAppTime();
-			if(m_fTimeToJump >= 0.3333)
+			if(m_fTimeToJump >= m_fTimeDurations)
 			{
 				if(OnHit(g_pPlayer->GetStickGold()->GetRectBoxHit()))
 				{
@@ -195,7 +199,7 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 
 			// Finish hit jump
 			m_fTimeToJump += pTheApp->GetDeltaAppTime();
-			if(m_fTimeToJump >= 0.6666)
+			if(m_fTimeToJump >= m_fTimeDurations)
 			{
 				m_uState = STATE_MC_FINISH;
 				m_fTimeToJump = 0.0f;
@@ -213,9 +217,9 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 
 			// Finish treambing
 			m_fTimeToJump += pTheApp->GetDeltaAppTime();
-			if(m_fTimeToJump >= 0.6666)
+			if(m_fTimeToJump >=m_fTimeDurations)
 			{
-				m_uState = STATE_MC_DIE;
+				m_uState = STATE_MC_DIE;																														   
 				m_fTimeToJump = 0.0f;
 				m_pSkeletonNode->ClearAnimation();
 			}
