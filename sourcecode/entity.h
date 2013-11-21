@@ -34,8 +34,8 @@ public:
 	// jump
 	virtual void Jump(const DJVector2 &vDelta);
 
-	virtual void SetPosition(const DJVector2 &vPos) { m_vPos = vPos; }
-	virtual const DJVector2 &GetPosition() const { return m_vPos; }	
+	void SetPosition(const DJVector2 &vPos) { m_vPos = vPos; }
+	const DJVector2 &GetPosition() const { return m_vPos; }	
 
 	virtual DJRECT* MakeBox(DJRECT *pRect, const DJVector2 &vPos, djint32 nWidth, djint32 nHeight) const;
 };

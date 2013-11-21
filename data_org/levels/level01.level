@@ -12,8 +12,9 @@ LEVEL
 	VIRTUAL_SCREEN_SIZE 	1024 768
 
 	# A scene describes one scene of the level, scenes set up all images and sprites
-	SCENE "SCENE1"
+	SCENE "FruitMountain"
 	{
+		SCENE_ID	"SCENE_00"
 		# Camera definition (position) <CAMERA_POS> <ROTATION> <CAMERA_ZOOM>
 		CAMERA [0 0] 0 0
 		
@@ -23,12 +24,9 @@ LEVEL
 		
 		# A sprite <ID> <ANIMATION_FILE> <POSITION> <LAYER> [<SCALE>]
 		#SPRITE "monkeyking" "monkey_jump"  [512 384] 1 [3 3]
-		
-		# Ball <ID> <POSITION> <SIZE> <SPRITE> 
-		BALL  0 [100 100] [100 100] "sprites/ball.png"
 
 		# Player <ID> <POSITION> <SIZE> <ANIMATION_FILE>
-		PLAYER 				"ID_NINJA" 			[595 703] [132 132] "monkey_king"
+		PLAYER 				"ID_MONKEYKING" 	[595 703] [132 132] "monkey_king"
 
 		#StickGold <POSITION>   <ATLAST_FILE> 			<ANIMATION_NAME>
 		STICKGOLD   [512 768] 	"sprites/stick_gold" 	"stand"
@@ -78,6 +76,34 @@ LEVEL
 		BEATSTIME	19			1 			[22579 22724]	
 		BEATSTIME	20			1 			[23237 23393]	
 	}
+
+	SCENE "CentipedeSpecter"
+	{
+		# Secne
+		SCENE_ID 	"SCENE_01"
+
+		# Camera definition (position) <CAMERA_POS> <ROTATION> <CAMERA_ZOOM>
+		CAMERA [0 0] 0 0
+		
+		# An image <ID> <BG_CONFIG_FILENAME> <POSITION> [<SIZE>]
+		# Images are by default set to have their hotspot in the center
+		BG_IMAGE "BG_CONFIG" "backgrounds/backgrounds.cfg" 
+		
+		# A sprite <ID> <ANIMATION_FILE> <POSITION> <LAYER> [<SCALE>]
+		#SPRITE "monkeyking" "monkey_jump"  [512 384] 1 [3 3]
+		
+		# Player <ID> <POSITION> <SIZE> <ANIMATION_FILE>
+		PLAYER 				"ID_MONKEYKING" 			[595 703] [132 132] "monkey_king"
+
+		# centipede specter     <ID>    <POSITION>		<BEATS TIME GROUP>		
+		CENTIPEDE_SPECTER		0		[275 427]			0	#GROUP 0  
+
+		# rays ghost 			<ID>  <TYPE>	<POSITION>	 	<BEATS TIME GROUP>
+		RAYS_GHOST				0		0		[275 427]			0
+		
+		# TIME		ID 		NUMBER MONKEY  	(START,END)
+		BEATSTIME 	0			1			[12401 12802]
+	}	
 	# A state describes one state in the gameplay state machine
 	STATE "INTRO"
 	{

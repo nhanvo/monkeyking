@@ -47,6 +47,8 @@ LevelScene::LevelScene()
 	m_vCameraPos		= DJVector2(0,0);
 	m_fCameraRotation	= 0.0f;
 	m_fCameraZoom		= 1.0f;
+	m_name				= "";
+	m_nID				= "";
 }
 
 ///
@@ -80,7 +82,15 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 	DJLinkedListIter<DJTagLine> iter(pDir->m_lines);
 	while ((pLine = iter.GetStep()))
 	{
-		if (pLine->m_name == "BG_IMAGE")
+		if(pLine->m_name == "SCENE_ID")
+		{
+			if (!pLine->GetArgString(0, m_nID))
+			{
+				DJWarning("Failed to parse ID in SCENE_ID!");
+				DJAssert(DJFALSE);
+			} 
+		}
+		else if (pLine->m_name == "BG_IMAGE")
 		{
 			DJString id;
 			DJString strBGConfig;
@@ -222,6 +232,27 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 				DJWarning("Invalid 	(START,END) from BEATSTIME tag");								
 			}
 			m_listBeatsData.AddLast(pBeatsData);
+		}	
+		else if(pLine->m_name == "RAYS_GHOST")
+		{
+			RaysGhostData *pRayGhostData = DJ_NEW(RaysGhostData);
+			if(!pLine->GetArgInt(0, pRayGhostData->nID))
+			{
+				DJWarning("Invalid 	ID from RAY_GHOST tag");									
+			}
+			if(!pLine->GetArgInt(1, pRayGhostData->nType))
+			{
+				DJWarning("Invalid TYPE from RAY_GHOST tag");								
+			}
+			if(!pLine->GetArgVector2(2, pRayGhostData->vPosition))
+			{
+				DJWarning("Invalid 	POSITION from RAY_GHOST tag");									
+			}
+			if(!pLine->GetArgInt(3, pRayGhostData->nBeatsTimeGroup))
+			{
+				DJWarning("Invalid 	BEATS TIME GROUP from RAY_GHOST tag");				
+			}
+			m_listRayGhostData.AddLast(pRayGhostData);
 		}
 	}
 
@@ -306,7 +337,8 @@ djbool Level::Init(const char* szLevelFile)
 	}
 
 	// Scene current 
-	m_pCurrentScene = m_scenes.GetFirst();	 
+	m_pCurrentScene = m_scenes.GetFirst();
+	//m_pCurrentScene = m_scenes.GetByIndex(1);
 
 	// Current scene 
 	if(m_pCurrentScene)
@@ -325,6 +357,7 @@ djbool Level::Init(const char* szLevelFile)
 						m_pCurrentScene->GetPlayerData().strAnimFile,
 						m_pCurrentScene);
 		
+		switch(m_pCurrentScene->GetBeatsData)
 		// Init monkey civilians
 		DJLinkedListIter<LevelScene::MonkeyCiviliansData> iter( m_pCurrentScene->GetMonkeyCiviliansData());
 		LevelScene::MonkeyCiviliansData *pMCD;
@@ -338,11 +371,21 @@ djbool Level::Init(const char* szLevelFile)
 		// Init beats time 
 		DJLinkedListIter<LevelScene::BeatsData> iter1( m_pCurrentScene->GetBeatsData());
 		LevelScene::BeatsData *pBD;
-		while(pBD = iter1.GetStep())
+		while((pBD = iter1.GetStep()))
 		{
 			BeatsTime *pBT = DJ_NEW(BeatsTime);
 			pBT->Init(pBD->nID, pBD->uCountNumber, pBD->vTimesDistance);
 			m_listBeatsTime.AddLast(pBT);
+		}
+
+		// Init rays ghost
+		DJLinkedListIter<LevelScene::RaysGhostData> iterRGD(m_pCurrentScene->GetRaysGhostData());
+		LevelScene::RaysGhostData *pRGD;
+		while((pRGD = iterRGD.GetStep()))
+		{
+			RaysGhost *pRG = DJ_NEW(RaysGhost);
+			pRG->Init(pRGD->nID, pRGD->nType, pRGD->vPosition, pRGD->nBeatsTimeGroup);
+			m_listRayGhost.AddLast(pRG);
 		}
 	}
 
@@ -445,6 +488,15 @@ void Level::Update(float fDeltaTime)
 		}
 		
 	}
+	
+	
+	// Update rays ghost
+	DJLinkedListIter<RaysGhost> iterRayGhost(m_listRayGhost);
+	RaysGhost *pRG;
+	while((pRG = iterRayGhost.GetStep()))
+	{
+		pRG->Update(fDeltaTime);
+	}
 	g_fRestrictionBottom = 1024.0f;
 	/*g_pCamera->SetLocalTransform(DJMatrix::Translate(DJVector3(-g_pPlayer->GetPosition().e[0],-g_pPlayer->GetPosition().e[1],0.0f)));
 	g_pCamera->UpdateTransforms();*/
@@ -470,12 +522,7 @@ void Level::Reset()
 	MonkeyCivilians *pMC;  
 	while((pMC = iter.GetStep()))
 	{
-		pMC->Reset(); 
-		/*if(pMC == m_listMonkeyCivians.GetLast() &&
-			m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_STANDING)
-		{
-			m_bFinishLevel = DJFALSE;
-		}*/
+		pMC->Reset();  
 	} 	
 }
 /////////////////////////////////////////////////////////////////

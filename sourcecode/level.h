@@ -16,10 +16,12 @@
 #include "gamedef.h"
 #include "player.h"
 #include "monkeycilivians.h"
+#include "specter.h"
 
 /////////////////////////////////////////////////////////////////
 DJ_FILE_START();
 /////////////////////////////////////////////////////////////////
+class RaysGhost;
 class MonkeyCivilians;
 class LevelBackground;
 class LevelScene
@@ -54,12 +56,22 @@ public:
 		djint32		uCountNumber;
 		DJVector2	vTimesDistance;
 	};
+
+	struct RaysGhostData
+	{
+		djint32		nID;
+		djint32		nType;
+		DJVector2	vPosition;
+		djint32		nBeatsTimeGroup;
+	};
 protected:
+	// Scene ID
+	DJString	m_nID;
 	// Scene name
-	DJString m_name;
+	DJString	m_name;
 
 	// Scene root
-	DJ2DNode* m_pSceneRoot;
+	DJ2DNode*	m_pSceneRoot;
 
 	// Sprite 
 	DJ2DSprite *m_pSprite;
@@ -87,6 +99,9 @@ protected:
 
 	// background image
 	DJString m_sBackgroundConfig;
+
+	// Rays ghost data
+	DJLinkedList<RaysGhostData>		m_listRayGhostData;
 
 public:
 	// Constructor
@@ -122,6 +137,9 @@ public:
 
 	// Get data for beats time
 	DJLinkedList<BeatsData>& GetBeatsData() {return m_listBeatsData;}
+
+	// Get data for rays ghost
+	DJLinkedList<RaysGhostData>& GetRaysGhostData() {return m_listRayGhostData;}
 };
 /////////////////////////////////////////////////////////////////  
 
@@ -140,6 +158,9 @@ protected:
 
 	// List monkey civinians
 	DJLinkedList<MonkeyCivilians> m_listMonkeyCivians;
+
+	// List raysghost
+	DJLinkedList<RaysGhost>		m_listRayGhost;
 
 	// List beatstime
 	DJLinkedList<BeatsTime> m_listBeatsTime;
