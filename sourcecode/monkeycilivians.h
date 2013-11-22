@@ -84,7 +84,7 @@ public:
 	void EnableJump() {m_bEnableJump = DJTRUE;}
 	void FinishJump() {m_bEnableJump = DJFALSE;}
 
-	void Update(djfloat fDeltaTime);
+	void Update(djfloat fDeltaTime, const DJRECT& box);
 	void Reset();
 	void Term();
 	virtual void Move(const DJVector2 &vDelta);

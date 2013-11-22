@@ -1,9 +1,12 @@
 LEVEL
 {
+	# Level id
+	LEVEL_ID	"LEVEL_01"	
+
 	# Level name string
-	LEVEL_NAME 				"LEVEL_1_NAME"
+	LEVEL_NAME 				"LEVEL_01_NAME"
 	# Level description string
-	LEVEL_DESC				"LEVEL_1_DESC"
+	LEVEL_DESC				"LEVEL_01_DESC"
 
 	# The virtual screen size we assume, note that you can draw outside
 	# and some devices will show more because of aspect ratio, so take 
@@ -14,7 +17,9 @@ LEVEL
 	# A scene describes one scene of the level, scenes set up all images and sprites
 	SCENE "FruitMountain"
 	{
-		SCENE_ID	"SCENE_00"
+		# Scene 1 of level 1
+		SCENE_ID	"SCENE_01"
+
 		# Camera definition (position) <CAMERA_POS> <ROTATION> <CAMERA_ZOOM>
 		CAMERA [0 0] 0 0
 		
@@ -79,8 +84,8 @@ LEVEL
 
 	SCENE "CentipedeSpecter"
 	{
-		# Secne
-		SCENE_ID 	"SCENE_01"
+		# Scene 2 of level 1
+		SCENE_ID	"SCENE_02"
 
 		# Camera definition (position) <CAMERA_POS> <ROTATION> <CAMERA_ZOOM>
 		CAMERA [0 0] 0 0
@@ -96,13 +101,47 @@ LEVEL
 		PLAYER 				"ID_MONKEYKING" 			[595 703] [132 132] "monkey_king"
 
 		# centipede specter     <ID>    <POSITION>		<BEATS TIME GROUP>		
-		CENTIPEDE_SPECTER		0		[275 427]			0	#GROUP 0  
+		#CENTIPEDE_SPECTER		0		[275 427]			0	#GROUP 0  
 
 		# rays ghost 			<ID>  <TYPE>	<POSITION>	 	<BEATS TIME GROUP>
 		RAYS_GHOST				0		0		[275 427]			0
 		
 		# TIME		ID 		NUMBER MONKEY  	(START,END)
-		BEATSTIME 	0			1			[12401 12802]
+		BEATSTIME 	0			1			[13900 14100]
+		BEATSTIME 	0			1			[14400 14600]
+		BEATSTIME 	0			1			[14900 15100]
+		BEATSTIME 	0			1			[15400 15600]
+		BEATSTIME 	0			1			[15900 16100]
+		BEATSTIME 	0			1			[17900 18100]
+		BEATSTIME 	0			1			[18400 18600]
+		BEATSTIME 	0			1			[18900 19100]
+		BEATSTIME 	0			1			[19400 19600]
+		BEATSTIME 	0			1			[19900 20100]
+		BEATSTIME 	0			1			[25400 25600]
+		BEATSTIME 	0			1			[28400 28600]
+		BEATSTIME 	0			1			[28900 29100]
+		BEATSTIME 	0			1			[29900 30100]
+		BEATSTIME 	0			1			[30400 30600]
+		BEATSTIME 	0			1			[30900 31100]
+		BEATSTIME 	0			1			[31400 31600]
+		BEATSTIME 	0			1			[31900 32100]
+		BEATSTIME 	0			1			[32400 32600]
+		BEATSTIME 	0			1			[32900 33100]
+		BEATSTIME 	0			1			[33400 33600]
+		BEATSTIME 	0			1			[33900 34100]
+		BEATSTIME 	0			1			[34400 34600]
+		BEATSTIME 	0			1			[34900 35100]
+		BEATSTIME 	0			1			[35400 35600]
+		BEATSTIME 	0			1			[38400 38600]
+		BEATSTIME 	0			1			[38900 39100]
+		BEATSTIME 	0			1			[39400 39600]
+		BEATSTIME 	0			1			[39900 40100]
+		BEATSTIME 	0			1			[40400 40600]
+		BEATSTIME 	0			1			[40900 41100]
+		BEATSTIME 	0			1			[41400 41600]
+		BEATSTIME 	0			1			[41900 42100]
+		BEATSTIME 	0			1			[42400 42600]
+
 	}	
 	# A state describes one state in the gameplay state machine
 	STATE "INTRO"

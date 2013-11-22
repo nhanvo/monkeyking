@@ -44,8 +44,7 @@ Player::Player()
 	m_vPos = DJVector2(0.0f);
 	m_vAcceleration = DJVector2(0.0f);
 	m_vVelocity = DJVector2(0.0f); 	
-	m_uState = STATE_NONE;		
-	m_pStickGold = NULL;
+	m_uState = STATE_NONE;	
 }
 
 ///
@@ -57,7 +56,7 @@ Player::~Player()
 
 ///
 
-djbool Player::Init(DJString id, DJVector2 vpos, DJVector2 vSize, DJString strAnimFile, LevelScene* pLevelScene)
+djbool Player::Init(DJString id, DJVector2 vpos, DJVector2 vSize, DJString strAnimFile)
 {
 	m_sID = id;
 	m_vPos = vpos;
@@ -85,12 +84,8 @@ djbool Player::Init(DJString id, DJVector2 vpos, DJVector2 vSize, DJString strAn
 	{
 		theSpriteEngine.AddActiveNode(m_pSprite);
 		theSpriteEngine.AddNode(m_pSprite, LAYER_SPRITES);
-	}
+	} 
 
-	// Init stick gold
-	LevelScene::StickGoldData pSGD = pLevelScene->GetStickGoldData();
-	m_pStickGold = DJ_NEW(StickGold);
-	m_pStickGold->Init(pSGD.vPos, pSGD.strAtlastFile, pSGD.strAnimationName);
 	return DJTRUE;	
 }
 
@@ -116,7 +111,6 @@ djbool Player::Update(djfloat fDeltaTime)
 	//MakeBox(&box,m_vPos, 
 	theBoundingBoxCollection.QueueBoundingBox(box);
 #endif //_DEV
-	m_pStickGold->Update(fDeltaTime);
 	return DJTRUE;
 }
 
@@ -142,7 +136,6 @@ void Player::Reset()
 
 djint32 Player::OnTouchBegin( djint32 nDevice, djint32 nID, float fX, float fY )
 {
-	m_pStickGold->OnTouchBegin(nDevice, nID, fX, fY);	
 	return 0;
 }
 

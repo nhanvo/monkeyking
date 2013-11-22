@@ -46,12 +46,6 @@ extern Player* g_pPlayer;
 // Animation path of all monkey civilians
 
 /////////////////////////////////////////////////////////////////
-const char* l_szMonkeyCiviliansAnim[MAX_MONKEY_CIVILIANS] = 
-{
-	"monkey_civilians_01",
-	"monkey_civilians_02",
-	"monkey_civilians_03"
-};
 
 const char* STR_MONKEYCIV_SLOTNAME = "monkey_jump";
 ///
@@ -108,7 +102,7 @@ djbool MonkeyCivilians::Init(djint32 id, DJVector2 vpos, djint32 nBeatsTime)
 ///
 /// Update object with applications delta time 
 ///
-void MonkeyCivilians::Update(djfloat fDeltaTime)
+void MonkeyCivilians::Update(djfloat fDeltaTime,const DJRECT& box)
 {
 	// update position of object
 	spBone* bone = m_pSkeletonNode->FindBone("root");  	
@@ -123,9 +117,9 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 	m_vSize = vSize;
 	m_rectBoxHit = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
 #ifdef _DEV	 
-	DJRECT box;
-	MakeBox(&box, vPos, m_vSize.e[0], m_vSize.e[1]);
-	theBoundingBoxCollection.QueueBoundingBox(box);
+	DJRECT boxDev;
+	MakeBox(&boxDev, vPos, m_vSize.e[0], m_vSize.e[1]);
+	theBoundingBoxCollection.QueueBoundingBox(boxDev);
 	//DJInfo("%d, %d", m_rectBoxHit.nX, m_rectBoxHit.nY);
 #endif 
 
@@ -174,7 +168,7 @@ void MonkeyCivilians::Update(djfloat fDeltaTime)
 			m_fTimeToJump += pTheApp->GetDeltaAppTime();
 			if(m_fTimeToJump >= m_fTimeDurations)
 			{
-				if(OnHit(g_pPlayer->GetStickGold()->GetRectBoxHit()))
+				if(OnHit(box))
 				{
 					m_uState = STATE_MC_HITJUMP;
 					m_pSkeletonNode->ClearAnimation();

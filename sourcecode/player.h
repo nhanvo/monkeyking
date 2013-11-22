@@ -45,18 +45,16 @@ protected:
 	DJ2DSprite*			m_pSprite;
 	DJ2DAnimation*		m_pAnimation;
 	djuint32			m_uState;	
-	StickGold*			m_pStickGold;
 public:
 	Player();
 	~Player();
 
-	djbool Init(DJString id, DJVector2 vpos,DJVector2 vSize, DJString strAnimFile, LevelScene* pLevelScene);
+	djbool Init(DJString id, DJVector2 vpos,DJVector2 vSize, DJString strAnimFile);
 	djbool Update(djfloat fDeltaTime);
 	void   Paint();
 	void Term();
 	void Reset();
-	// Get stick gold
-	StickGold* GetStickGold() const {return m_pStickGold;}
+	
 	// Touch begin callback
 	djint32		OnTouchBegin( djint32 nDevice, djint32 nID, float fX, float fY );
 	// Touch move callback

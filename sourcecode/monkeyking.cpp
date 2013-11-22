@@ -120,9 +120,12 @@ DJ2DGraphicsSheet*		g_pFlareSheet			= NULL;
 // A font to use for drawing text
 DJFont*					g_pFont					= NULL;
 // Mode color
-DJColor			g_cModColor(1,1,1,1);
+DJColor					g_cModColor(1,1,1,1);
 
-djfloat						g_fRestrictionBottom = 0.0f;
+djfloat					g_fRestrictionBottom	= 0.0f;
+
+// Scene is start
+djint32					g_SceneStart			= 1;	
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
@@ -559,11 +562,13 @@ djbool DJMonkeyKingApplication::OnLoad()
 		DJError("Failed to initialize level manager!");
 		return DJFALSE;
 	}
-	//g_pCamera->SetNearDistance(10.0f);
-	//g_pCamera->SetFarDistance(2000.0f);
-	//g_pCamera->SetFOV(DJRADIANS(65.0f));
-	//g_pCamera->SetAspect((float)g_nScreenWidth/(float)g_nScreenHeight);
+	else
+	{
+		// Scene ID get from menu select scene
+		g_pLevelManager->SetSceneID(g_SceneStart);
+	}
 
+	// init level
 	if (g_pLevelManager->GetCurrentLevel() == NULL)
 	{
 		if (!g_pLevelManager->LoadLevel("levels/level01.level"))
@@ -697,6 +702,7 @@ djint32 DJMonkeyKingApplication::OnTouchBegin(djint32 nDevice, djint32 nID, floa
 	if (DJApplication::OnTouchBegin(nDevice, nID, x, y))
 		return 1;
 	g_pPlayer->OnTouchBegin(nDevice, nID,x,y);
+	g_pLevelManager->GetCurrentLevel()->GetStickGold()->OnTouchBegin(nDevice, nID,x,y);
     
 	return 0;
 }

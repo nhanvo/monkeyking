@@ -22,8 +22,11 @@
 DJ_FILE_START();
 /////////////////////////////////////////////////////////////////
 class RaysGhost;
+class StickGold;
 class MonkeyCivilians;
 class LevelBackground;
+class Level;
+
 class LevelScene
 {
 public:
@@ -64,9 +67,19 @@ public:
 		DJVector2	vPosition;
 		djint32		nBeatsTimeGroup;
 	};
+
+	enum 
+	{
+		// Level 01
+		SCENE_01 = 0,
+		SCENE_02,
+		SCENE_03,
+		SCENE_COUNT
+	};
 protected:
 	// Scene ID
-	DJString	m_nID;
+	djint32		m_nID;
+		
 	// Scene name
 	DJString	m_name;
 
@@ -75,33 +88,38 @@ protected:
 
 	// Sprite 
 	DJ2DSprite *m_pSprite;
-	// Skeleton	
 
-	DJVector2 m_vCameraPos;
+	// Camera position	
+	DJVector2	m_vCameraPos;
 
 	// Scene camera rotation (radians)
-	float m_fCameraRotation;
+	float		m_fCameraRotation;
 
 	// Scene camera zoom factor
-	float m_fCameraZoom;
+	float		m_fCameraZoom;
 
 	// Player data
 	PlayerData	m_PlayerData;
-
-	// Monkey civilians data
-	DJLinkedList<MonkeyCiviliansData>	m_listMonkeyCiviliansData;
-
-	// Stick gold data
-	StickGoldData		m_StickGoldData;
+	djbool						m_bPlayer;
 
 	// Beats data 
+	djbool						m_bBeatsTime;
 	DJLinkedList<BeatsData>		m_listBeatsData;
 
 	// background image
 	DJString m_sBackgroundConfig;
 
 	// Rays ghost data
+	djbool							m_bRayGhost;
 	DJLinkedList<RaysGhostData>		m_listRayGhostData;
+
+	// Stick Gold
+	djbool			m_bStickGold;
+	StickGoldData	m_StickGoldData;
+
+	// Monkey civilians data
+	djbool								m_bMonkeyCilivians;
+	DJLinkedList<MonkeyCiviliansData>	m_listMonkeyCiviliansData;
 
 public:
 	// Constructor
@@ -111,6 +129,7 @@ public:
 
 	// Initialize scene
 	djbool Init(DJTagFile& file, DJTagDir* pDir);
+	
 	// Terminate scene
 	void Term();
 
@@ -131,15 +150,25 @@ public:
 
 	// Get list data of monkey civilians
 	DJLinkedList<MonkeyCiviliansData>& GetMonkeyCiviliansData() {return m_listMonkeyCiviliansData;}
+	djbool	IsMonKeyCilivians() const {return m_bMonkeyCilivians;}
 
 	// Get data for stickgold 
 	StickGoldData GetStickGoldData()const {return m_StickGoldData;}
+	djbool	IsStickGold()	const {return m_bStickGold;}
 
 	// Get data for beats time
 	DJLinkedList<BeatsData>& GetBeatsData() {return m_listBeatsData;}
+	djbool  IsBeatsTime()	const {return m_bBeatsTime;}
 
 	// Get data for rays ghost
 	DJLinkedList<RaysGhostData>& GetRaysGhostData() {return m_listRayGhostData;}
+	djbool	IsRayGhost()	const {return m_bRayGhost;}
+
+	// Get ID
+	djint32 GetID() const {return m_nID;}
+
+	// Convert Scene ID to int
+	void ConvertSceneID(DJString strID);
 };
 /////////////////////////////////////////////////////////////////  
 
@@ -152,30 +181,48 @@ class LevelState
 /////////////////////////////////////////////////////////////////
 class Level
 { 
+public:
+	enum
+	{
+		LEVEL_01,
+		LEVEL_02,
+		LEVEL_03,
+
+		LEVEL_COUNT
+	};
 protected:
+	// Level ID
+	djint32							m_nID;
+	
+	// Level name 
+	DJString						m_sLevelName;
+
 	// List of all scenes in level
-	DJLinkedList<LevelScene> m_scenes;
+	DJLinkedList<LevelScene>		m_scenes;
+
+	// Stick gold 
+	StickGold*			m_pStickGold;
 
 	// List monkey civinians
-	DJLinkedList<MonkeyCivilians> m_listMonkeyCivians;
+	DJLinkedList<MonkeyCivilians>	m_listMonkeyCivians;
 
 	// List raysghost
-	DJLinkedList<RaysGhost>		m_listRayGhost;
+	DJLinkedList<RaysGhost>			m_listRayGhost;
 
 	// List beatstime
-	DJLinkedList<BeatsTime> m_listBeatsTime;
+	DJLinkedList<BeatsTime>			m_listBeatsTime;
 
 	// Current scene
-	LevelScene*			m_pCurrentScene;
+	LevelScene*						m_pCurrentScene;
 
 	//Level background
-	LevelBackground*	m_pLevelBackground;
+	LevelBackground*				m_pLevelBackground;
 
 	// Current city
-	djint32				m_nCurrentCity;
+	djint32							m_nCurrentCity;
 
 	// Finish level
-	djbool				m_bFinishLevel;
+	djbool							m_bFinishLevel;
 
 public:
 	// Constructor
@@ -184,7 +231,7 @@ public:
 	~Level();
 
 	// Initialize level
-	djbool Init(const char* szLevelFile);
+	djbool Init(const char* szLevelFile, djint32 nSceneID);
 
 	// Reset level
 	void Reset();
@@ -195,6 +242,11 @@ public:
 	// Update level
 	void Update(float fDeltaTime);
 	void PrePaint();
+
+	// Get stick gold
+	StickGold* GetStickGold() const {return m_pStickGold;}
+
+	void ConvertLevelID(DJString strID);
 };
 ///////////////////////////////////////////////////////////////// 
 
@@ -203,7 +255,8 @@ public:
 class LevelManager
 {
 protected:
-	Level	*m_pCurrentLevel;
+	Level*			m_pCurrentLevel;
+	djint32		m_nSceneID;
 public:
 	LevelManager();
 	~LevelManager();
@@ -215,6 +268,10 @@ public:
 	djbool LoadLevel(const char* szLevelFile);
 	djbool UnloadLevel();
 	Level*	GetCurrentLevel(){return m_pCurrentLevel;}
+
+	// Get and Set scene id
+	void SetSceneID(djint32 nSceneID)	{m_nSceneID = nSceneID;}
+	djint32 GetSceneID() const {return m_nSceneID;}
 
 };
 // End level manager

@@ -39,6 +39,20 @@ extern DJColor			g_cModColor;
 extern djfloat			g_fRestrictionBottom;
 extern DJMusicHandler theMusicHandler;
 
+const char* szLevelID[Level::LEVEL_COUNT] = 
+{
+	"LEVEL_01",
+	"LEVEL_02",
+	"LEVEL_03"
+};
+
+const char* szSceneID[LevelScene::SCENE_COUNT] = 
+{
+	"SCENE_01",
+	"SCENE_02",
+	"SCENE_03"
+};
+
 /////////////////////////////////////////////////////////////////
 LevelScene::LevelScene()
 {
@@ -48,7 +62,12 @@ LevelScene::LevelScene()
 	m_fCameraRotation	= 0.0f;
 	m_fCameraZoom		= 1.0f;
 	m_name				= "";
-	m_nID				= "";
+	m_nID				= -1;
+	m_bStickGold		= DJFALSE;
+	m_bMonkeyCilivians	= DJFALSE;
+	m_bBeatsTime		= DJFALSE;
+	m_bRayGhost			= DJFALSE;
+	m_bPlayer			= DJFALSE;
 }
 
 ///
@@ -70,11 +89,13 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 
 	DJAssert(m_pSprite == NULL);
 
+	// Init LevelID for Scene
+	DJTagLine* pLine;
+
 	// Parse name
 	m_name = pDir->m_attribute;
 
 	// Parse nodes
-	DJTagLine* pLine;
 	m_pSceneRoot = DJ_NEW(DJ2DNode);
 
 	theSpriteEngine.AddNode(m_pSceneRoot, LAYER_BACKGROUND);
@@ -82,13 +103,131 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 	DJLinkedListIter<DJTagLine> iter(pDir->m_lines);
 	while ((pLine = iter.GetStep()))
 	{
+		// Stick gold
+		if(pLine->m_name == "STICKGOLD")
+		{
+			if(!pLine->GetArgVector2(0, m_StickGoldData.vPos))
+			{
+				DJWarning("Invalid POSITION from STICKGOLD tag");
+			}
+			if(!pLine->GetArgString(1, m_StickGoldData.strAtlastFile))
+			{
+				DJWarning("Invalid SIZE from STICKGOLD tag");
+			}
+			if(!pLine->GetArgString(2, m_StickGoldData.strAnimationName))
+			{
+				DJWarning("Invalid ANIMATION_NAME from STICKGOLD tag");
+			}
+			m_bStickGold = DJTRUE;
+		}						  
+		// Monkey cilivians
+		if(pLine->m_name == "MONKEY_CIVILIANS")
+		{
+			MonkeyCiviliansData	*pMonkeyCiviliansData =	DJ_NEW(MonkeyCiviliansData);
+			if(!pLine->GetArgInt(0,pMonkeyCiviliansData->id))
+			{
+				DJWarning("Invalid ID from MONKEY_CIVILIANS	tag");
+			}
+
+			if(!pLine->GetArgVector2(1,pMonkeyCiviliansData->vpos))
+			{
+				DJWarning("Invalid POSITION	from MONKEY_CIVILIANS tag");
+			}
+
+			if(!pLine->GetArgInt(2,	pMonkeyCiviliansData->nBeatsTimeGroup))
+			{
+				DJWarning("Invalid <BEATS TIME GROUP> from MONKEY_CIVILIANS	tag");			
+			}
+
+			m_listMonkeyCiviliansData.AddLast(pMonkeyCiviliansData);
+			m_bMonkeyCilivians = DJTRUE;
+		} 
+
+		// Player
+		if(pLine->m_name == "PLAYER")
+		{
+			if(!pLine->GetArgString(0, m_PlayerData.sID))
+			{
+				DJWarning("Invalid ID from PLAYER tag");
+			}
+
+			if(!pLine->GetArgVector2(1, m_PlayerData.vPos))
+			{
+				DJWarning("Invalid POSITION from PLAYER tag");
+			}
+
+			if(!pLine->GetArgVector2(2, m_PlayerData.vSize))
+			{
+				DJWarning("Invalid SIZE from PLAYER tag");
+			}
+
+			if(!pLine->GetArgString(3, m_PlayerData.strAnimFile))
+			{
+				DJWarning("Invalid ANIMATION_FILE from PLAYER tag");
+			}
+			m_bPlayer = DJTRUE;
+		}
+
+		// Beats time
+		if(pLine->m_name == "BEATSTIME")
+		{
+			BeatsData *pBeatsData = DJ_NEW(BeatsData);
+			if(!pLine->GetArgInt(0, pBeatsData->nID))
+			{
+				DJWarning("Invalid ID from BEATSTIME tag");				
+			}
+			if(!pLine->GetArgInt(1, pBeatsData->uCountNumber))
+			{
+				DJWarning("Invalid NUMBER MONKEY from BEATSTIME tag");				
+			}
+
+			if(!pLine->GetArgVector2(2,pBeatsData->vTimesDistance))
+			{
+				DJWarning("Invalid 	(START,END) from BEATSTIME tag");								
+			}
+			m_listBeatsData.AddLast(pBeatsData);
+			m_bBeatsTime = DJTRUE;
+		}
+
+		// Ray ghost
+		if(pLine->m_name == "RAYS_GHOST")
+		{
+			RaysGhostData *pRayGhostData = DJ_NEW(RaysGhostData);
+			if(!pLine->GetArgInt(0, pRayGhostData->nID))
+			{
+				DJWarning("Invalid 	ID from RAY_GHOST tag");									
+			}
+			if(!pLine->GetArgInt(1, pRayGhostData->nType))
+			{
+				DJWarning("Invalid TYPE from RAY_GHOST tag");								
+			}
+			if(!pLine->GetArgVector2(2, pRayGhostData->vPosition))
+			{
+				DJWarning("Invalid 	POSITION from RAY_GHOST tag");									
+			}
+			if(!pLine->GetArgInt(3, pRayGhostData->nBeatsTimeGroup))
+			{
+				DJWarning("Invalid 	BEATS TIME GROUP from RAY_GHOST tag");				
+			}
+			m_listRayGhostData.AddLast(pRayGhostData);
+			m_bRayGhost = DJTRUE;
+		}
+
+
 		if(pLine->m_name == "SCENE_ID")
 		{
-			if (!pLine->GetArgString(0, m_nID))
+			DJString strID;
+			if (!pLine->GetArgString(0, strID))
 			{
-				DJWarning("Failed to parse ID in SCENE_ID!");
-				DJAssert(DJFALSE);
-			} 
+				DJAssert(pLine != NULL);
+			}
+			else
+			{
+				ConvertSceneID(strID);
+			}
+
+			// Sure scene is exits
+			DJAssert(m_nID != -1);
 		}
 		else if (pLine->m_name == "BG_IMAGE")
 		{
@@ -152,109 +291,14 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 			}
 			if (pLine->GetArgFloat(1, m_fCameraRotation))
 			{
-				m_fCameraRotation = DJRADIANS(m_fCameraRotation);
+				m_fCameraRotation =	DJRADIANS(m_fCameraRotation);
 			}
 			if (pLine->GetArgFloat(2, m_fCameraZoom))
 			{
 			}
-		}
-		else if(pLine->m_name == "PLAYER")
-		{
-			if(!pLine->GetArgString(0, m_PlayerData.sID))
-			{
-				DJWarning("Invalid ID from PLAYER tag");
-			}
-
-			if(!pLine->GetArgVector2(1, m_PlayerData.vPos))
-			{
-				DJWarning("Invalid POSITION from PLAYER tag");
-			}
-
-			if(!pLine->GetArgVector2(2, m_PlayerData.vSize))
-			{
-				DJWarning("Invalid SIZE from PLAYER tag");
-			}
-
-			if(!pLine->GetArgString(3, m_PlayerData.strAnimFile))
-			{
-				DJWarning("Invalid ANIMATION_FILE from PLAYER tag");
-			}
-		}
-		else if(pLine->m_name == "MONKEY_CIVILIANS")
-		{
-			MonkeyCiviliansData *pMonkeyCiviliansData = DJ_NEW(MonkeyCiviliansData);
-			if(!pLine->GetArgInt(0,pMonkeyCiviliansData->id))
-			{
-				DJWarning("Invalid ID from MONKEY_CIVILIANS tag");
-			}
-
-			if(!pLine->GetArgVector2(1,pMonkeyCiviliansData->vpos))
-			{
-				DJWarning("Invalid POSITION from MONKEY_CIVILIANS tag");
-			}
-
-			if(!pLine->GetArgInt(2, pMonkeyCiviliansData->nBeatsTimeGroup))
-			{
-				DJWarning("Invalid <BEATS TIME GROUP> from MONKEY_CIVILIANS tag");			
-			}
-
-			m_listMonkeyCiviliansData.AddLast(pMonkeyCiviliansData);
-		}
-		else if(pLine->m_name == "STICKGOLD")
-		{
-			if(!pLine->GetArgVector2(0, m_StickGoldData.vPos))
-			{
-				DJWarning("Invalid POSITION from STICKGOLD tag");
-			}
-			if(!pLine->GetArgString(1, m_StickGoldData.strAtlastFile))
-			{
-				DJWarning("Invalid SIZE from STICKGOLD tag");
-			}
-			if(!pLine->GetArgString(2, m_StickGoldData.strAnimationName))
-			{
-				DJWarning("Invalid ANIMATION_NAME from STICKGOLD tag");
-			}
-		}
-		else if(pLine->m_name == "BEATSTIME")
-		{
-			BeatsData *pBeatsData = DJ_NEW(BeatsData);
-			if(!pLine->GetArgInt(0, pBeatsData->nID))
-			{
-				DJWarning("Invalid ID from BEATSTIME tag");				
-			}
-			if(!pLine->GetArgInt(1, pBeatsData->uCountNumber))
-			{
-				DJWarning("Invalid NUMBER MONKEY from BEATSTIME tag");				
-			}
-
-			if(!pLine->GetArgVector2(2,pBeatsData->vTimesDistance))
-			{
-				DJWarning("Invalid 	(START,END) from BEATSTIME tag");								
-			}
-			m_listBeatsData.AddLast(pBeatsData);
-		}	
-		else if(pLine->m_name == "RAYS_GHOST")
-		{
-			RaysGhostData *pRayGhostData = DJ_NEW(RaysGhostData);
-			if(!pLine->GetArgInt(0, pRayGhostData->nID))
-			{
-				DJWarning("Invalid 	ID from RAY_GHOST tag");									
-			}
-			if(!pLine->GetArgInt(1, pRayGhostData->nType))
-			{
-				DJWarning("Invalid TYPE from RAY_GHOST tag");								
-			}
-			if(!pLine->GetArgVector2(2, pRayGhostData->vPosition))
-			{
-				DJWarning("Invalid 	POSITION from RAY_GHOST tag");									
-			}
-			if(!pLine->GetArgInt(3, pRayGhostData->nBeatsTimeGroup))
-			{
-				DJWarning("Invalid 	BEATS TIME GROUP from RAY_GHOST tag");				
-			}
-			m_listRayGhostData.AddLast(pRayGhostData);
-		}
-	}
+		} 	   	
+		
+	} 
 
 	float fScaleX = (float)g_nScreenWidth/1024.0f;
 	float fScaleY = (float)g_nScreenHeight/768;
@@ -262,10 +306,13 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 
 	//m_pSceneRoot->SetScale(fScale,fScale);
 	m_pSceneRoot->SetPosition(m_vCameraPos[0], m_vCameraPos[1]);
-	//m_pSceneRoot->SetRotation(m_fCameraRotation);
-	
+	//m_pSceneRoot->SetRotation(m_fCameraRotation);	  
+
+	// Sure Player is exits
+	DJAssert(m_bPlayer != NULL);
+
 	return DJTRUE;
-}
+}  
 
 ///
 
@@ -285,6 +332,25 @@ void LevelScene::Term()
 	m_name				= "";
 }
 
+///
+
+void LevelScene::ConvertSceneID(DJString strID)
+{
+	// Scene ID	
+	if(djStringCompare(strID, szSceneID[LevelScene::SCENE_01])== 0)
+	{
+		m_nID = LevelScene::SCENE_01;
+	}
+	else if(djStringCompare(strID, szSceneID[LevelScene::SCENE_02])== 0)
+	{
+		m_nID = LevelScene::SCENE_02;
+	}
+	else if(djStringCompare(strID, szSceneID[LevelScene::SCENE_03])== 0)
+	{
+		m_nID = LevelScene::SCENE_03;
+	}
+}
+
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
@@ -294,6 +360,9 @@ Level::Level()
 	m_pLevelBackground = NULL;
 	m_nCurrentCity = 0;
 	m_bFinishLevel = DJFALSE;
+	m_sLevelName = "";
+	m_nID	 = -1;
+	m_pStickGold = NULL;
 }
 
 ///
@@ -305,7 +374,7 @@ Level::~Level()
 
 ///
 
-djbool Level::Init(const char* szLevelFile)
+djbool Level::Init(const char* szLevelFile, djint32 nSceneID)
 {
 	DJTagFile tf;
 	if (tf.Load(szLevelFile) != DJ_SUCCESS)
@@ -313,10 +382,35 @@ djbool Level::Init(const char* szLevelFile)
 		DJWarning("Failed to load or parse level!");
 		return DJFALSE;
 	}
-
-	tf.GetTag("LEVEL_NAME");
+	
+	DJTagLine* pLine;
+		
 	tf.GetTag("LEVEL_DESC");
 	tf.GetTag("VIRTUAL_SCREEN_SIZE");
+
+	// Level ID
+	pLine = tf.GetTag("LEVEL_ID");
+	DJString strLevelID = "";
+	if(!pLine->GetArgString(0, strLevelID))
+	{
+		DJAssert(DJFALSE);
+	}
+	else
+	{
+		ConvertLevelID(strLevelID);
+	}
+
+	// Sure level id is exits
+	DJAssert(m_nID != -1);
+
+	// Level name
+	pLine = tf.GetTag("LEVEL_NAME");
+	if(!pLine->GetArgString(0, m_sLevelName))
+	{
+		DJWarning("Failed toload LEVEL_NAME fron LEVEL");
+		DJAssert(0);
+	}
+
 	DJLinkedListIter<DJTagDir> iter(tf.m_root.m_dirs);
 	DJTagDir* pDir;
 	while ((pDir = iter.GetStep()))
@@ -336,9 +430,8 @@ djbool Level::Init(const char* szLevelFile)
 		}
 	}
 
-	// Scene current 
-	m_pCurrentScene = m_scenes.GetFirst();
-	//m_pCurrentScene = m_scenes.GetByIndex(1);
+	// Set current scene
+	m_pCurrentScene = m_scenes.GetByIndex(nSceneID); 
 
 	// Current scene 
 	if(m_pCurrentScene)
@@ -350,43 +443,68 @@ djbool Level::Init(const char* szLevelFile)
 			DJError("Failed to create Player (out of memory)!");
 			return DJFALSE;
 		}
+		
 		// Init player
 		g_pPlayer->Init(m_pCurrentScene->GetPlayerData().sID,
 						m_pCurrentScene->GetPlayerData().vPos,
 						m_pCurrentScene->GetPlayerData().vSize,
-						m_pCurrentScene->GetPlayerData().strAnimFile,
-						m_pCurrentScene);
+						m_pCurrentScene->GetPlayerData().strAnimFile);	
+
+		/////////////////////////////////////////////////////////////////////////////
+		// Init Stick Gold
+		if(m_pCurrentScene->IsStickGold())
+		{  			
+			LevelScene::StickGoldData pSG = m_pCurrentScene->GetStickGoldData();
+			m_pStickGold = DJ_NEW(StickGold);
+			m_pStickGold->Init(pSG.vPos, pSG.strAtlastFile, pSG.strAnimationName);
+		}
+		/////////////////////////////////////////////////////////////////////////////
+
+		/////////////////////////////////////////////////////////////////////////////
+		// init monkey cilivians
+		if(m_pCurrentScene->IsMonKeyCilivians())
+		{
+			DJLinkedListIter<LevelScene::MonkeyCiviliansData> iter( m_pCurrentScene->GetMonkeyCiviliansData());
+			LevelScene::MonkeyCiviliansData *pMCD;
+			while((pMCD = iter.GetStep()))
+			{
+				MonkeyCivilians *pMC = DJ_NEW(MonkeyCivilians);
+				pMC->Init(pMCD->id, pMCD->vpos, pMCD->nBeatsTimeGroup);
+				m_listMonkeyCivians.AddLast(pMC);
+			}
+		}
+		/////////////////////////////////////////////////////////////////////////////
+
+		/////////////////////////////////////////////////////////////////////////////
+		// init beats time
+		if(m_pCurrentScene->IsBeatsTime())
+		{
+			DJLinkedListIter<LevelScene::BeatsData> iter1( m_pCurrentScene->GetBeatsData());
+			LevelScene::BeatsData *pBD;
+			while((pBD = iter1.GetStep()))
+			{
+				BeatsTime *pBT = DJ_NEW(BeatsTime);
+				pBT->Init(pBD->nID, pBD->uCountNumber, pBD->vTimesDistance);
+				m_listBeatsTime.AddLast(pBT);
+			}
+		}		
+		/////////////////////////////////////////////////////////////////////////////
+
+		/////////////////////////////////////////////////////////////////////////////
+		// init ray ghost
+		if(m_pCurrentScene->IsRayGhost())
+		{
+			DJLinkedListIter<LevelScene::RaysGhostData> iterRGD(m_pCurrentScene->GetRaysGhostData());
+			LevelScene::RaysGhostData *pRGD;
+			while((pRGD = iterRGD.GetStep()))
+			{
+				RaysGhost *pRG = DJ_NEW(RaysGhost);
+				pRG->Init(pRGD->nID, pRGD->nType, pRGD->vPosition, pRGD->nBeatsTimeGroup);
+				m_listRayGhost.AddLast(pRG);
+			}
+		}
+		/////////////////////////////////////////////////////////////////////////////  
 		
-		switch(m_pCurrentScene->GetBeatsData)
-		// Init monkey civilians
-		DJLinkedListIter<LevelScene::MonkeyCiviliansData> iter( m_pCurrentScene->GetMonkeyCiviliansData());
-		LevelScene::MonkeyCiviliansData *pMCD;
-		while((pMCD = iter.GetStep()))
-		{
-			MonkeyCivilians *pMC = DJ_NEW(MonkeyCivilians);
-			pMC->Init(pMCD->id, pMCD->vpos, pMCD->nBeatsTimeGroup);
-			m_listMonkeyCivians.AddLast(pMC);
-		}
-
-		// Init beats time 
-		DJLinkedListIter<LevelScene::BeatsData> iter1( m_pCurrentScene->GetBeatsData());
-		LevelScene::BeatsData *pBD;
-		while((pBD = iter1.GetStep()))
-		{
-			BeatsTime *pBT = DJ_NEW(BeatsTime);
-			pBT->Init(pBD->nID, pBD->uCountNumber, pBD->vTimesDistance);
-			m_listBeatsTime.AddLast(pBT);
-		}
-
-		// Init rays ghost
-		DJLinkedListIter<LevelScene::RaysGhostData> iterRGD(m_pCurrentScene->GetRaysGhostData());
-		LevelScene::RaysGhostData *pRGD;
-		while((pRGD = iterRGD.GetStep()))
-		{
-			RaysGhost *pRG = DJ_NEW(RaysGhost);
-			pRG->Init(pRGD->nID, pRGD->nType, pRGD->vPosition, pRGD->nBeatsTimeGroup);
-			m_listRayGhost.AddLast(pRG);
-		}
 	}
 
 	// Random current city
@@ -406,6 +524,7 @@ djbool Level::Init(const char* szLevelFile)
 	//g_pCamera->SetLocalTransform(DJMatrix::Translate(DJVector3(0, 0, 0)));
 	//g_pCamera->UpdateTransforms();
 	Reset();
+
 	return DJTRUE;
 }
 
@@ -447,64 +566,77 @@ void Level::Update(float fDeltaTime)
 			theMusicHandler.PlayMusic("music/level01.mp3");
 		}
 	}
+	//////////////////////////////////////////////////////////////////////////////
 	// update player
 	g_pPlayer->Update(fDeltaTime);
+	//////////////////////////////////////////////////////////////////////////////
 
-	// update monkey cavilians
-	DJLinkedListIter<MonkeyCivilians> iter(m_listMonkeyCivians);
-	MonkeyCivilians *pMC;  
-	while((pMC = iter.GetStep()))
+	//////////////////////////////////////////////////////////////////////////////
+	// update stick gold
+	if(m_pCurrentScene->IsStickGold() && !m_bFinishLevel)
 	{
-		if(pMC->GetIDBeatsTime() == -1)
+		m_pStickGold->Update(fDeltaTime);
+	}
+	//////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////////////////
+	// update monkey cilivians
+	if(m_pCurrentScene->IsMonKeyCilivians())
+	{
+		DJLinkedListIter<MonkeyCivilians> iter(m_listMonkeyCivians);
+		MonkeyCivilians *pMC;  
+		while((pMC = iter.GetStep()))
 		{
-			DJWarning("Monkey cilivians %d invalid beats time", pMC->GetID());		
-			DJAssert((pMC->GetIDBeatsTime() != -1));
-		}
-		else
-		{
-			DJLinkedListIter<BeatsTime> iter2(m_listBeatsTime);
-			BeatsTime *pBT;
-			while((pBT = iter2.GetStep()))
+			if(pMC->GetIDBeatsTime() == -1)
 			{
-				if(pMC->GetIDBeatsTime() == pBT->GetID())
+				DJWarning("Monkey cilivians %d invalid beats time", pMC->GetID());		
+				DJAssert((pMC->GetIDBeatsTime() != -1));
+			}
+			else
+			{
+				DJLinkedListIter<BeatsTime> iter2(m_listBeatsTime);
+				BeatsTime *pBT;
+				while((pBT = iter2.GetStep()))
 				{
-					if(pTheSoundDevice->GetMusicPos() >= pBT->GetBeatsTime().e[0] && 
-						pTheSoundDevice->GetMusicPos() <= pBT->GetBeatsTime().e[1])
+					if(pMC->GetIDBeatsTime() == pBT->GetID())
 					{
-					 	pMC->EnableJump();
+						if(pTheSoundDevice->GetMusicPos() >= pBT->GetBeatsTime().e[0] && 
+							pTheSoundDevice->GetMusicPos() <= pBT->GetBeatsTime().e[1])
+						{
+		 					pMC->EnableJump();
+						}
 					}
 				}
-			}
-			pMC->Update(fDeltaTime);	
+				pMC->Update(fDeltaTime, m_pStickGold->GetRectBoxHit());	
 
-			// Reset level if monkey cilivians end is finish jump
-			if(pMC == m_listMonkeyCivians.GetLast() &&
-			   (m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_DIE ||
-			   m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_FINISH))
-			{
-				m_bFinishLevel = DJTRUE;			
-				Reset();			
+				// Reset level if monkey cilivians end is finish jump
+				if(pMC == m_listMonkeyCivians.GetLast() &&
+				   (m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_DIE ||
+				   m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_FINISH))
+				{
+					m_bFinishLevel = DJTRUE;			
+					Reset();			
+				}
 			}
+			
 		}
-		
 	}
-	
-	
-	// Update rays ghost
-	DJLinkedListIter<RaysGhost> iterRayGhost(m_listRayGhost);
-	RaysGhost *pRG;
-	while((pRG = iterRayGhost.GetStep()))
+	//////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////////////////
+	// update ray ghost
+	if(m_pCurrentScene->IsRayGhost())
 	{
-		pRG->Update(fDeltaTime);
+		DJLinkedListIter<RaysGhost> iterRayGhost(m_listRayGhost);
+		RaysGhost *pRG;
+		while((pRG = iterRayGhost.GetStep()))
+		{
+			pRG->Update(fDeltaTime);
+		}
 	}
+	//////////////////////////////////////////////////////////////////////////////
+
 	g_fRestrictionBottom = 1024.0f;
-	/*g_pCamera->SetLocalTransform(DJMatrix::Translate(DJVector3(-g_pPlayer->GetPosition().e[0],-g_pPlayer->GetPosition().e[1],0.0f)));
-	g_pCamera->UpdateTransforms();*/
-	// update position scene root
-	/*DJ2DNode* pSceneRoot = m_pCurrentScene->GetSceneRoot();
-	DJMatrix mx = g_pCamera->GetLocalTransform();
-	DJVector3 v3 = mx * DJVector3(0, 0,0.0f);
-	pSceneRoot->SetPosition(DJVector2(v3.e[0], v3.e[1]));*/
 }
 
 ///
@@ -525,12 +657,33 @@ void Level::Reset()
 		pMC->Reset();  
 	} 	
 }
+
+///
+
+///
+void Level::ConvertLevelID(DJString strID)
+{
+	// Scene ID	
+	if(djStringCompare(strID, szLevelID[Level::LEVEL_01])== 0)
+	{
+		m_nID = Level::LEVEL_01;
+	}
+	else if(djStringCompare(strID, szLevelID[Level::LEVEL_02])== 0)
+	{
+		m_nID = Level::LEVEL_02;
+	}
+	else if(djStringCompare(strID, szLevelID[Level::LEVEL_03])== 0)
+	{
+		m_nID = Level::LEVEL_03;
+	}
+}
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
 LevelManager::LevelManager()
 {
 	m_pCurrentLevel = NULL;	
+	m_nSceneID = 0;
 }
 
 ///
@@ -572,7 +725,7 @@ void LevelManager::Term()
 djbool LevelManager::LoadLevel(const char* szLevelFile)
 {
 	m_pCurrentLevel  = DJ_NEW(Level);
-	if(m_pCurrentLevel == NULL || !m_pCurrentLevel->Init(szLevelFile))
+	if(m_pCurrentLevel == NULL || !m_pCurrentLevel->Init(szLevelFile, m_nSceneID))
 	{
 		DJError("Failed to load level!");
 		DJ_SAFE_DELETE(m_pCurrentLevel);
