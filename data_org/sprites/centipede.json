@@ -1,0 +1,29 @@
+{
+"bones": [
+	{ "name": "root" }
+],
+"slots": [
+	{ "name": "centipede", "bone": "root", "attachment": "Centipede" }
+],
+"skins": {
+	"default": {
+		"centipede": {
+			"Centipede": { "x": -0.5, "y": 126.99, "width": 223, "height": 252 }
+		}
+	}
+},
+"events": {},
+"animations": {
+	"animation": {
+		"bones": {
+			"root": {
+				"scale": [
+					{ "time": 0, "x": 0.7, "y": 0.7 },
+					{ "time": 0.5, "x": 1, "y": 1 },
+					{ "time": 1, "x": 0.7, "y": 0.7 }
+				]
+			}
+		}
+	}
+}
+}

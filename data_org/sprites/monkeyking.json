@@ -1,0 +1,31 @@
+{
+"bones": [
+	{ "name": "root" }
+],
+"slots": [
+	{ "name": "monkeyking", "bone": "root", "attachment": "monkeyking" }
+],
+"skins": {
+	"default": {
+		"monkeyking": {
+			"monkeyking": { "width": 123, "height": 124 }
+		}
+	}
+},
+"events": {},
+"animations": {
+	"animation": {
+		"bones": {
+			"root": {
+				"scale": [
+					{ "time": 0, "x": 0.799, "y": 0.799 },
+					{ "time": 0.1666, "x": 0.9, "y": 0.9 },
+					{ "time": 0.3333, "x": 1, "y": 1 },
+					{ "time": 0.5, "x": 0.9, "y": 0.9 },
+					{ "time": 0.6666, "x": 0.799, "y": 0.799 }
+				]
+			}
+		}
+	}
+}
+}

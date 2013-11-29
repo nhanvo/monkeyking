@@ -1,0 +1,12 @@
+
+spiral_effect.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+circle_big
+  rotate: false
+  xy: 2, 2
+  size: 49, 50
+  orig: 49, 50
+  offset: 0, 0
+  index: -1

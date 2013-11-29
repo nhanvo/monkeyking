@@ -1,0 +1,12 @@
+
+centipede.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+Centipede
+  rotate: false
+  xy: 2, 2
+  size: 218, 239
+  orig: 223, 252
+  offset: 2, 4
+  index: -1

@@ -37,19 +37,21 @@ class Player : public Entity
 	{
 		STATE_NONE,
 		STATE_CUT,
+		STATE_MOVE,
 
 		STATE_COUNT
 	};
 protected:
-	DJString			m_sID;	
-	DJ2DSprite*			m_pSprite;
-	DJ2DAnimation*		m_pAnimation;
-	djuint32			m_uState;	
+	DJ2DSkeletonNode*			m_pSkeletonNode;	
+	djuint32					m_uState;
+	DJVector2					m_vTarget;
+	djfloat						m_fTimeMove;
 public:
 	Player();
 	~Player();
 
-	djbool Init(DJString id, DJVector2 vpos,DJVector2 vSize, DJString strAnimFile);
+	djbool Init(DJVector2 vpos, DJString strAtlastFile, DJString strAnimName);
+	void Move(DJVector2 vTarget);
 	djbool Update(djfloat fDeltaTime);
 	void   Paint();
 	void Term();

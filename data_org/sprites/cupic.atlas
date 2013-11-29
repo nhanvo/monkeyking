@@ -1,0 +1,54 @@
+
+cupic.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+angel_cupic
+  rotate: true
+  xy: 2, 181
+  size: 156, 137
+  orig: 156, 137
+  offset: 0, 0
+  index: -1
+c1
+  rotate: false
+  xy: 454, 449
+  size: 30, 30
+  orig: 30, 30
+  offset: 0, 0
+  index: -1
+c2
+  rotate: false
+  xy: 2, 2
+  size: 40, 28
+  orig: 40, 28
+  offset: 0, 0
+  index: -1
+cupic
+  rotate: false
+  xy: 307, 352
+  size: 145, 127
+  orig: 145, 127
+  offset: 0, 0
+  index: -1
+fairy_cupic
+  rotate: false
+  xy: 2, 339
+  size: 154, 140
+  orig: 154, 140
+  offset: 0, 0
+  index: -1
+iron_cupic
+  rotate: false
+  xy: 158, 350
+  size: 147, 129
+  orig: 147, 129
+  offset: 0, 0
+  index: -1
+super-cupic
+  rotate: true
+  xy: 2, 32
+  size: 147, 129
+  orig: 147, 129
+  offset: 0, 0
+  index: -1

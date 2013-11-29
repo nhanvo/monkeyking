@@ -299,11 +299,8 @@ void MonkeyCivilians::Reset()
 /////////////////////////////////////////////////////////////////
 // Begin class BeatsTime
 ///
-BeatsTime::BeatsTime()
+BeatsTime::BeatsTime(): m_nID(-1), m_nNumberOfMonkeyCilivians(-1), m_vBeatsTime(DJVector2(0.0f))
 {
-	m_nID = -1;
-	m_nNumberOfMonkeyCilivians = -1;
-	m_vBeatsTime = DJVector2(0.0f);
 }
 
 ///

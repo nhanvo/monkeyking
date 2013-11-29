@@ -1,0 +1,19 @@
+
+circle_effect_fast.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+circle
+  rotate: false
+  xy: 53, 28
+  size: 23, 24
+  orig: 23, 24
+  offset: 0, 0
+  index: -1
+circle_big
+  rotate: false
+  xy: 2, 2
+  size: 49, 50
+  orig: 49, 50
+  offset: 0, 0
+  index: -1

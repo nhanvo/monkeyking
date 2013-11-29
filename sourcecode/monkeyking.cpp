@@ -29,7 +29,6 @@
 #include <djgamesounds.h>
 #include <djfont.h>
 #include <djdevicemanager.h>
-#include <djcamera.h>
 
 /////////////////////////////////////////////////////////////////
 // Game Includes
@@ -125,7 +124,7 @@ DJColor					g_cModColor(1,1,1,1);
 djfloat					g_fRestrictionBottom	= 0.0f;
 
 // Scene is start
-djint32					g_SceneStart			= 1;	
+djint32					g_SceneStart			= SCENE_CENTIPEDE_SPECTER;	
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
@@ -154,7 +153,7 @@ extern djuint32			g_uGlobalVertexBufferUsageFlags;
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
-DJCamera*					g_pCamera				= NULL;
+Camera*						g_pCamera				= NULL;
 LevelManager*				g_pLevelManager			= NULL;
 Player*						g_pPlayer; 
 DJVector2					g_vScaleScreen			= DJVector2(1.0f);
@@ -548,12 +547,12 @@ djbool DJMonkeyKingApplication::OnLoad()
 	}
 
 	// Create camera
-	//g_pCamera = DJ_NEW (DJCamera);
-	//if(g_pCamera == NULL)
-	//{
-	//	DJError("Failed to create camera (out of memory)!");
-	//	return DJFALSE;
-	//}
+	g_pCamera = DJ_NEW (Camera);
+	if(g_pCamera == NULL)
+	{
+		DJError("Failed to create camera (out of memory)!");
+		return DJFALSE;
+	}
 
 	// Create new level manager
 	g_pLevelManager = DJ_NEW ( LevelManager );
@@ -702,7 +701,10 @@ djint32 DJMonkeyKingApplication::OnTouchBegin(djint32 nDevice, djint32 nID, floa
 	if (DJApplication::OnTouchBegin(nDevice, nID, x, y))
 		return 1;
 	g_pPlayer->OnTouchBegin(nDevice, nID,x,y);
-	g_pLevelManager->GetCurrentLevel()->GetStickGold()->OnTouchBegin(nDevice, nID,x,y);
+	if(g_pLevelManager->GetCurrentLevel()->GetCurrentScene()->IsStickGold())
+	{
+		g_pLevelManager->GetCurrentLevel()->GetStickGold()->OnTouchBegin(nDevice, nID,x,y);
+	}
     
 	return 0;
 }

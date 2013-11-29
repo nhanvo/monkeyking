@@ -21,7 +21,9 @@
 /////////////////////////////////////////////////////////////////
 DJ_FILE_START();
 /////////////////////////////////////////////////////////////////
-class RaysGhost;
+//class RaysGhost;
+class Centipede;
+class Specter;
 class StickGold;
 class MonkeyCivilians;
 class LevelBackground;
@@ -39,10 +41,9 @@ public:
 
 	struct PlayerData
 	{
-		DJString	sID;
 		DJVector2	vPos;
-		DJVector2   vSize;
-		DJString	strAnimFile;		
+		DJString    strAtlastFile;
+		DJString	strAnimationName;	
 	};
 
 	struct StickGoldData
@@ -68,6 +69,13 @@ public:
 		djint32		nBeatsTimeGroup;
 	};
 
+	struct SpecterData
+	{
+		djint32		nType;
+		DJVector2	vPosition;
+		djint32		nBeatsTime;
+	};
+
 	enum 
 	{
 		// Level 01
@@ -78,7 +86,7 @@ public:
 	};
 protected:
 	// Scene ID
-	djint32		m_nID;
+	DJString	m_sID;
 		
 	// Scene name
 	DJString	m_name;
@@ -120,6 +128,10 @@ protected:
 	// Monkey civilians data
 	djbool								m_bMonkeyCilivians;
 	DJLinkedList<MonkeyCiviliansData>	m_listMonkeyCiviliansData;
+
+	// Specter 
+	djbool								m_bSpecter;
+	DJLinkedList<SpecterData>			m_listSpecterData;
 
 public:
 	// Constructor
@@ -164,11 +176,12 @@ public:
 	DJLinkedList<RaysGhostData>& GetRaysGhostData() {return m_listRayGhostData;}
 	djbool	IsRayGhost()	const {return m_bRayGhost;}
 
-	// Get ID
-	djint32 GetID() const {return m_nID;}
+	// Get specter
+	DJLinkedList<SpecterData>& GetSpecterData() {return m_listSpecterData;}
+	djbool IsSpecter() const {return m_bSpecter;}
 
-	// Convert Scene ID to int
-	void ConvertSceneID(DJString strID);
+	// Get ID
+	DJString GetID() const {return m_sID;}
 };
 /////////////////////////////////////////////////////////////////  
 
@@ -192,10 +205,13 @@ public:
 	};
 protected:
 	// Level ID
-	djint32							m_nID;
+	DJString						m_sID;
 	
 	// Level name 
 	DJString						m_sLevelName;
+
+	// music path
+	DJString						m_sSceneMusic;
 
 	// List of all scenes in level
 	DJLinkedList<LevelScene>		m_scenes;
@@ -206,8 +222,8 @@ protected:
 	// List monkey civinians
 	DJLinkedList<MonkeyCivilians>	m_listMonkeyCivians;
 
-	// List raysghost
-	DJLinkedList<RaysGhost>			m_listRayGhost;
+	// List Specter
+	DJLinkedList<Centipede>			m_listSpecter;
 
 	// List beatstime
 	DJLinkedList<BeatsTime>			m_listBeatsTime;
@@ -246,7 +262,11 @@ public:
 	// Get stick gold
 	StickGold* GetStickGold() const {return m_pStickGold;}
 
-	void ConvertLevelID(DJString strID);
+	// Get current scene
+	LevelScene* GetCurrentScene() const {return m_pCurrentScene;}
+	void SetCurrentScene(LevelScene* pScene) {m_pCurrentScene = pScene;}
+
+	void InitSceneMusic();
 };
 ///////////////////////////////////////////////////////////////// 
 

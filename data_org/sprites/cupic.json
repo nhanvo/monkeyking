@@ -1,0 +1,134 @@
+{
+"bones": [
+	{ "name": "root" },
+	{ "name": "all", "parent": "root", "x": -1.37, "y": -0.28, "rotation": 1.79 },
+	{ "name": "wing2", "parent": "all", "length": 20.34, "x": -17.29, "y": -19.91, "rotation": 145.58 },
+	{ "name": "wing1", "parent": "wing2", "length": 15.63, "x": -3.08, "y": -8.46, "rotation": -15.82 }
+],
+"slots": [
+	{ "name": "c1", "bone": "wing1", "attachment": "c1" },
+	{ "name": "character", "bone": "all", "attachment": "character" },
+	{ "name": "c2", "bone": "wing2", "attachment": "c2" }
+],
+"skins": {
+	"default": {
+		"c1": {
+			"c1": { "x": 12.17, "y": 1.38, "rotation": -129.76, "width": 30, "height": 30 }
+		},
+		"c2": {
+			"c2": { "x": 13.71, "y": -0.48, "rotation": -145.58, "width": 40, "height": 28 }
+		}
+	},
+	"angel": {
+		"character": {
+			"character": { "name": "angel_cupic", "x": 18.2, "y": 10.9, "width": 156, "height": 137 }
+		}
+	},
+	"kiwi": {
+		"character": {
+			"character": { "name": "cupic", "x": 24.62, "y": 6.33, "width": 145, "height": 127 }
+		}
+	},
+	"fairy": {
+		"character": {
+			"character": { "name": "fairy_cupic", "x": 20.21, "y": 13.04, "width": 154, "height": 140 }
+		}
+	},
+	"iron": {
+		"character": {
+			"character": { "name": "iron_cupic", "x": 22.33, "y": 6.73, "width": 147, "height": 129 }
+		}
+	},
+	"super": {
+		"character": {
+			"character": { "name": "super-cupic", "x": 24.3, "y": 6.7, "width": 147, "height": 129 }
+		}
+	}
+},
+"animations": {
+	"fly": {
+		"bones": {
+			"root": {
+				"rotate": [
+					{ "time": 0, "angle": 0, "curve": "stepped" },
+					{ "time": 0.0666, "angle": 0 }
+				],
+				"translate": [
+					{ "time": 0, "x": 0, "y": 0, "curve": "stepped" },
+					{ "time": 0.0666, "x": 0, "y": 0 }
+				],
+				"scale": [
+					{ "time": 0, "x": 1, "y": 1, "curve": "stepped" },
+					{ "time": 0.0666, "x": 1, "y": 1 }
+				]
+			},
+			"all": {
+				"rotate": [
+					{ "time": 0, "angle": 0, "curve": "stepped" },
+					{ "time": 0.0666, "angle": 0 }
+				],
+				"translate": [
+					{ "time": 0, "x": 0, "y": 0, "curve": "stepped" },
+					{ "time": 0.0666, "x": 0, "y": 0 }
+				],
+				"scale": [
+					{ "time": 0, "x": 1, "y": 1, "curve": "stepped" },
+					{ "time": 0.0666, "x": 1, "y": 1 }
+				]
+			},
+			"wing2": {
+				"rotate": [
+					{ "time": 0, "angle": -10.37 },
+					{ "time": 0.0666, "angle": -311.04 }
+				],
+				"translate": [
+					{ "time": 0, "x": 0, "y": 0 },
+					{ "time": 0.0666, "x": 1.59, "y": -0.04 }
+				],
+				"scale": [
+					{ "time": 0, "x": 1, "y": 1, "curve": "stepped" },
+					{ "time": 0.0666, "x": 1, "y": 1 }
+				]
+			},
+			"wing1": {
+				"rotate": [
+					{ "time": 0, "angle": 1.19 },
+					{ "time": 0.0666, "angle": -8.69 }
+				],
+				"translate": [
+					{ "time": 0, "x": 1.57, "y": -0.41 },
+					{ "time": 0.0666, "x": -5.32, "y": 5.24 }
+				],
+				"scale": [
+					{ "time": 0, "x": 1, "y": 1, "curve": "stepped" },
+					{ "time": 0.0666, "x": 1, "y": 1 }
+				]
+			}
+		},
+		"slots": {
+			"c1": {
+				"attachment": [
+					{ "time": 0, "name": "c1" },
+					{ "time": 0.0666, "name": "c1" }
+				]
+			},
+			"c2": {
+				"attachment": [
+					{ "time": 0, "name": "c2" },
+					{ "time": 0.0666, "name": "c2" }
+				]
+			},
+			"character": {
+				"attachment": [
+					{ "time": 0, "name": "character" },
+					{ "time": 0.0666, "name": "character" }
+				]
+			}
+		},
+		"draworder": [
+			{ "time": 0 },
+			{ "time": 0.0666 }
+		]
+	}
+}
+}

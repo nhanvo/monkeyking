@@ -37,14 +37,19 @@ extern DJFont*		g_pFont;
 struct Bone;
 extern Player* g_pPlayer;
 
+const char* STR_PLAYER_SLOTNAME = "monkeyking";
+
 /////////////////////////////////////////////////////////////////
 // Begin class Player
 Player::Player()
 {
 	m_vPos = DJVector2(0.0f);
 	m_vAcceleration = DJVector2(0.0f);
-	m_vVelocity = DJVector2(0.0f); 	
-	m_uState = STATE_NONE;	
+	m_vVelocity = DJVector2(1.0f); 	
+	m_uState = STATE_NONE;
+	m_pSkeletonNode = NULL;
+	m_vTarget		= DJVector2(0.0f);
+	m_fTimeMove		= 0.0f;
 }
 
 ///
@@ -56,43 +61,27 @@ Player::~Player()
 
 ///
 
-djbool Player::Init(DJString id, DJVector2 vpos, DJVector2 vSize, DJString strAnimFile)
+djbool Player::Init(DJVector2 vpos, DJString strAtlastFile, DJString strAnimName)
 {
-	m_sID = id;
 	m_vPos = vpos;
-	m_vSize = vSize;
-	// init sprite
-	m_pSprite = DJ_NEW(DJ2DSprite);
-	m_pSprite->SetFilter(DJ2DSprite::filterLinear);
-	m_pSprite->SetPosition(vpos);
-	m_pSprite->SetSortValue(m_pSprite->GetPosition()[1]);
-	m_pSprite->SetScale(DJVector2(1.0f, 1.0f));
+	m_vOrgPos = vpos;
+	// Init skeleton animation
+	m_pSkeletonNode = DJ_NEW(DJ2DSkeletonNode);
+	m_pSkeletonNode->SetPosition(vpos);			
+	m_pSkeletonNode->Create(strAtlastFile);
+	m_pSkeletonNode->SetAnimation(strAnimName, DJTRUE);
+	theSpriteEngine.AddActiveNode(m_pSkeletonNode);
+	theSpriteEngine.AddNode(m_pSkeletonNode, LAYER_SPRITES); 
 
-	m_pAnimation =	(DJ2DAnimation*)theResourceManager.GetResource(strAnimFile, DJResource::TYPE_ANIMATION2D);
-	if(m_pAnimation)
-	{
-		m_pSprite->PlayAnimation(m_pAnimation);
-	}
-	
-	// Add sprrite to Sprite Engine
-	if(!m_pSprite)
-	{
-		DJAssert(m_pSprite != NULL)	;
-		return DJFALSE;
-	}
-	else
-	{
-		theSpriteEngine.AddActiveNode(m_pSprite);
-		theSpriteEngine.AddNode(m_pSprite, LAYER_SPRITES);
-	} 
-
+	m_vSize = GetSizeFromSpine(STR_PLAYER_SLOTNAME, m_pSkeletonNode);
+	m_vOrgSize = m_vSize;
 	return DJTRUE;	
 }
 
 ///
 void Player::Paint()
-{/*
-	if(m_bTouch)
+{
+	/*if(m_bTouch)
 	{
 		g_pFont->DrawString(
 			"Boom", 
@@ -111,6 +100,10 @@ djbool Player::Update(djfloat fDeltaTime)
 	//MakeBox(&box,m_vPos, 
 	theBoundingBoxCollection.QueueBoundingBox(box);
 #endif //_DEV
+	if(m_uState == STATE_MOVE)
+	{
+		
+	}
 	return DJTRUE;
 }
 
@@ -118,11 +111,7 @@ djbool Player::Update(djfloat fDeltaTime)
 
 void Player::Term()
 {
-	if(m_pSprite)
-	{
-		theSpriteEngine.RemoveActiveNode(m_pSprite);
-		DJ_SAFE_DELETE(m_pSprite);		
-	}	
+
 }
 
 ///
@@ -136,7 +125,20 @@ void Player::Reset()
 
 djint32 Player::OnTouchBegin( djint32 nDevice, djint32 nID, float fX, float fY )
 {
+	m_vTarget = DJVector2(fX,fY);
+	m_uState = STATE_MOVE;
 	return 0;
+}
+
+///
+void Player::Move(DJVector2 vTarget)
+{
+	//DJVector2 vPos = m_vPos;
+	//djfloat f = 0.0f;
+	//f = DJ_MAX(m_vVelocity.e[0]*, m_vVelocity.e[1]);
+	//vPos = djStepToDesiredVector2(vPos, vTarget,f);
+	//m_vPos += vPos; 
+	//m_pSkeletonNode->SetPosition(m_vPos);
 }
 
 ///

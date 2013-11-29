@@ -24,6 +24,40 @@ DJ_FILE_START();
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
+// Music object
+class MusicObject : Entity
+{
+protected:
+	djuint32	m_uState;
+	DJRECT		m_rectBoxHit;
+	djint32		m_nBeatsTimeID;
+	djfloat		m_fTimeDurations;
+public:
+	MusicObject();
+	~MusicObject();
+
+	// Set and Get state
+	void SetState(djuint32 uState)	{m_uState == uState;}
+	djuint32 GetState() const {return m_uState;}
+
+	// Set and Get Box hit
+	void SetBoxHit(DJRECT rect) {m_rectBoxHit = rect;}
+	DJRECT GetBoxHit() const {return m_rectBoxHit;}
+
+	// Set and Get beats time
+	void SetBeatsTime(djint32 nBeatsTime)	{m_nBeatsTimeID = nBeatsTime;}
+	djint32 GetBeatsTime() const {return m_nBeatsTimeID;}
+
+	// Set and Get time duration
+	void SetTimeDuration(djfloat fTimeDuration) {m_fTimeDurations = fTimeDuration;}
+	djfloat GetTimeDuration() const {return m_fTimeDurations;} 
+
+	virtual djbool OnInit() = 0;
+	virtual	void OnUpdate(djfloat fDeltaTime) = 0;
+};
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
 // Start monkey cilivians class
 class MonkeyCivilians : public Entity
 {
@@ -93,7 +127,7 @@ public:
 };
 // End monkey cilivians class
 /////////////////////////////////////////////////////////////////
-class BeatsTime
+class BeatsTime 
 {
 protected:
 	djint32		m_nID;
