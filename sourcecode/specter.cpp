@@ -112,6 +112,7 @@ djbool RaysGhost::Init(djint32 id, djint32 nType, DJVector2 vPos, djint32 nBeatT
 {
 	m_nID			= id;
 	m_vPos			= vPos;
+	m_vOrgPos		= m_vPos;
 	m_nBeatTimeID	= nBeatTime; 
 	m_uType			= nType;
 	if(m_uType >= TYPE_RG_COUNT)
@@ -207,6 +208,7 @@ void RaysGhost::Update(djfloat fDeltaTime)
 					pNode->s_pSkeletonNode->SetAnimation(lsz_AnimCircleFastName[pNode->s_uIDAnim], DJTRUE);	
 				}
 			}
+			pNode->s_pSkeletonNode->SetPosition(m_vPos);
 			pNode->s_fTimeFinishAnim += pTheApp->GetDeltaAppTime();
 			if(pNode->s_fTimeFinishAnim >= pNode->s_fTimeDuration)
 			{
@@ -215,7 +217,6 @@ void RaysGhost::Update(djfloat fDeltaTime)
 				pNode->s_fTimeFinishAnim = 0.0f;
 			}
 		}
-		/// ::TODO Update position of RG[i]
 	}
 }
 
@@ -236,10 +237,18 @@ DJRECT* RaysGhost::MakeBox(DJRECT *pRect, const DJVector2 &vPos, djint32 nWidth,
 
 /////////////////////////////////////////////////////////////////
 // Centipede
-
-Centipede::Centipede():m_pSkeletonNode(NULL), m_nBeatsTime(-1)
+const char*	g_szAnimCentipede[Centipede::STATE_CEP_SHOOP_WEAPON_COUNT] = 
 {
+	"shoot_weapon_1",
+	"shoot_weapon_2",
+	"shoot_weapon_3",
+};
 
+Centipede::Centipede():m_pSkeletonNode(NULL), m_State(STATE_CEP_SHOOT_WEAPON_1)
+{
+	m_fTimeAnimActive	= 0.0f;
+	m_fTimeDuration		= 0.0f;
+	m_fTimeChangeState	= 0.0f;
 }
 
 /// Destructor
@@ -251,18 +260,29 @@ Centipede::~Centipede()
 
 /// Init object
 
-djbool Centipede::Init(djint32 uType, DJVector2 vPos, djint32 nBeatsTime)
+djbool Centipede::Init(djint32 uType, DJVector2 vPos)
 {
 	m_nType = uType;
 	m_vPos = vPos;
+	m_vOrgPos = m_vPos;
 
 	// init skeleton
 	m_pSkeletonNode = DJ_NEW(DJ2DSkeletonNode);
 	m_pSkeletonNode->SetPosition(m_vPos);			
-	m_pSkeletonNode->Create(g_szAtlastCentipedeAnimFile);	
-	m_pSkeletonNode->SetAnimation("animation", DJTRUE);
+	m_pSkeletonNode->Create(g_szAtlastCentipedeAnimFile);		
 	theSpriteEngine.AddActiveNode(m_pSkeletonNode);
 	theSpriteEngine.AddNode(m_pSkeletonNode, LAYER_SPRITES);
+
+	// Set time change animation
+	m_fTimeDuration = GetTimeDurationOfAnimation(m_pSkeletonNode);
+
+	// Set time change state
+	if(m_listBeatsTime.GetLength() != 0)
+	{
+		djint32 nIdx = djRoundToInt(m_listBeatsTime.GetLength() / 3);
+		m_fTimeChangeState = m_listBeatsTime.GetByIndex(nIdx)->GetBeatsTime().e[0];	
+	}
+
 	return DJTRUE;
 }
 
@@ -271,16 +291,70 @@ djbool Centipede::Init(djint32 uType, DJVector2 vPos, djint32 nBeatsTime)
 void Centipede::Update(djfloat fDeltaTime)
 {
 	//////////////////////////////////////////////////////////////////////////////
-	// update ray ghost
-	DJLinkedListIter<RaysGhost> iter(m_listRayGhost);
-	RaysGhost* p;
-	djint32 i = 0;
-	while(p = iter.GetStep())
+	// update centipede
+	spBone* pBone = m_pSkeletonNode->FindBone("centipede");
+	if(pBone)
 	{
-		i++;
+		DJVector2 vPos;
+		vPos = m_vOrgPos;
+		vPos.e[0] += pBone->x;
+		vPos.e[1] += pBone->y;	 
+		m_vPos = vPos;	
+		m_pSkeletonNode->SetPosition(m_vPos);
 	}
-	DJLinkedListIter<RaysGhost> iterRayGhost(m_listRayGhost);
-	DJLinkedListIter<BeatsTime> iterBeatsTime(m_listBeatsTime);
+	switch(m_State)
+	{
+		case STATE_CEP_SHOOT_WEAPON_1: 		
+		{
+			if(!m_pSkeletonNode->IsAnyAnimationRunning())
+			{
+				m_pSkeletonNode->SetAnimation(g_szAnimCentipede[STATE_CEP_SHOOT_WEAPON_1], DJTRUE);				
+			}
+
+			if(pTheSoundDevice->GetMusicPos() != -1 && pTheSoundDevice->GetMusicPos() >= m_fTimeChangeState)
+			{
+				m_pSkeletonNode->ClearAnimation();
+				m_fTimeAnimActive = 0.0f;
+				m_State = STATE_CEP_SHOOT_WEAPON_2;
+
+				// set time change state
+				djint32 nIdx = djRoundToInt(m_listBeatsTime.GetLength()*2 / 3);
+				m_fTimeChangeState = m_listBeatsTime.GetByIndex(nIdx)->GetBeatsTime().e[0];					
+			}
+		}
+		break;
+
+		case STATE_CEP_SHOOT_WEAPON_2:
+		{
+			if(!m_pSkeletonNode->IsAnyAnimationRunning())
+			{
+				m_pSkeletonNode->SetAnimation(g_szAnimCentipede[STATE_CEP_SHOOT_WEAPON_2], DJTRUE);				
+			}  
+			m_fTimeAnimActive += fDeltaTime;			
+			if(m_fTimeAnimActive >= m_fTimeDuration)
+			{
+				m_pSkeletonNode->ClearAnimation();
+				m_fTimeAnimActive = 0.0f;
+				m_State = STATE_CEP_SHOOT_WEAPON_1; 
+			}
+		}
+		break;
+
+		case STATE_CEP_SHOOT_WEAPON_3:
+		{
+			if(!m_pSkeletonNode->IsAnyAnimationRunning())
+			{
+				m_pSkeletonNode->SetAnimation(g_szAnimCentipede[STATE_CEP_SHOOT_WEAPON_3], DJTRUE);				
+			} 
+		}
+		break;
+	};	
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////////////////
+	// update ray ghost
+	DJLinkedListIter<RaysGhost> iterRayGhost(m_listRayGhost);	
 	RaysGhost *pRG;
 	while((pRG = iterRayGhost.GetStep()))
 	{
@@ -291,20 +365,21 @@ void Centipede::Update(djfloat fDeltaTime)
 		}
 		else
 		{
+			DJLinkedListIter<BeatsTime> iterBeatsTime(m_listBeatsTime);
 			BeatsTime *pBT;
 			while((pBT = iterBeatsTime.GetStep()))
 			{
 				if(pRG->GetBeatsTimeID() == pBT->GetID())
 				{
-					//DJInfo("%d", pTheSoundDevice->GetMusicPos());
 					if(pTheSoundDevice->GetMusicPos() >= pBT->GetBeatsTime().e[0] && 
-						pTheSoundDevice->GetMusicPos() <= pBT->GetBeatsTime().e[1])
+					   pTheSoundDevice->GetMusicPos() <= pBT->GetBeatsTime().e[1])
 					{
 						pRG->SetState(RaysGhost::STATE_RG_SHOOT);
 					}
 				}
 			}
-			pRG->Update(fDeltaTime);	
+			pRG->SetPosition(m_vPos);
+			pRG->Update(fDeltaTime); 			
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////////
@@ -319,16 +394,16 @@ void Centipede::Term()
 
 /// Init rayghost
 
-void Centipede::SetListRayGhost(DJLinkedList<RaysGhost> listRayGhost)
+void Centipede::SetListRayGhost(DJLinkedList<RaysGhost> &listRayGhost)
 {
-	m_listRayGhost.CopyTo(listRayGhost);
+	listRayGhost.CopyTo(m_listRayGhost);
 }
 
 /// Init beats time
 
 void Centipede::SetListBeatsTime(DJLinkedList<BeatsTime> listBeatsTime)
 {
-	m_listBeatsTime.CopyTo(listBeatsTime);
+	listBeatsTime.CopyTo(m_listBeatsTime);
 }
 
 /////////////////////////////////////////////////////////////////

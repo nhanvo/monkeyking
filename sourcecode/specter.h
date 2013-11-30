@@ -14,7 +14,7 @@ DJ_FILE_START();
 class BeatsTime;
 /////////////////////////////////////////////////////////////////
 // Rayghost
-class RaysGhost : Entity
+class RaysGhost : public Entity
 {
 public:
 	// circle effect
@@ -139,6 +139,9 @@ public:
 	// Get and Set beats time
 	void SetBeatsTimeID(djint32 nBeatsTime) {m_nBeatTimeID = nBeatsTime;}
 	djint32 GetBeatsTimeID() const {return m_nBeatTimeID;}
+
+	// Get skeleton node
+	DJLinkedList<SkeletonAnimNode>& GetSkeletonAnimNode() {return m_listSkeletonAnimNode;}
 };
 /////////////////////////////////////////////////////////////////
 
@@ -162,7 +165,7 @@ public:
 	// Set and get type of specter
 	djint32 GetType() const {return m_nType;}	
 
-	virtual djbool  Init(djint32 uType, DJVector2 vPos, djint32 nBeatsTime)=0;
+	virtual djbool  Init(djint32 uType, DJVector2 vPos)=0;
 	virtual void	Update(djfloat fDeltaTime)=0;
 	virtual void	Term()=0;
 
@@ -189,25 +192,43 @@ public:
 
 class Centipede : public Specter
 {
+public:
+	enum
+	{
+		STATE_CEP_SHOOT_WEAPON_1,
+		STATE_CEP_SHOOT_WEAPON_2,
+		STATE_CEP_SHOOT_WEAPON_3,
+
+		STATE_CEP_SHOOP_WEAPON_COUNT
+	};
 protected:
-	DJ2DSkeletonNode*	m_pSkeletonNode;  
-	djint32				m_nBeatsTime;
+	DJ2DSkeletonNode*			m_pSkeletonNode;  
 	DJLinkedList<RaysGhost>		m_listRayGhost;
 	DJLinkedList<BeatsTime>		m_listBeatsTime;
+	djuint32					m_State;
+	djfloat						m_fTimeAnimActive;
+	djfloat						m_fTimeDuration;
+	djfloat						m_fTimeChangeState;
+
 public:
 	Centipede();
 	~Centipede();
 
-	virtual djbool  Init(djint32 uType, DJVector2 vPos, djint32 nBeatsTime);
+	virtual djbool  Init(djint32 uType, DJVector2 vPos);
 	virtual void	Update(djfloat fDeltaTime);
 	virtual void	Term();
 
 	// Set rayghost for centipede
-	void SetListRayGhost(DJLinkedList<RaysGhost> lisRayGhost);
+	void SetListRayGhost(DJLinkedList<RaysGhost> &lisRayGhost);
+	DJLinkedList<RaysGhost>& GetListRayGhost() {return m_listRayGhost;}
 
 	// Set beats time for rayghost and centipede
 	void SetListBeatsTime(DJLinkedList<BeatsTime> listBeatsTime);
 	DJLinkedList<BeatsTime>& GetListBeatsTime() {return m_listBeatsTime;}
+
+	// Set and get state
+	void SetState(djuint32 uState)	{m_State = uState;}
+	djuint32 GetState() const {return m_State;}
 };
 
 /////////////////////////////////////////////////////////////////

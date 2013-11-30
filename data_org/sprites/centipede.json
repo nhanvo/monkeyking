@@ -1,26 +1,100 @@
 {
 "bones": [
-	{ "name": "root" }
+	{ "name": "root" },
+	{ "name": "centipede", "parent": "root", "length": 71, "rotation": 89.54 }
 ],
 "slots": [
-	{ "name": "centipede", "bone": "root", "attachment": "Centipede" }
+	{ "name": "centipede", "bone": "centipede", "attachment": "centipede_2" }
 ],
 "skins": {
 	"default": {
 		"centipede": {
-			"Centipede": { "x": -0.5, "y": 126.99, "width": 223, "height": 252 }
+			"centipede_2": { "x": -1.51, "y": 1.48, "rotation": -89.54, "width": 192, "height": 176 }
 		}
 	}
 },
 "events": {},
 "animations": {
-	"animation": {
+	"shoot_weapon_1": {
 		"bones": {
-			"root": {
+			"centipede": {
+				"rotate": [
+					{ "time": 0, "angle": 0 },
+					{ "time": 0.5, "angle": 0 },
+					{ "time": 1, "angle": 0 }
+				],
+				"translate": [
+					{ "time": 0, "x": 0, "y": 0, "curve": "stepped" },
+					{ "time": 0.5, "x": 0, "y": 0, "curve": "stepped" },
+					{ "time": 1, "x": 0, "y": 0 }
+				],
 				"scale": [
-					{ "time": 0, "x": 0.7, "y": 0.7 },
-					{ "time": 0.5, "x": 1, "y": 1 },
-					{ "time": 1, "x": 0.7, "y": 0.7 }
+					{ "time": 0, "x": 1, "y": 1 },
+					{ "time": 0.5, "x": 0.7, "y": 0.7 },
+					{ "time": 1, "x": 1, "y": 1 }
+				]
+			}
+		}
+	},
+	"shoot_weapon_2": {
+		"bones": {
+			"centipede": {
+				"rotate": [
+					{ "time": 0, "angle": 0, "curve": "stepped" },
+					{ "time": 0.5, "angle": 0, "curve": "stepped" },
+					{ "time": 1, "angle": 0 }
+				],
+				"translate": [
+					{ "time": 0, "x": 0, "y": 0 },
+					{ "time": 0.5, "x": 228.88, "y": -45.22 },
+					{ "time": 1, "x": 273.45, "y": -221.12 }
+				],
+				"scale": [
+					{ "time": 0, "x": 1, "y": 1 },
+					{ "time": 0.5, "x": 1.4, "y": 1.4 },
+					{ "time": 1, "x": 1, "y": 1 }
+				]
+			}
+		}
+	},
+	"shoot_weapon_3": {
+		"bones": {
+			"centipede": {
+				"rotate": [
+					{ "time": 0, "angle": 0, "curve": "stepped" },
+					{ "time": 0.5, "angle": 0, "curve": "stepped" },
+					{ "time": 1, "angle": 0 }
+				],
+				"translate": [
+					{ "time": 0, "x": 263.8, "y": -194.69 },
+					{ "time": 0.5, "x": 38.36, "y": -178.11 },
+					{ "time": 1, "x": -210.98, "y": -199 }
+				],
+				"scale": [
+					{ "time": 0, "x": 1, "y": 1 },
+					{ "time": 0.5, "x": 1.4, "y": 1.4 },
+					{ "time": 1, "x": 1, "y": 1 }
+				]
+			}
+		}
+	},
+	"shoot_weapon_4": {
+		"bones": {
+			"centipede": {
+				"rotate": [
+					{ "time": 0, "angle": 0, "curve": "stepped" },
+					{ "time": 0.5, "angle": 0, "curve": "stepped" },
+					{ "time": 1, "angle": 0 }
+				],
+				"translate": [
+					{ "time": 0, "x": -225.4, "y": -202.25 },
+					{ "time": 0.5, "x": -159.64, "y": -82.32 },
+					{ "time": 1, "x": 15.36, "y": -13.19 }
+				],
+				"scale": [
+					{ "time": 0, "x": 1, "y": 1 },
+					{ "time": 0.5, "x": 1.4, "y": 1.4 },
+					{ "time": 1, "x": 1, "y": 1 }
 				]
 			}
 		}

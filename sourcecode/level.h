@@ -73,7 +73,6 @@ public:
 	{
 		djint32		nType;
 		DJVector2	vPosition;
-		djint32		nBeatsTime;
 	};
 
 	enum 

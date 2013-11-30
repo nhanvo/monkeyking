@@ -224,11 +224,6 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 				DJWarning("Invalid POSITION from SPECTER tag");
 			}
 
-			if(!pLine->GetArgInt(2, pSpecterData->nBeatsTime))
-			{
-				DJWarning("Invalid BEATSTIME from SPECTER tag");
-			}
-
 			m_listSpecterData.AddLast(pSpecterData);
 			m_bSpecter = DJTRUE;
 		}	
@@ -515,14 +510,15 @@ djbool Level::Init(const char* szLevelFile, djint32 nSceneID)
 				{
 					case Specter::SPECTER_CENTIPEDE:
 					{
-						pSPE = DJ_NEW(Centipede); 
-						((Centipede*)pSPE)->Init(pSD->nType, pSD->vPosition, pSD->nBeatsTime);
+						pSPE = DJ_NEW(Centipede);  		
 
 						DJAssert(listRayGhost.GetLength() != 0);
 						pSPE->SetListRayGhost(listRayGhost); 
 
 						DJAssert(m_listBeatsTime.GetLength() != 0);
 						pSPE->SetListBeatsTime(m_listBeatsTime);
+
+						((Centipede*)pSPE)->Init(pSD->nType, pSD->vPosition);
 					}
 					break;
 				}				

@@ -3,10 +3,10 @@ centipede.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-Centipede
+centipede_2
   rotate: false
   xy: 2, 2
-  size: 218, 239
-  orig: 223, 252
-  offset: 2, 4
+  size: 192, 176
+  orig: 192, 176
+  offset: 0, 0
   index: -1

@@ -300,6 +300,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\data\levels\level01.level"
+				>
+			</File>
+			<File
 				RelativePath=".\data\sprites\monkey_jump.json"
 				>
 			</File>
