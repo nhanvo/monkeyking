@@ -116,12 +116,14 @@ protected:
 	    djfloat				s_fTimeDuration;
 	};
 	DJLinkedList<SkeletonAnimNode>	m_listSkeletonAnimNode;	
+	DJRECT		*m_pRectHitBox;
 	djint32		m_nID;
 	djuint32	m_uState;
 	djint32		m_nBeatTimeID;
 	djuint32	m_uType;
 	djuint32	m_uMaxAnim;
 	DJString	m_strAtlastFile;
+	DJString	m_strSlotName;
 public:
 	RaysGhost();
 	~RaysGhost();
@@ -129,6 +131,7 @@ public:
 	djbool Init(djint32 id, djint32 nType, DJVector2 vPos, djint32 nBeatTime);
 	void Update(djfloat fDeltaTime);
 	void Term();	
+	djbool OnHit();
 
 	virtual DJRECT* MakeBox(DJRECT *pRect, const DJVector2 &vPos, djint32 nWidth, djint32 nHeight) const;
 
@@ -198,6 +201,7 @@ public:
 		STATE_CEP_SHOOT_WEAPON_1,
 		STATE_CEP_SHOOT_WEAPON_2,
 		STATE_CEP_SHOOT_WEAPON_3,
+		STATE_CEP_SHOOT_WEAPON_4,
 
 		STATE_CEP_SHOOP_WEAPON_COUNT
 	};
@@ -208,7 +212,10 @@ protected:
 	djuint32					m_State;
 	djfloat						m_fTimeAnimActive;
 	djfloat						m_fTimeDuration;
-	djfloat						m_fTimeChangeState;
+	djfloat						m_fTimeChangeState[STATE_CEP_SHOOP_WEAPON_COUNT-1];
+	djbool						m_bFinishState[STATE_CEP_SHOOP_WEAPON_COUNT-1];
+	DJRECT						m_rectBoxHit;
+	DJRECT						m_rectTargetHitBox;
 
 public:
 	Centipede();
@@ -228,7 +235,7 @@ public:
 
 	// Set and get state
 	void SetState(djuint32 uState)	{m_State = uState;}
-	djuint32 GetState() const {return m_State;}
+	djuint32 GetState() const {return m_State;}	 
 };
 
 /////////////////////////////////////////////////////////////////

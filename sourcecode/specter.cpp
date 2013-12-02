@@ -28,6 +28,18 @@ const char* lsz_AnimCircleName[RaysGhost::ANIM_CIRCLE_COUNT] =
 	"animation_7",
 };
 
+DJRECT	g_arrRectCircleBullet[RaysGhost::ANIM_CIRCLE_COUNT] = 
+{
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+};
+
 // animation name on sprites/light_effect.json file
 const char* lsz_AnimCircleFastName[RaysGhost::ANIM_CIRCLE_FAST_COUNT] = 
 {
@@ -47,6 +59,26 @@ const char* lsz_AnimCircleFastName[RaysGhost::ANIM_CIRCLE_FAST_COUNT] =
 	"animation_66",
 	"animation_7",
 	"animation_77",
+};
+
+DJRECT	g_arrRectCircleFastBullet[RaysGhost::ANIM_CIRCLE_FAST_COUNT] = 
+{
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
 };
 
 // animation name on sprites/light_effect.json file
@@ -70,6 +102,26 @@ const char* lsz_AnimLightName[RaysGhost::ANIM_LIGHT_COUNT] =
 	"animation_15",
 };
 
+DJRECT	g_arrRectLightBullet[RaysGhost::ANIM_LIGHT_COUNT] = 
+{
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+	DJRECT(0,0,0,0),
+};
+
 // animation name on sprites/spiral_effect.json file
 const char* lsz_AnimSpiralName[RaysGhost::ANIM_SPIRAL_COUNT] = 
 {
@@ -81,12 +133,18 @@ const char* lsz_AnimSpiralName[RaysGhost::ANIM_SPIRAL_COUNT] =
 	"animation_spiral_six",
 	"animation_spiral_seven",
 	"animation_spiral_eight",
-};
+}; 
 
 const char* g_szAtlastCircleAnimFile		= "sprites/circle_effect";
 const char* g_szAtlastCircleFastAnimFile	= "sprites/circle_effect_fast";
 const char* g_szAtlastLightAnimFile			= "sprites/light_effect";
 const char* g_szAtlastSpiralAnimFile		= "sprites/spiral_effect";
+
+const char* g_szCircleSlotName				= "circle_effect";
+const char* g_szCircleFastSlotName			= "circle_small";
+const char* g_szLightSlotName				= "light";
+const char* g_szSpiralSlotName				= "circle_big";
+
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
@@ -95,7 +153,9 @@ const char* g_szAtlastCentipedeAnimFile		= "sprites/centipede";
 
 /////////////////////////////////////////////////////////////////
 
-RaysGhost::RaysGhost() : m_uState(STATE_RG_STAND), m_nBeatTimeID(0), m_uMaxAnim(0), m_uType(0), m_strAtlastFile(""), m_nID(0)
+RaysGhost::RaysGhost() : m_uState(STATE_RG_STAND), m_nBeatTimeID(0), m_uMaxAnim(0), 
+						 m_uType(0), m_strAtlastFile(""), m_nID(0), m_pRectHitBox(NULL),
+						 m_strSlotName("")
 { 	
 }
 
@@ -127,25 +187,33 @@ djbool RaysGhost::Init(djint32 id, djint32 nType, DJVector2 vPos, djint32 nBeatT
 		if(m_nID % 2 == 0)
 		{
 			m_strAtlastFile = g_szAtlastCircleAnimFile;
-			m_uMaxAnim	= ANIM_CIRCLE_COUNT;
+			m_uMaxAnim		= ANIM_CIRCLE_COUNT;
+			m_pRectHitBox	= &g_arrRectCircleBullet[0];
+			m_strSlotName	= g_szCircleSlotName;
 		}
 		else
 		{
 			m_strAtlastFile = g_szAtlastCircleFastAnimFile;
-			m_uMaxAnim	= ANIM_CIRCLE_FAST_COUNT;
+			m_uMaxAnim		= ANIM_CIRCLE_FAST_COUNT;
+			m_pRectHitBox	= &g_arrRectCircleFastBullet[0];
+			m_strSlotName = g_szCircleFastSlotName;
 		}
 	}
 	else if(m_uType == TYPE_RG_LIGHT)
 	{
 		m_strAtlastFile =   g_szAtlastLightAnimFile;
-		m_uMaxAnim = ANIM_LIGHT_COUNT;
+		m_uMaxAnim		= ANIM_LIGHT_COUNT;
+		m_pRectHitBox	= &g_arrRectLightBullet[0];
+		m_strSlotName	= g_szLightSlotName;
 	}
 	else if(m_uType == TYPE_RG_SPIRAL)
 	{
 		/*m_strAtlastFile = g_szAtlastSpiralAnimFile;
 		m_uMaxAnim = ANIM_SPIRAL_COUNT;*/
 		m_strAtlastFile = g_szAtlastCircleFastAnimFile;
-		m_uMaxAnim = ANIM_CIRCLE_FAST_COUNT;
+		m_uMaxAnim		= ANIM_CIRCLE_FAST_COUNT;
+		m_pRectHitBox	= &g_arrRectCircleFastBullet[0];
+		m_strSlotName	= g_szSpiralSlotName;
 	}
 
 	// Init skeleton node
@@ -159,6 +227,36 @@ djbool RaysGhost::Init(djint32 id, djint32 nType, DJVector2 vPos, djint32 nBeatT
 		theSpriteEngine.AddActiveNode(pNode->s_pSkeletonNode);
 		theSpriteEngine.AddNode(pNode->s_pSkeletonNode, LAYER_SPRITES);
 
+		m_vSize = GetSizeFromSpine(m_strSlotName, pNode->s_pSkeletonNode);
+		m_vOrgSize = m_vSize;
+
+		spBone* pBone = pNode->s_pSkeletonNode->FindBone("");
+		DJVector2 vPosBullet = DJVector2(0.0f);
+		m_vPos.e[0] += pBone->x;
+		m_vPos.e[1] += pBone->y;
+
+		DJRECT rect = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
+
+		if(m_uType == TYPE_RG_CIRCLE)
+		{
+			if(m_nID % 2 == 0)
+			{
+				g_arrRectCircleBullet[uID] = rect;
+			}
+			else 
+			{
+				g_arrRectCircleFastBullet[uID] = rect;
+			}
+		}
+		else if(m_uType == TYPE_RG_LIGHT)
+		{
+			g_arrRectLightBullet[uID] = rect;
+		}
+		else if(m_uType == TYPE_RG_SPIRAL)
+		{
+			g_arrRectCircleFastBullet[uID] = rect;
+		}
+
 		// Set time duration
 		pNode->s_fTimeDuration = GetTimeDurationOfAnimation(pNode->s_pSkeletonNode);
 		DJAssert(pNode->s_fTimeDuration != 0);
@@ -170,7 +268,8 @@ djbool RaysGhost::Init(djint32 id, djint32 nType, DJVector2 vPos, djint32 nBeatT
 		pNode->s_uIDAnim = uID;
 		m_listSkeletonAnimNode.AddLast(pNode);
 		uID++;
-	}
+	}	
+
 	return DJTRUE;
 }
 
@@ -242,13 +341,19 @@ const char*	g_szAnimCentipede[Centipede::STATE_CEP_SHOOP_WEAPON_COUNT] =
 	"shoot_weapon_1",
 	"shoot_weapon_2",
 	"shoot_weapon_3",
+	"shoot_weapon_4",
 };
+
+const char* STR_CENTIPEDE_SLOTNAME = "centipede";
 
 Centipede::Centipede():m_pSkeletonNode(NULL), m_State(STATE_CEP_SHOOT_WEAPON_1)
 {
 	m_fTimeAnimActive	= 0.0f;
 	m_fTimeDuration		= 0.0f;
-	m_fTimeChangeState	= 0.0f;
+	m_fTimeChangeState[0]	= m_fTimeChangeState[1] = m_fTimeChangeState[2] = 0.0f;
+	m_bFinishState[0]		= m_bFinishState[1] = m_bFinishState[2] = DJFALSE;
+	m_rectBoxHit			= DJRECT(0,0,0,0);
+	m_rectTargetHitBox		= DJRECT(0,0,0,0);
 }
 
 /// Destructor
@@ -262,9 +367,9 @@ Centipede::~Centipede()
 
 djbool Centipede::Init(djint32 uType, DJVector2 vPos)
 {
-	m_nType = uType;
-	m_vPos = vPos;
-	m_vOrgPos = m_vPos;
+	m_nType		= uType;
+	m_vPos		= vPos;
+	m_vOrgPos	= m_vPos;	 	
 
 	// init skeleton
 	m_pSkeletonNode = DJ_NEW(DJ2DSkeletonNode);
@@ -279,9 +384,20 @@ djbool Centipede::Init(djint32 uType, DJVector2 vPos)
 	// Set time change state
 	if(m_listBeatsTime.GetLength() != 0)
 	{
-		djint32 nIdx = djRoundToInt(m_listBeatsTime.GetLength() / 3);
-		m_fTimeChangeState = m_listBeatsTime.GetByIndex(nIdx)->GetBeatsTime().e[0];	
+		djuint nCnt = 1;
+		for(djint32 i = 0; i < STATE_CEP_SHOOP_WEAPON_COUNT - 1; i++)
+		{
+			djint32 nIdx = djRoundToInt(m_listBeatsTime.GetLength()*nCnt / STATE_CEP_SHOOP_WEAPON_COUNT);
+			m_fTimeChangeState[i] = m_listBeatsTime.GetByIndex(nIdx)->GetBeatsTime().e[0];	
+			nCnt++;
+		}
 	}
+
+	// Init size
+	m_vSize = GetSizeFromSpine(STR_CENTIPEDE_SLOTNAME, m_pSkeletonNode);
+
+	// Init rect box hit
+	m_rectBoxHit = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
 
 	return DJTRUE;
 }
@@ -293,15 +409,7 @@ void Centipede::Update(djfloat fDeltaTime)
 	//////////////////////////////////////////////////////////////////////////////
 	// update centipede
 	spBone* pBone = m_pSkeletonNode->FindBone("centipede");
-	if(pBone)
-	{
-		DJVector2 vPos;
-		vPos = m_vOrgPos;
-		vPos.e[0] += pBone->x;
-		vPos.e[1] += pBone->y;	 
-		m_vPos = vPos;	
-		m_pSkeletonNode->SetPosition(m_vPos);
-	}
+
 	switch(m_State)
 	{
 		case STATE_CEP_SHOOT_WEAPON_1: 		
@@ -311,16 +419,27 @@ void Centipede::Update(djfloat fDeltaTime)
 				m_pSkeletonNode->SetAnimation(g_szAnimCentipede[STATE_CEP_SHOOT_WEAPON_1], DJTRUE);				
 			}
 
-			if(pTheSoundDevice->GetMusicPos() != -1 && pTheSoundDevice->GetMusicPos() >= m_fTimeChangeState)
+			if(pTheSoundDevice->GetMusicPos() != -1)
 			{
-				m_pSkeletonNode->ClearAnimation();
-				m_fTimeAnimActive = 0.0f;
-				m_State = STATE_CEP_SHOOT_WEAPON_2;
-
-				// set time change state
-				djint32 nIdx = djRoundToInt(m_listBeatsTime.GetLength()*2 / 3);
-				m_fTimeChangeState = m_listBeatsTime.GetByIndex(nIdx)->GetBeatsTime().e[0];					
-			}
+				if(!m_bFinishState[0] && pTheSoundDevice->GetMusicPos() >= m_fTimeChangeState[0])
+				{
+					m_pSkeletonNode->ClearAnimation();
+					m_fTimeAnimActive = 0.0f;
+					m_State = STATE_CEP_SHOOT_WEAPON_2;	
+				}
+				else if(!m_bFinishState[1] && pTheSoundDevice->GetMusicPos() >= m_fTimeChangeState[1])
+				{
+					m_pSkeletonNode->ClearAnimation();
+					m_fTimeAnimActive = 0.0f;
+					m_State = STATE_CEP_SHOOT_WEAPON_3;
+				}
+				else if(!m_bFinishState[2] && pTheSoundDevice->GetMusicPos() >= m_fTimeChangeState[2])
+				{
+					m_pSkeletonNode->ClearAnimation();
+					m_fTimeAnimActive = 0.0f;
+					m_State = STATE_CEP_SHOOT_WEAPON_4;
+				}
+			} 			
 		}
 		break;
 
@@ -329,13 +448,24 @@ void Centipede::Update(djfloat fDeltaTime)
 			if(!m_pSkeletonNode->IsAnyAnimationRunning())
 			{
 				m_pSkeletonNode->SetAnimation(g_szAnimCentipede[STATE_CEP_SHOOT_WEAPON_2], DJTRUE);				
-			}  
+			} 
+			if(pBone)
+			{
+				DJVector2 vPos;
+				vPos = m_vOrgPos;
+				vPos.e[0] += djFloatAbs(pBone->x);
+				vPos.e[1] += djFloatAbs(pBone->y);	 
+				m_vPos = vPos;		
+			}
 			m_fTimeAnimActive += fDeltaTime;			
 			if(m_fTimeAnimActive >= m_fTimeDuration)
 			{
 				m_pSkeletonNode->ClearAnimation();
 				m_fTimeAnimActive = 0.0f;
-				m_State = STATE_CEP_SHOOT_WEAPON_1; 
+ 				m_bFinishState[0] = DJTRUE;
+				m_State = STATE_CEP_SHOOT_WEAPON_1;				
+				m_vOrgPos = m_vPos;
+				m_pSkeletonNode->SetPosition(m_vPos);
 			}
 		}
 		break;
@@ -345,7 +475,52 @@ void Centipede::Update(djfloat fDeltaTime)
 			if(!m_pSkeletonNode->IsAnyAnimationRunning())
 			{
 				m_pSkeletonNode->SetAnimation(g_szAnimCentipede[STATE_CEP_SHOOT_WEAPON_3], DJTRUE);				
-			} 
+			}
+			if(pBone)
+			{
+				DJVector2 vPos;
+				vPos = m_vOrgPos;
+				vPos.e[0] -= djFloatAbs(pBone->x);
+				vPos.e[1] -= djFloatAbs(pBone->y);	 
+				m_vPos = vPos;		
+			}
+			m_fTimeAnimActive += fDeltaTime;			
+			if(m_fTimeAnimActive >= m_fTimeDuration)
+			{
+				m_pSkeletonNode->ClearAnimation();
+				m_fTimeAnimActive = 0.0f;
+				m_bFinishState[1] = DJTRUE;
+				m_State = STATE_CEP_SHOOT_WEAPON_1;	
+				m_vOrgPos = m_vPos;
+				m_pSkeletonNode->SetPosition(m_vPos);
+			}
+		}
+		break;
+
+		case STATE_CEP_SHOOT_WEAPON_4:
+		{
+			if(!m_pSkeletonNode->IsAnyAnimationRunning())
+			{
+				m_pSkeletonNode->SetAnimation(g_szAnimCentipede[STATE_CEP_SHOOT_WEAPON_4], DJTRUE);				
+			}
+			if(pBone)
+			{
+				DJVector2 vPos;
+				vPos = m_vOrgPos;
+				vPos.e[0] += djFloatAbs(pBone->x);
+				vPos.e[1] -= djFloatAbs(pBone->y);	 
+				m_vPos = vPos;	
+			}
+			m_fTimeAnimActive += fDeltaTime;			
+			if(m_fTimeAnimActive >= m_fTimeDuration)
+			{
+				m_pSkeletonNode->ClearAnimation();
+				m_fTimeAnimActive = 0.0f;
+				m_bFinishState[2] = DJTRUE;
+				m_State = STATE_CEP_SHOOT_WEAPON_1;	
+				m_vOrgPos = m_vPos;
+				m_pSkeletonNode->SetPosition(m_vPos);
+			}
 		}
 		break;
 	};	

@@ -46,6 +46,7 @@ protected:
 	djuint32					m_uState;
 	DJVector2					m_vTarget;
 	djfloat						m_fTimeMove;
+	DJRECT						m_rectHitBox;
 public:
 	Player();
 	~Player();
@@ -65,6 +66,9 @@ public:
 	djint32		OnTouchEnd( djint32 nDevice, djint32 nID, float fX, float fY );
 	// Touch cancel callback
 	djint32		OnTouchCancel( djint32 nDevice, djint32 nID, float fX, float fY );
+
+	// Hit box
+	DJRECT GetHitBox() const {return m_rectHitBox;}
 };
 /////////////////////////////////////////////////////////////////
 

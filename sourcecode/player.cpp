@@ -50,6 +50,7 @@ Player::Player()
 	m_pSkeletonNode = NULL;
 	m_vTarget		= DJVector2(0.0f);
 	m_fTimeMove		= 0.0f;
+	m_rectHitBox	= DJRECT(0,0,0,0);
 }
 
 ///
@@ -73,8 +74,13 @@ djbool Player::Init(DJVector2 vpos, DJString strAtlastFile, DJString strAnimName
 	theSpriteEngine.AddActiveNode(m_pSkeletonNode);
 	theSpriteEngine.AddNode(m_pSkeletonNode, LAYER_SPRITES); 
 
+	// Init size
 	m_vSize = GetSizeFromSpine(STR_PLAYER_SLOTNAME, m_pSkeletonNode);
 	m_vOrgSize = m_vSize;
+	
+	// Init hit box
+	m_rectHitBox = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
+
 	return DJTRUE;	
 }
 
