@@ -71,8 +71,9 @@ DJVector2 const GetSizeFromSpine(const char *strName,const DJ2DSkeletonNode* pNo
 	if(pSlot)
 	{
 		spRegionAttachment* patt = (spRegionAttachment*)pSlot->attachment;
+		DJAssert(patt != NULL);
 		vSize.e[0] = patt->width;
-		vSize.e[1] = patt->height;			
+		vSize.e[1] = patt->height;					
 	}
 	return vSize;
 }

@@ -3,6 +3,11 @@
 #define _SPECTER_H_
 /////////////////////////////////////////////////////////////////
 
+
+/////////////////////////////////////////////////////////////////
+// Engine include
+#include <djosdef.h>
+
 /////////////////////////////////////////////////////////////////
 // Game Includes
 #include "level.h"
@@ -35,21 +40,13 @@ public:
 	enum 
 	{
 		ANIM_CIRCLE_FAST_0,
-		ANIM_CIRCLE_FAST_00,
 		ANIM_CIRCLE_FAST_1,
-		ANIM_CIRCLE_FAST_11,
-		ANIM_CIRCLE_FAST_22,
 		ANIM_CIRCLE_FAST_2,
-		ANIM_CIRCLE_FAST_3,
-		ANIM_CIRCLE_FAST_33,
+		ANIM_CIRCLE_FAST_3,		
 		ANIM_CIRCLE_FAST_4,
-		ANIM_CIRCLE_FAST_44,
 		ANIM_CIRCLE_FAST_5,
-		ANIM_CIRCLE_FAST_55,
 		ANIM_CIRCLE_FAST_6,
-		ANIM_CIRCLE_FAST_66,
 		ANIM_CIRCLE_FAST_7,
-		ANIM_CIRCLE_FAST_77,
 		
 		ANIM_CIRCLE_FAST_COUNT
 	};
@@ -117,6 +114,7 @@ protected:
 	};
 	DJLinkedList<SkeletonAnimNode>	m_listSkeletonAnimNode;	
 	DJRECT		*m_pRectHitBox;
+	DJRECT		m_rectTarget;
 	djint32		m_nID;
 	djuint32	m_uState;
 	djint32		m_nBeatTimeID;
@@ -124,6 +122,7 @@ protected:
 	djuint32	m_uMaxAnim;
 	DJString	m_strAtlastFile;
 	DJString	m_strSlotName;
+	DJString	m_strBoneName;
 public:
 	RaysGhost();
 	~RaysGhost();
@@ -131,7 +130,7 @@ public:
 	djbool Init(djint32 id, djint32 nType, DJVector2 vPos, djint32 nBeatTime);
 	void Update(djfloat fDeltaTime);
 	void Term();	
-	djbool OnHit();
+	djbool OnHit(const DJRECT* pRect);
 
 	virtual DJRECT* MakeBox(DJRECT *pRect, const DJVector2 &vPos, djint32 nWidth, djint32 nHeight) const;
 
