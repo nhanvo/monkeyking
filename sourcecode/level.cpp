@@ -691,7 +691,7 @@ void Level::InitSceneMusic()
 	{
 		if(djStringCompare(m_pCurrentScene->GetID(), szSceneID[LevelScene::SCENE_01]) == 0)
 		{
-			m_sSceneMusic = DJString("%s", g_szSceneMusic) + DJString("level%d", Level::LEVEL_01) + DJString("_scene%d", LevelScene::SCENE_01);						
+			m_sSceneMusic = DJString("%s", g_szSceneMusic) + DJString("level%d_scene%d.mp3", Level::LEVEL_01, LevelScene::SCENE_01);						
 		}
 		else if(djStringCompare(m_pCurrentScene->GetID(), szSceneID[LevelScene::SCENE_02]) == 0)
 		{

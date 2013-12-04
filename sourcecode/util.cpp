@@ -15,6 +15,7 @@
 #include <spine/RegionAttachment.h>
 #include <spine/animation.h>
 #include <spine/animationstate.h>
+#include <spine/Skeleton.h>
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
@@ -65,16 +66,24 @@ void FillQuadVertices(RectVertex *pVertices,
 ///
 DJVector2 const GetSizeFromSpine(const char *strName,const DJ2DSkeletonNode* pNode)
 {
-	DJVector2 vSize;
+	DJVector2 vSize; 
 	spSlot* pSlot = pNode->FindSlot(strName);
 	DJAssert(pSlot != NULL);
 	if(pSlot)
 	{
-		spRegionAttachment* patt = (spRegionAttachment*)pSlot->attachment;
+		spSkin* skins = pSlot->skeleton->skin;
+		if(!skins)
+		{
+			skins = pSlot->skeleton->data->defaultSkin;
+		}
+		int slotIndex = spSkeleton_findSlotIndex(pSlot->skeleton, pSlot->data->name);
+		spAttachment* att = spSkin_getAttachment(skins,slotIndex , pSlot->attachment->name);
+		spRegionAttachment* patt = (spRegionAttachment*)att;   
 		DJAssert(patt != NULL);
 		vSize.e[0] = patt->width;
-		vSize.e[1] = patt->height;					
-	}
+		vSize.e[1] = patt->height;	
+						
+	}	
 	return vSize;
 }
 
@@ -90,6 +99,13 @@ djfloat GetTimeDurationOfAnimation(DJ2DSkeletonNode *pSkeletonNode)
 	djfloat fDuration = (*pAnim)->duration;	
 
 	return fDuration;
+}
+
+///
+
+djfloat GetTimeOfAnimation(DJ2DSkeletonNode *pSkeletonNode, const char* strSlotName, const char* strAnimationName)
+{
+	return 0.0f;
 }
 /////////////////////////////////////////////////////////////////
 

@@ -8,7 +8,7 @@
 "skins": {
 	"default": {
 		"monkeyking": {
-			"monkeyking": { "width": 123, "height": 124 }
+			"monkeyking": { "y": 64, "width": 123, "height": 124 }
 		}
 	}
 },

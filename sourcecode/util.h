@@ -55,6 +55,9 @@ DJVector2 const GetSizeFromSpine(const char *strName,const DJ2DSkeletonNode* pNo
 /// Get time animation duration from SPINE
 djfloat GetTimeDurationOfAnimation(DJ2DSkeletonNode *pSkeletonNode);
 
+/// Get time animation
+djfloat GetTimeOfAnimation(DJ2DSkeletonNode *pSkeletonNode, const char* strSlotName, const char* strAnimationName);
+
 /////////////////////////////////////////////////////////////////
 DJ_FILE_END();
 /////////////////////////////////////////////////////////////////

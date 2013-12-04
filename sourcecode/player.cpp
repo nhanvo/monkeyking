@@ -103,7 +103,7 @@ djbool Player::Update(djfloat fDeltaTime)
 {			
 #ifdef _DEV
 	DJRECT box;	
-	//MakeBox(&box,m_vPos, 
+	MakeBox(&box,m_vPos,m_vSize.x(), m_vSize.y());
 	theBoundingBoxCollection.QueueBoundingBox(box);
 #endif //_DEV
 	if(m_uState == STATE_MOVE)

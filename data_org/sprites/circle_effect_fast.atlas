@@ -1,9 +1,9 @@
 
-circle_fast.png
+circle_effect_fast.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-circle_small
+circle
   rotate: false
   xy: 53, 28
   size: 23, 24

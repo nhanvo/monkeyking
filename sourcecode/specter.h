@@ -144,7 +144,10 @@ public:
 
 	// Get skeleton node
 	DJLinkedList<SkeletonAnimNode>& GetSkeletonAnimNode() {return m_listSkeletonAnimNode;}
-};
+
+	// calculate bording box for rayghost to collision detect
+	DJRECT CalculateBordingBox(const DJ2DSkeletonNode* pNode);
+};				   
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////

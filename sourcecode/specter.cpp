@@ -11,6 +11,7 @@
 #include "specter.h"
 #include "util.h"
 #include "musichandler.h"
+#include "debug.h"
 /////////////////////////////////////////////////////////////////
 DJ_FILE_START(); 
 /////////////////////////////////////////////////////////////////
@@ -133,19 +134,19 @@ DJRECT	g_arrRectCircleSpiralBullet[RaysGhost::ANIM_CIRCLE_FAST_COUNT] =
 };
 
 const char* g_szAtlastCircleAnimFile		= "sprites/circle_effect";
-const char* g_szAtlastCircleFastAnimFile	= "sprites/circle_fast";
+const char* g_szAtlastCircleFastAnimFile	= "sprites/circle_effect_fast";
 const char* g_szAtlastLightAnimFile			= "sprites/light_effect";
 const char* g_szAtlastSpiralAnimFile		= "sprites/spiral_effect";
 
 const char* g_szCircleSlotName				= "circle_effect";
-const char* g_szCircleFastSlotName			= "circle_effect_fast";
+const char* g_szCircleFastSlotName			= "circle";
 const char* g_szLightSlotName				= "light";
-const char* g_szSpiralSlotName				= "circle_effect_fast";
+const char* g_szSpiralSlotName				= "circle";
 
 const char* g_szCircleBone					= "root";
-const char* g_szCircleFastBone				= "root";
+const char* g_szCircleFastBone				= "all";
 const char* g_szLightBone					= "root";
-const char* g_szSpiralBone					= "root";
+const char* g_szSpiralBone					= "all";
 
 /////////////////////////////////////////////////////////////////
 
@@ -229,38 +230,32 @@ djbool RaysGhost::Init(djint32 id, djint32 nType, DJVector2 vPos, djint32 nBeatT
 		SkeletonAnimNode* pNode = DJ_NEW(SkeletonAnimNode);
 		pNode->s_pSkeletonNode = DJ_NEW(DJ2DSkeletonNode);
 		pNode->s_pSkeletonNode->SetPosition(m_vPos);			
-		pNode->s_pSkeletonNode->Create(m_strAtlastFile);
-	
+		pNode->s_pSkeletonNode->Create(m_strAtlastFile);		
 		theSpriteEngine.AddActiveNode(pNode->s_pSkeletonNode);
 		theSpriteEngine.AddNode(pNode->s_pSkeletonNode, LAYER_SPRITES);	
 
-		m_vSize = GetSizeFromSpine(m_strSlotName, pNode->s_pSkeletonNode);
-		m_vOrgSize = m_vSize;
-
-		spBone* pBone = pNode->s_pSkeletonNode->FindBone(m_strBoneName);
-		DJVector2 vPosBullet = DJVector2(0.0f);
-		m_vPos.e[0] += pBone->x;
-		m_vPos.e[1] += pBone->y;
-
-		DJRECT rect = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
 		if(m_uType == TYPE_RG_CIRCLE)
 		{
 			if(m_nID % 2 == 0)
 			{
-				g_arrRectCircleBullet[uID] = rect;
+				g_arrRectCircleBullet[uID] = CalculateBordingBox(pNode->s_pSkeletonNode); 				
 			}
 			else 
 			{
-				g_arrRectCircleFastBullet[uID] = rect;
+				g_arrRectCircleFastBullet[uID] = CalculateBordingBox(pNode->s_pSkeletonNode);
 			}
 		}
 		else if(m_uType == TYPE_RG_LIGHT)
 		{
-			g_arrRectLightBullet[uID] = rect;
+			g_arrRectLightBullet[uID] = CalculateBordingBox(pNode->s_pSkeletonNode);
 		}
 		else if(m_uType == TYPE_RG_SPIRAL)
 		{
-			g_arrRectCircleSpiralBullet[uID] = rect;
+			if(!pNode->s_pSkeletonNode->SetSkin("circle_bigbig"))
+			{
+				DJAssert(DJFALSE);
+			}
+			g_arrRectCircleSpiralBullet[uID] = CalculateBordingBox(pNode->s_pSkeletonNode);
 		}
 
 		// Set time duration
@@ -295,25 +290,26 @@ void RaysGhost::Update(djfloat fDeltaTime)
 				{
 					if(m_nID % 2 == 0)
 					{
-						pNode->s_pSkeletonNode->SetAnimation(lsz_AnimCircleName[pNode->s_uIDAnim], DJTRUE);
+						pNode->s_pSkeletonNode->SetAnimation(lsz_AnimCircleName[pNode->s_uIDAnim], DJTRUE);							
 					}
 					else
 					{
-						pNode->s_pSkeletonNode->SetAnimation(lsz_AnimCircleFastName[pNode->s_uIDAnim], DJTRUE);
+						pNode->s_pSkeletonNode->SetAnimation(lsz_AnimCircleFastName[pNode->s_uIDAnim], DJTRUE);	
 					}
 				}
 				else if(m_uType == TYPE_RG_LIGHT)
 				{
-					pNode->s_pSkeletonNode->SetAnimation(lsz_AnimLightName[pNode->s_uIDAnim], DJTRUE);	
+					pNode->s_pSkeletonNode->SetAnimation(lsz_AnimLightName[pNode->s_uIDAnim], DJTRUE);
 				}
 				else if(m_uType == TYPE_RG_SPIRAL)
 				{
-					pNode->s_pSkeletonNode->SetSkin("circle_effect_big");
 					pNode->s_pSkeletonNode->SetAnimation(lsz_AnimCircleFastName[pNode->s_uIDAnim], DJTRUE);	
-				} 
-				
+				} 				
 			}
-			pNode->s_pSkeletonNode->SetPosition(m_vPos);
+			
+			m_vOrgPos = m_vPos;
+			pNode->s_pSkeletonNode->SetPosition(m_vPos);			
+
 			pNode->s_fTimeFinishAnim += pTheApp->GetDeltaAppTime();
 			if(pNode->s_fTimeFinishAnim >= pNode->s_fTimeDuration)
 			{
@@ -321,59 +317,118 @@ void RaysGhost::Update(djfloat fDeltaTime)
 				pNode->s_pSkeletonNode->ClearAnimation();
 				pNode->s_fTimeFinishAnim = 0.0f;
 			}
-		}
+
+			//
+			spBone* bone = pNode->s_pSkeletonNode->FindBone(m_strBoneName);
+			if(bone)
+			{
+				DJVector2 vPos = m_vOrgPos;
+				vPos.e[1] += bone->y;
+				vPos.e[0] += bone->x;
+
+				DJRECT rect = DJRECT(vPos.e[0], vPos.e[1], m_vSize.x(), m_vSize.y());
+
+				if(m_uType == TYPE_RG_CIRCLE)
+				{
+					if(m_nID %2 == 0)
+					{
+						g_arrRectCircleBullet[pNode->s_uIDAnim] = rect;	
+					}
+					else
+					{
+						g_arrRectCircleFastBullet[pNode->s_uIDAnim] = rect;
+					}
+				}
+				else if(m_uType == TYPE_RG_LIGHT)
+				{
+					g_arrRectLightBullet[pNode->s_uIDAnim] = rect;					
+				}
+				else if(m_uType == TYPE_RG_SPIRAL)
+				{
+					g_arrRectCircleSpiralBullet[pNode->s_uIDAnim] = rect;
+				}
+			}
+		} 
 
 		if(m_uType == TYPE_RG_CIRCLE)
 		{
 			if(m_nID % 2 == 0)
 			{
+				m_pRectHitBox = &g_arrRectCircleBullet[0];
 				for(djint32 i = 0; i < ANIM_CIRCLE_COUNT; i++)
 				{
 					if(OnHit(m_pRectHitBox))
 					{
 						/// TODO:: Processs if hit with player
-						DJAssert(0);
+						//DJAssert(0);
 					}
+					#ifdef _DEV
+						DJRECT box;	
+						DJVector2 vPosHit = DJVector2(m_pRectHitBox->nX, m_pRectHitBox->nY);
+						MakeBox(&box,vPosHit,m_pRectHitBox->nW, m_pRectHitBox->nH);
+						theBoundingBoxCollection.QueueBoundingBox(box);
+					#endif //_DEV
 					m_pRectHitBox ++;
 				}
 			}
 			else 
 			{
+				m_pRectHitBox = &g_arrRectCircleFastBullet[0];
 				for(djint32 i = 0; i < ANIM_CIRCLE_FAST_COUNT; i++)
 				{
 					if(OnHit(m_pRectHitBox))
 					{
 						/// TODO:: Processs if hit with player
-						DJAssert(0);
+						//DJAssert(0);
 					}
+					#ifdef _DEV
+						DJRECT box;	
+						DJVector2 vPosHit = DJVector2(m_pRectHitBox->nX, m_pRectHitBox->nY);
+						MakeBox(&box,vPosHit,m_pRectHitBox->nW, m_pRectHitBox->nH);
+						theBoundingBoxCollection.QueueBoundingBox(box);
+					#endif //_DEV
 					m_pRectHitBox ++;
 				}				
 			}
 		}
 		else if(m_uType ==  TYPE_RG_LIGHT)
 		{
+			m_pRectHitBox = &g_arrRectLightBullet[0];
 			for(djint32 i = 0; i < ANIM_LIGHT_COUNT; i++)
 			{
 				if(OnHit(m_pRectHitBox))
 				{
 					/// TODO:: Processs if hit with player
-					DJAssert(0);
+					//DJAssert(0);
 				}
+				#ifdef _DEV
+					DJRECT box;	
+					DJVector2 vPosHit = DJVector2(m_pRectHitBox->nX, m_pRectHitBox->nY);
+					MakeBox(&box,vPosHit,m_pRectHitBox->nW, m_pRectHitBox->nH);
+					theBoundingBoxCollection.QueueBoundingBox(box);
+				#endif //_DEV
 				m_pRectHitBox ++;
 			}
 		}
 		else if(m_uType == TYPE_RG_SPIRAL)
 		{
-			for(djint32 i = 0; i < ANIM_CIRCLE_FAST_COUNT; i++)
+			m_pRectHitBox =	&g_arrRectCircleSpiralBullet[0];
+			for(djint32	i =	0; i < ANIM_CIRCLE_FAST_COUNT; i++)
 			{
 				if(OnHit(m_pRectHitBox))
 				{
-					/// TODO:: Processs if hit with player
-					DJAssert(0);
+					///	TODO:: Processs	if hit with	player
+					//DJAssert(0);
 				}
+				#ifdef _DEV
+					DJRECT box;	
+					DJVector2 vPosHit = DJVector2(m_pRectHitBox->nX, m_pRectHitBox->nY);
+					MakeBox(&box,vPosHit,m_pRectHitBox->nW, m_pRectHitBox->nH);
+					theBoundingBoxCollection.QueueBoundingBox(box);
+				#endif //_DEV
 				m_pRectHitBox ++;
 			}
-		}
+		}		 
 	}
 }
 
@@ -408,7 +463,30 @@ djbool RaysGhost::OnHit(const DJRECT* pRect)
 
 DJRECT* RaysGhost::MakeBox(DJRECT *pRect, const DJVector2 &vPos, djint32 nWidth, djint32 nHeight) const
 {
-	DJRECT* rect = DJ_NEW(DJRECT(0, 0, 0, 0));
+	pRect->nX = djTruncToInt(vPos.e[0] - nWidth/2.0f);
+	pRect->nY = djTruncToInt(vPos.e[1] - nHeight/2.0f);
+	pRect->nW = nWidth;
+	pRect->nH = nHeight;
+	return pRect;
+}
+
+///
+
+DJRECT RaysGhost::CalculateBordingBox(const DJ2DSkeletonNode* pNode)
+{
+	DJRECT rect = DJRECT(0.0f,0.0f,0.0f,0.0f);	
+	spBone* pBone = pNode->FindBone(m_strBoneName);
+	DJVector2 vPosBullet = DJVector2(0.0f);
+	m_vPos.e[0] += pBone->x;
+	m_vPos.e[1] += pBone->y;
+
+	DJVector2 vSize = GetSizeFromSpine(m_strSlotName, pNode);
+	vSize.e[0] *= pBone->scaleX;
+	vSize.e[1] *= pBone->scaleY;
+	m_vSize = vSize;
+	m_vOrgSize = m_vSize;
+
+	rect = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
 	return rect;
 }
 
