@@ -36,21 +36,33 @@ extern Camera *g_pCamera;
 extern DJFont*		g_pFont;
 struct Bone;
 extern Player* g_pPlayer;
+extern djint32 g_nControls;
 
 const char* STR_PLAYER_SLOTNAME = "monkeyking";
+const char* STR_PLAYER_BONENAME = "root";
+const char* g_szAtlastFileName  = "sprites/monkeyking";
+
+const char* g_szAnimationName[Player::STATE_COUNT] =
+{
+	"animation_stand",
+	"animation_move_left",
+	"animation_move_right",
+};
 
 /////////////////////////////////////////////////////////////////
 // Begin class Player
 Player::Player()
 {
-	m_vPos = DJVector2(0.0f);
+	m_vPos			= DJVector2(0.0f);
 	m_vAcceleration = DJVector2(0.0f);
-	m_vVelocity = DJVector2(1.0f); 	
-	m_uState = STATE_NONE;
+	m_vVelocity		= DJVector2(1.0f); 	
+	m_uState		= STATE_STAND;
 	m_pSkeletonNode = NULL;
 	m_vTarget		= DJVector2(0.0f);
 	m_fTimeMove		= 0.0f;
 	m_rectHitBox	= DJRECT(0,0,0,0);
+	m_fTimeDuration = 0.0f;
+	m_bEnableTouch	= DJTRUE;
 }
 
 ///
@@ -62,24 +74,31 @@ Player::~Player()
 
 ///
 
-djbool Player::Init(DJVector2 vpos, DJString strAtlastFile, DJString strAnimName)
+djbool Player::Init(DJVector2 vpos)
 {
 	m_vPos = vpos;
-	m_vOrgPos = vpos;
+	m_vOrgPos = vpos;  
+
 	// Init skeleton animation
 	m_pSkeletonNode = DJ_NEW(DJ2DSkeletonNode);
 	m_pSkeletonNode->SetPosition(vpos);			
-	m_pSkeletonNode->Create(strAtlastFile);
-	m_pSkeletonNode->SetAnimation(strAnimName, DJTRUE);
+	m_pSkeletonNode->Create(g_szAtlastFileName);
 	theSpriteEngine.AddActiveNode(m_pSkeletonNode);
 	theSpriteEngine.AddNode(m_pSkeletonNode, LAYER_SPRITES); 
 
-	// Init size
+	// size
 	m_vSize = GetSizeFromSpine(STR_PLAYER_SLOTNAME, m_pSkeletonNode);
 	m_vOrgSize = m_vSize;
+
+	// Init time duration for animation
+	m_fTimeDuration = GetTimeDurationOfAnimation(m_pSkeletonNode);
 	
 	// Init hit box
 	m_rectHitBox = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
+
+	m_nTouchTrackID = -1;
+	m_vLastTrackedPos = m_vPos;
+	m_vFirstTrackedPos = m_vLastTrackedPos;
 
 	return DJTRUE;	
 }
@@ -100,16 +119,74 @@ void Player::Paint()
 ///
 
 djbool Player::Update(djfloat fDeltaTime)
-{			
+{		
+	// size
+	if(m_pSkeletonNode)
+	{
+		spBone* bone = m_pSkeletonNode->FindBone(STR_PLAYER_BONENAME);
+		if(bone)
+		{
+			DJVector2 vScale = DJVector2(bone->scaleX, bone->scaleY);
+			DJVector2 vSize = m_vOrgSize;
+			vSize = vSize & vScale;
+			m_vSize = vSize;
+
+			DJVector2 vPos = m_vOrgPos;
+			vPos.e[0] += bone->x;
+			vPos.e[1] -= bone->y;
+			m_vPos = vPos;			
+		}
+	}
 #ifdef _DEV
 	DJRECT box;	
 	MakeBox(&box,m_vPos,m_vSize.x(), m_vSize.y());
 	theBoundingBoxCollection.QueueBoundingBox(box);
-#endif //_DEV
-	if(m_uState == STATE_MOVE)
+#endif //_DEV  
+
+	switch(m_uState)
 	{
-		
-	}
+		case STATE_STAND:
+		{
+			if(!m_pSkeletonNode->IsAnyAnimationRunning())
+			{
+				m_pSkeletonNode->SetAnimation(g_szAnimationName[STATE_STAND], DJTRUE);
+			}
+		}
+		break;
+		case STATE_MOVE_LEFT:
+		{
+			if(!m_pSkeletonNode->IsAnyAnimationRunning())
+			{
+				m_pSkeletonNode->SetAnimation(g_szAnimationName[STATE_MOVE_LEFT], DJFALSE);
+			}
+			m_fTimeMove += fDeltaTime;
+			if(m_fTimeMove >= m_fTimeDuration)
+			{
+				m_pSkeletonNode->ClearAnimation();
+				m_fTimeMove = 0.0f;
+				m_uState = STATE_STAND;
+				m_bEnableTouch = DJTRUE;
+			}
+		}
+		break;
+		case STATE_MOVE_RIGHT:
+		{
+			 if(!m_pSkeletonNode->IsAnyAnimationRunning())
+			{
+				m_pSkeletonNode->SetAnimation(g_szAnimationName[STATE_MOVE_RIGHT], DJFALSE);
+			}
+			m_fTimeMove += fDeltaTime;
+			if(m_fTimeMove >= m_fTimeDuration)
+			{
+				m_pSkeletonNode->ClearAnimation();
+				m_fTimeMove = 0.0f;
+				m_uState = STATE_STAND;
+				m_bEnableTouch = DJTRUE;
+			}
+		}
+		break;	
+	};
+
 	return DJTRUE;
 }
 
@@ -131,9 +208,74 @@ void Player::Reset()
 
 djint32 Player::OnTouchBegin( djint32 nDevice, djint32 nID, float fX, float fY )
 {
-	m_vTarget = DJVector2(fX,fY);
-	m_uState = STATE_MOVE;
+	if(!m_bEnableTouch)
+		return 0;
+	m_pSkeletonNode->ClearAnimation();
+	m_bEnableTouch = DJFALSE;
+	if(fX <= m_vPos.x())
+	{
+		m_uState = STATE_MOVE_RIGHT;
+	}
+	else
+	{
+		m_uState = STATE_MOVE_LEFT;
+	}
+	
 	return 0;
+}
+
+///
+
+djint32 Player::OnTouchMove(djint32 nDevice, djint32 nID, float fX, float fY)
+{
+	djint32 nRet = 0;
+	if(g_nControls != CONTROLS_TOUCH)
+	{
+		OnTouchCancel(nDevice, nID, fX, fY);
+		nRet = 1;
+	}
+
+	if(m_nTouchTrackID = nID)
+	{
+		DJVector2 vTouch(fX, fY);
+		m_vLastTrackedPos = vTouch + m_vTrackInitialDelta;
+		nRet = 1;
+	}
+	return nRet;
+}
+
+///
+
+djint32 Player::OnTouchEnd(djint32 nDevice , djint32 nID, float fX, float fY)
+{
+	djint32 nRet = 0;
+	if(g_nControls != CONTROLS_TOUCH)
+	{
+		OnTouchCancel(nDevice, nID, fX, fY);
+		nRet = 1;
+	}
+
+	if(m_nTouchTrackID = nID)
+	{
+		DJVector2 vTouch(fX, fY);
+		m_vLastTrackedPos = vTouch + m_vTrackInitialDelta;
+		m_nTouchTrackID = -1;
+		nRet = 1;
+	}
+	return nRet;
+}
+
+djint32 Player::OnTouchCancel(djint32 nDevice , djint32 nID, float fX, float fY)
+{
+	djint32 nRet = 0;
+	if(m_nTouchTrackID = nID)
+	{
+		DJVector2 vTouch(fX, fY);
+		m_vLastTrackedPos = vTouch + m_vTrackInitialDelta;
+		m_nTouchTrackID = -1;
+		nRet = 1;
+	}
+	return nRet;
 }
 
 ///

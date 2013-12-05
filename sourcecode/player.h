@@ -33,11 +33,12 @@ class LevelScene;
 #define ANIM_PLAYER_COUNT 1
 class Player : public Entity
 {
+public:
 	enum 
 	{
-		STATE_NONE,
-		STATE_CUT,
-		STATE_MOVE,
+		STATE_STAND,
+		STATE_MOVE_LEFT,
+		STATE_MOVE_RIGHT,
 
 		STATE_COUNT
 	};
@@ -46,12 +47,20 @@ protected:
 	djuint32					m_uState;
 	DJVector2					m_vTarget;
 	djfloat						m_fTimeMove;
+	djfloat						m_fTimeDuration;
 	DJRECT						m_rectHitBox;
+	djbool						m_bEnableTouch;
+
+	//Touch
+	djint						m_nTouchTrackID;
+	DJVector2					m_vTrackInitialDelta;
+	DJVector2					m_vFirstTrackedPos;
+	DJVector2					m_vLastTrackedPos;
 public:
 	Player();
 	~Player();
 
-	djbool Init(DJVector2 vpos, DJString strAtlastFile, DJString strAnimName);
+	djbool Init(DJVector2 vpos);
 	void Move(DJVector2 vTarget);
 	djbool Update(djfloat fDeltaTime);
 	void   Paint();

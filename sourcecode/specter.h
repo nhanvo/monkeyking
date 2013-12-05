@@ -49,30 +49,8 @@ public:
 		ANIM_CIRCLE_FAST_7,
 		
 		ANIM_CIRCLE_FAST_COUNT
-	};
-
-	// light effect
-	enum 
-	{
-		ANIM_LIGHT_0,
-		ANIM_LIGHT_1,
-		ANIM_LIGHT_2,
-		ANIM_LIGHT_3,
-		ANIM_LIGHT_4,
-		ANIM_LIGHT_5,
-		ANIM_LIGHT_6,
-		ANIM_LIGHT_7,
-		ANIM_LIGHT_8,
-		ANIM_LIGHT_9,
-		ANIM_LIGHT_10,
-		ANIM_LIGHT_11,
-		ANIM_LIGHT_12,
-		ANIM_LIGHT_13,
-		ANIM_LIGHT_14,
-		ANIM_LIGHT_15,
-		
-		ANIM_LIGHT_COUNT
-	};
+	}; 
+	
 
 	// spiral effect
 	enum
@@ -123,6 +101,9 @@ protected:
 	DJString	m_strAtlastFile;
 	DJString	m_strSlotName;
 	DJString	m_strBoneName;
+	djbool		m_bCircleEffectHit[ANIM_CIRCLE_COUNT];
+	djbool		m_bCircleFastEffectHit[ANIM_CIRCLE_FAST_COUNT];
+	djbool		m_bSpiralEffectHit[ANIM_SPIRAL_COUNT];
 public:
 	RaysGhost();
 	~RaysGhost();
@@ -147,6 +128,10 @@ public:
 
 	// calculate bording box for rayghost to collision detect
 	DJRECT CalculateBordingBox(const DJ2DSkeletonNode* pNode);
+
+	// Set and get target hit box
+	void SetTargetHitBox(DJRECT rect){m_rectTarget = rect;}
+	DJRECT GetTargetHitBox() const {return m_rectTarget;}
 };				   
 /////////////////////////////////////////////////////////////////
 

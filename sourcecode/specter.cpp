@@ -15,7 +15,8 @@
 /////////////////////////////////////////////////////////////////
 DJ_FILE_START(); 
 /////////////////////////////////////////////////////////////////
-
+extern djfloat g_fGameTimeScale;
+extern Player* g_pPlayer; 
 /////////////////////////////////////////////////////////////////
 // Ray ghost
 const char* lsz_AnimCircleName[RaysGhost::ANIM_CIRCLE_COUNT] = 
@@ -65,48 +66,7 @@ DJRECT	g_arrRectCircleFastBullet[RaysGhost::ANIM_CIRCLE_FAST_COUNT] =
 	DJRECT(0,0,0,0),
 	DJRECT(0,0,0,0),
 	DJRECT(0,0,0,0),
-};
-
-// animation name on sprites/light_effect.json file
-const char* lsz_AnimLightName[RaysGhost::ANIM_LIGHT_COUNT] = 
-{
-	"animation_0",
-	"animation_1",
-	"animation_2",
-	"animation_3",
-	"animation_4",
-	"animation_5", 
-	"animation_6",
-	"animation_7",
-	"animation_8",
-	"animation_9",
-	"animation_10",
-	"animation_11", 
-	"animation_12",
-	"animation_13",
-	"animation_14",
-	"animation_15",
-};
-
-DJRECT	g_arrRectLightBullet[RaysGhost::ANIM_LIGHT_COUNT] = 
-{
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-	DJRECT(0,0,0,0),
-};
+};	
 
 // animation name on sprites/spiral_effect.json file
 const char* lsz_AnimSpiralName[RaysGhost::ANIM_SPIRAL_COUNT] = 
@@ -135,17 +95,14 @@ DJRECT	g_arrRectCircleSpiralBullet[RaysGhost::ANIM_CIRCLE_FAST_COUNT] =
 
 const char* g_szAtlastCircleAnimFile		= "sprites/circle_effect";
 const char* g_szAtlastCircleFastAnimFile	= "sprites/circle_effect_fast";
-const char* g_szAtlastLightAnimFile			= "sprites/light_effect";
 const char* g_szAtlastSpiralAnimFile		= "sprites/spiral_effect";
 
 const char* g_szCircleSlotName				= "circle_effect";
 const char* g_szCircleFastSlotName			= "circle";
-const char* g_szLightSlotName				= "light";
 const char* g_szSpiralSlotName				= "circle";
 
 const char* g_szCircleBone					= "root";
 const char* g_szCircleFastBone				= "all";
-const char* g_szLightBone					= "root";
 const char* g_szSpiralBone					= "all";
 
 /////////////////////////////////////////////////////////////////
@@ -160,6 +117,18 @@ RaysGhost::RaysGhost() : m_uState(STATE_RG_STAND), m_nBeatTimeID(0), m_uMaxAnim(
 						 m_uType(0), m_strAtlastFile(""), m_nID(0), m_pRectHitBox(NULL),
 						 m_strSlotName(""), m_strBoneName("")
 { 	
+	for(djuint i = 0; i < ANIM_CIRCLE_COUNT; i++)
+	{
+		m_bCircleEffectHit[i] = DJFALSE;
+	}
+	for(djuint i = 0; i < ANIM_CIRCLE_FAST_COUNT; i++)
+	{
+		m_bCircleFastEffectHit[i] = DJFALSE;
+	}
+	for(djuint i = 0; i < ANIM_SPIRAL_COUNT; i++)
+	{
+		m_bSpiralEffectHit[i] = DJFALSE;
+	}
 }
 
 ///
@@ -204,14 +173,6 @@ djbool RaysGhost::Init(djint32 id, djint32 nType, DJVector2 vPos, djint32 nBeatT
 			m_strBoneName	= g_szCircleFastBone;
 		}
 	}
-	else if(m_uType == TYPE_RG_LIGHT)
-	{
-		m_strAtlastFile =   g_szAtlastLightAnimFile;
-		m_uMaxAnim		= ANIM_LIGHT_COUNT;
-		m_pRectHitBox	= &g_arrRectLightBullet[0];
-		m_strSlotName	= g_szLightSlotName;
-		m_strBoneName	= g_szLightBone;
-	}
 	else if(m_uType == TYPE_RG_SPIRAL)
 	{
 		/*m_strAtlastFile = g_szAtlastSpiralAnimFile;
@@ -244,10 +205,6 @@ djbool RaysGhost::Init(djint32 id, djint32 nType, DJVector2 vPos, djint32 nBeatT
 			{
 				g_arrRectCircleFastBullet[uID] = CalculateBordingBox(pNode->s_pSkeletonNode);
 			}
-		}
-		else if(m_uType == TYPE_RG_LIGHT)
-		{
-			g_arrRectLightBullet[uID] = CalculateBordingBox(pNode->s_pSkeletonNode);
 		}
 		else if(m_uType == TYPE_RG_SPIRAL)
 		{
@@ -297,10 +254,6 @@ void RaysGhost::Update(djfloat fDeltaTime)
 						pNode->s_pSkeletonNode->SetAnimation(lsz_AnimCircleFastName[pNode->s_uIDAnim], DJTRUE);	
 					}
 				}
-				else if(m_uType == TYPE_RG_LIGHT)
-				{
-					pNode->s_pSkeletonNode->SetAnimation(lsz_AnimLightName[pNode->s_uIDAnim], DJTRUE);
-				}
 				else if(m_uType == TYPE_RG_SPIRAL)
 				{
 					pNode->s_pSkeletonNode->SetAnimation(lsz_AnimCircleFastName[pNode->s_uIDAnim], DJTRUE);	
@@ -339,10 +292,6 @@ void RaysGhost::Update(djfloat fDeltaTime)
 						g_arrRectCircleFastBullet[pNode->s_uIDAnim] = rect;
 					}
 				}
-				else if(m_uType == TYPE_RG_LIGHT)
-				{
-					g_arrRectLightBullet[pNode->s_uIDAnim] = rect;					
-				}
 				else if(m_uType == TYPE_RG_SPIRAL)
 				{
 					g_arrRectCircleSpiralBullet[pNode->s_uIDAnim] = rect;
@@ -357,10 +306,14 @@ void RaysGhost::Update(djfloat fDeltaTime)
 				m_pRectHitBox = &g_arrRectCircleBullet[0];
 				for(djint32 i = 0; i < ANIM_CIRCLE_COUNT; i++)
 				{
-					if(OnHit(m_pRectHitBox))
+					if(!m_bCircleEffectHit[i])
 					{
-						/// TODO:: Processs if hit with player
-						//DJAssert(0);
+						if(OnHit(m_pRectHitBox))
+						{
+							/// TODO:: Processs if hit with player
+							DJInfo("HIT CIRCLE %d", m_nID);
+							m_bCircleEffectHit[i] = DJTRUE;
+						}
 					}
 					#ifdef _DEV
 						DJRECT box;	
@@ -376,10 +329,14 @@ void RaysGhost::Update(djfloat fDeltaTime)
 				m_pRectHitBox = &g_arrRectCircleFastBullet[0];
 				for(djint32 i = 0; i < ANIM_CIRCLE_FAST_COUNT; i++)
 				{
-					if(OnHit(m_pRectHitBox))
+					if(!m_bCircleFastEffectHit[i])
 					{
-						/// TODO:: Processs if hit with player
-						//DJAssert(0);
+						if(OnHit(m_pRectHitBox))
+						{
+							/// TODO:: Processs if hit with player
+							DJInfo("HIT FAST CIRCLE %d", m_nID);
+							m_bCircleFastEffectHit[i] = DJTRUE;
+						}
 					}
 					#ifdef _DEV
 						DJRECT box;	
@@ -391,34 +348,19 @@ void RaysGhost::Update(djfloat fDeltaTime)
 				}				
 			}
 		}
-		else if(m_uType ==  TYPE_RG_LIGHT)
-		{
-			m_pRectHitBox = &g_arrRectLightBullet[0];
-			for(djint32 i = 0; i < ANIM_LIGHT_COUNT; i++)
-			{
-				if(OnHit(m_pRectHitBox))
-				{
-					/// TODO:: Processs if hit with player
-					//DJAssert(0);
-				}
-				#ifdef _DEV
-					DJRECT box;	
-					DJVector2 vPosHit = DJVector2(m_pRectHitBox->nX, m_pRectHitBox->nY);
-					MakeBox(&box,vPosHit,m_pRectHitBox->nW, m_pRectHitBox->nH);
-					theBoundingBoxCollection.QueueBoundingBox(box);
-				#endif //_DEV
-				m_pRectHitBox ++;
-			}
-		}
 		else if(m_uType == TYPE_RG_SPIRAL)
 		{
 			m_pRectHitBox =	&g_arrRectCircleSpiralBullet[0];
 			for(djint32	i =	0; i < ANIM_CIRCLE_FAST_COUNT; i++)
 			{
-				if(OnHit(m_pRectHitBox))
+				if(!m_bSpiralEffectHit[i])
 				{
-					///	TODO:: Processs	if hit with	player
-					//DJAssert(0);
+					if(OnHit(m_pRectHitBox))
+					{
+						///	TODO:: Processs	if hit with	player
+						DJInfo("HIT SPIRAL %d", m_nID);
+						m_bSpiralEffectHit[i] = DJTRUE;
+					}
 				}
 				#ifdef _DEV
 					DJRECT box;	
@@ -443,19 +385,13 @@ void RaysGhost::Term()
 djbool RaysGhost::OnHit(const DJRECT* pRect)
 {
 	// hit
-	if(((pRect->nX + pRect->nW) < m_rectTarget.nX) ||(pRect->nX > (m_rectTarget.nX + m_rectTarget.nW)))
+	if(((pRect->nX + pRect->nW) > m_rectTarget.nX) && ((pRect->nX + pRect->nW) < (m_rectTarget.nX + m_rectTarget.nW)))
 	{
-		return DJFALSE;
+		if((pRect->nY > m_rectTarget.nY) && (pRect->nY + pRect->nH) < (m_rectTarget.nY + m_rectTarget.nH))
+		{
+			return DJTRUE;
+		}
 	}
-	else if(((pRect->nY + pRect->nH) > m_rectTarget.nY) || pRect->nY > (m_rectTarget.nY + m_rectTarget.nH))
-	{
-		return DJFALSE;
-	}
-	else
-	{
-		return DJTRUE;
-	}
-
 	return DJFALSE;
 }
 
@@ -565,7 +501,6 @@ void Centipede::Update(djfloat fDeltaTime)
 	//////////////////////////////////////////////////////////////////////////////
 	// update centipede
 	spBone* pBone = m_pSkeletonNode->FindBone("centipede");
-
 	switch(m_State)
 	{
 		case STATE_CEP_SHOOT_WEAPON_1: 		
@@ -594,7 +529,7 @@ void Centipede::Update(djfloat fDeltaTime)
 					m_pSkeletonNode->ClearAnimation();
 					m_fTimeAnimActive = 0.0f;
 					m_State = STATE_CEP_SHOOT_WEAPON_4;
-				}
+				}  				
 			} 			
 		}
 		break;
@@ -681,6 +616,9 @@ void Centipede::Update(djfloat fDeltaTime)
 		break;
 	};	
 
+	// update rect box hit
+	m_rectBoxHit = DJRECT(m_vPos.x(), m_vPos.y(), m_vSize.x(), m_vSize.y());
+
 	//////////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -710,7 +648,17 @@ void Centipede::Update(djfloat fDeltaTime)
 				}
 			}
 			pRG->SetPosition(m_vPos);
+			pRG->SetTargetHitBox(g_pPlayer->GetHitBox());
 			pRG->Update(fDeltaTime); 			
+		}
+
+		if(pRG == m_listRayGhost.GetLast())
+		{
+			/// TODO::Reset Scene
+			for(djuint i = 0; i < STATE_CEP_SHOOP_WEAPON_COUNT; i++)
+			{
+				m_bFinishState[i] = DJTRUE;
+			}
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////////

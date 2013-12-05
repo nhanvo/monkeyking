@@ -77,6 +77,8 @@ public:
 	virtual djint32 OnTouchMove(djint32 nDevice, djint32 nID, float x, float y );
 	// Touch end callback
 	virtual djint32 OnTouchEnd(djint32 nDevice, djint32 nID, float x, float y );
+	// Touch cancel
+	virtual djint32	OnTouchCancel( djint32 nDevice, djint32 nID, float fX, float fY );
 	// Accelerator event callback
 	virtual djint32 OnAccelerate( float x, float y, float z );
 	// Button Down

@@ -125,6 +125,8 @@ djfloat					g_fRestrictionBottom	= 0.0f;
 
 // Scene is start
 djint32					g_SceneStart			= SCENE_CENTIPEDE_SPECTER;	
+
+djint32 g_nControls		= CONTROLS_TOUCH;
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
@@ -694,13 +696,58 @@ djbool DJMonkeyKingApplication::OnPaint()
 
 ///
 
+enum
+{
+	TOUCHOWNER_INVALID = -1,
+	TOUCHOWNER_APP,
+	TOUCHOWNER_PLAYER,
+};
+
+djint32 g_nTouchOwners[16] =  {
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+	TOUCHOWNER_INVALID,
+};
+
 djint32 DJMonkeyKingApplication::OnTouchBegin(djint32 nDevice, djint32 nID, float x, float y)
 {
 	DJInfo("Touch Begin: %d %.2f %.2f", nID, x, y);
+	djint32 nRet = 0;
+	djint32 sx,sy,sw,sh;
+    pTheRenderDevice->GetViewportSize(sx,sy,sw,sh);
+    x = ((float)x-(float)sx);
+    y = ((float)y-(float)sy);
+	
+	if (g_nTouchOwners[nID] != TOUCHOWNER_INVALID)
+	{
+		OnTouchCancel(nDevice,nID, x, y);
+	}
+	g_nTouchOwners[nID] = TOUCHOWNER_INVALID;
 
-	if (DJApplication::OnTouchBegin(nDevice, nID, x, y))
-		return 1;
-	g_pPlayer->OnTouchBegin(nDevice, nID,x,y);
+	if(!nRet)
+	{
+		if(g_pPlayer)
+		{
+			nRet = g_pPlayer->OnTouchBegin(nDevice, nID,x,y);
+			if(nRet)
+				g_nTouchOwners[nID] == TOUCHOWNER_PLAYER;
+		}
+	}
+
+	
 	if(g_pLevelManager->GetCurrentLevel()->GetCurrentScene()->IsStickGold())
 	{
 		g_pLevelManager->GetCurrentLevel()->GetStickGold()->OnTouchBegin(nDevice, nID,x,y);
@@ -715,10 +762,25 @@ djint32 DJMonkeyKingApplication::OnTouchMove(djint32 nDevice, djint32 nID, float
 {
 	DJInfo("Touch Move: %d %.2f %.2f", nDevice, nID, x, y);
 
-	if (DJApplication::OnTouchMove(nDevice, nID, x,y))
-		return 1;
+	if(g_nTouchOwners[nID] == TOUCHOWNER_INVALID)
+		return 0;
+	djint32 nRet = 0;
+	if(g_nTouchOwners[nID] == TOUCHOWNER_APP)
+	{
+		if(!nRet)
+		{
+			nRet = DJApplication::OnTouchMove(nDevice, nID, x, y);
+		}
+	}
+	else if(g_nTouchOwners[nID] == TOUCHOWNER_PLAYER)
+	{
+		if(g_pPlayer)
+		{
+			nRet = g_pPlayer->OnTouchMove(nDevice, nID, x, y);
+		}
+	}
 
-	return 0;
+	return nRet;
 }
 
 ///
@@ -727,10 +789,36 @@ djint32 DJMonkeyKingApplication::OnTouchEnd(djint32 nDevice, djint32 nID, float 
 {
 	DJInfo("Touch End: %d %.2f %.2f",nDevice, nID, x, y);
 
-	if (DJApplication::OnTouchEnd(nDevice, nID, x,y))
-		return 1;
+	djint32 nRet = 0;
+	if(g_nTouchOwners[nID] == TOUCHOWNER_PLAYER)
+	{
+		if(g_pPlayer)
+		{
+			nRet = g_pPlayer->OnTouchEnd(nDevice, nID, x, y);
+		}
+	}
+	g_nTouchOwners[nID] = TOUCHOWNER_INVALID;
+	return nRet;
+}
 
-	return 0;
+///
+
+djint32	DJMonkeyKingApplication::OnTouchCancel( djint32 nDevice, djint32 nID, float fX, float fY )
+{
+	DJAssert(nID >= 0 && nID < 16);
+	if(g_nTouchOwners[nID] == TOUCHOWNER_INVALID)
+		return 0;
+
+	djint32 nRet = 0;
+	if(g_nTouchOwners[nID] == TOUCHOWNER_PLAYER)
+	{
+		if(g_pPlayer)
+		{
+			nRet = g_pPlayer->OnTouchCancel(nDevice, nID, fX, fY);
+		}
+	}
+	g_nTouchOwners[nID] = TOUCHOWNER_INVALID;
+	return nRet;
 }
 
 ///

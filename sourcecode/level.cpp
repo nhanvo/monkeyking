@@ -152,16 +152,7 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 			{
 				DJWarning("Invalid POSITION from PLAYER tag");
 			}
-
-			if(!pLine->GetArgString(1, m_PlayerData.strAtlastFile))
-			{
-				DJWarning("Invalid ATLAST_FILE from PLAYER tag");
-			}
-
-			if(!pLine->GetArgString(2, m_PlayerData.strAnimationName))
-			{
-				DJWarning("Invalid ANIMATION_NAME from PLAYER tag");
-			}
+			
 			m_bPlayer = DJTRUE;
 		}
 
@@ -435,9 +426,7 @@ djbool Level::Init(const char* szLevelFile, djint32 nSceneID)
 		}
 		
 		// Init player
-		g_pPlayer->Init(m_pCurrentScene->GetPlayerData().vPos,
-						m_pCurrentScene->GetPlayerData().strAtlastFile,
-						m_pCurrentScene->GetPlayerData().strAnimationName);	
+		g_pPlayer->Init(m_pCurrentScene->GetPlayerData().vPos);	
 
 		/////////////////////////////////////////////////////////////////////////////
 		// Init Stick Gold

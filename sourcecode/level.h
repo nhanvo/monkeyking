@@ -41,9 +41,7 @@ public:
 
 	struct PlayerData
 	{
-		DJVector2	vPos;
-		DJString    strAtlastFile;
-		DJString	strAnimationName;	
+		DJVector2	vPos;	
 	};
 
 	struct StickGoldData

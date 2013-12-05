@@ -97,8 +97,8 @@ LEVEL
 		# A sprite <ID> <ANIMATION_FILE> <POSITION> <LAYER> [<SCALE>]
 		#SPRITE "monkeyking" "monkey_jump"  [512 384] 1 [3 3]
 		
-		# Player <ID> <POSITION> <SIZE> <ANIMATION_FILE>
-		PLAYER 	 	[595 703] 	"sprites/monkeyking" 	"animation"
+		# Player  <POSITION> 
+		PLAYER 	  [512 703] 	
 
 
 		##########################################################################		
