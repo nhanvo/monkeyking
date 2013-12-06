@@ -80,7 +80,8 @@ public:
 	enum
 	{
 		STATE_RG_STAND,
-		STATE_RG_SHOOT,		
+		STATE_RG_SHOOT,	
+		STATE_RG_FINISH_SHOOT,
 	};
 protected:
 	struct SkeletonAnimNode
@@ -112,6 +113,7 @@ public:
 	void Update(djfloat fDeltaTime);
 	void Term();	
 	djbool OnHit(const DJRECT* pRect);
+	void Reset();
 
 	virtual DJRECT* MakeBox(DJRECT *pRect, const DJVector2 &vPos, djint32 nWidth, djint32 nHeight) const;
 
@@ -196,7 +198,7 @@ protected:
 	DJ2DSkeletonNode*			m_pSkeletonNode;  
 	DJLinkedList<RaysGhost>		m_listRayGhost;
 	DJLinkedList<BeatsTime>		m_listBeatsTime;
-	djuint32					m_State;
+	djuint32					m_uState;
 	djfloat						m_fTimeAnimActive;
 	djfloat						m_fTimeDuration;
 	djfloat						m_fTimeChangeState[STATE_CEP_SHOOP_WEAPON_COUNT-1];
@@ -221,8 +223,11 @@ public:
 	DJLinkedList<BeatsTime>& GetListBeatsTime() {return m_listBeatsTime;}
 
 	// Set and get state
-	void SetState(djuint32 uState)	{m_State = uState;}
-	djuint32 GetState() const {return m_State;}	 
+	void SetState(djuint32 uState)	{m_uState = uState;}
+	djuint32 GetState() const {return m_uState;}	 
+
+	// Reset
+	void Reset();
 };
 
 /////////////////////////////////////////////////////////////////

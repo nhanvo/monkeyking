@@ -209,6 +209,7 @@ void DJMusicHandler::PlayMusic(const char* szMusic, djbool bLoop, float fFadeFac
 	if (szMusic == NULL || *szMusic == 0)
 		return;
 	djEnterCriticalSection(m_hThreadCS);
+	m_sCurrMusic	= szMusic;
 	m_sPendingMusic	= szMusic;
 	m_bPendingLoop	= bLoop;
 	m_fFadeFactor	= fFadeFactor;

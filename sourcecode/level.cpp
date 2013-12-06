@@ -65,6 +65,7 @@ LevelScene::LevelScene()
 	m_fCameraZoom		= 1.0f;
 	m_name				= "";
 	m_sID				= "";
+	m_fEndMusic			= 0.0f;
 	m_bStickGold		= DJFALSE;
 	m_bMonkeyCilivians	= DJFALSE;
 	m_bBeatsTime		= DJFALSE;
@@ -230,6 +231,14 @@ djbool LevelScene::Init(DJTagFile& file, DJTagDir* pDir)
 			// Sure scene is exits
 			DJAssert(m_sID != "");
 		}
+		else if(pLine->m_name == "END_MUSIC")
+		{
+			if(!pLine->GetArgFloat(0, m_fEndMusic))
+			{
+				DJWarning("Failed to parse End music value in END_MUSIC!");
+				DJAssert(pLine != NULL);
+			}
+		}
 		else if (pLine->m_name == "BG_IMAGE")
 		{
 			DJString id;
@@ -341,7 +350,7 @@ Level::Level()
 	m_pCurrentScene = NULL;
 	m_pLevelBackground = NULL;
 	m_nCurrentCity	= 0;
-	m_bFinishLevel	= DJFALSE;
+	m_bFinishScene	= DJFALSE;
 	m_sLevelName	= "";
 	m_sID			= "";
 	m_sSceneMusic	= "";
@@ -533,7 +542,7 @@ djbool Level::Init(const char* szLevelFile, djint32 nSceneID)
 	//g_pCamera->SetupOrthoCamera(m_pCurrentScene->GetCameraPosition().e[0], m_pCurrentScene->GetCameraPosition().e[1], g_nScreenWidth, g_nScreenHeight, 0.0f, 0.0f);
 	//g_pCamera->SetLocalTransform(DJMatrix::Translate(DJVector3(0, 0, 0)));
 	//g_pCamera->UpdateTransforms();
-	Reset();
+	//Reset();
 
 	return DJTRUE;
 }
@@ -552,102 +561,92 @@ static float fTimeDelay = 0.0f;
 
 void Level::Update(float fDeltaTime)
 { 
-	if(m_bFinishLevel)
-	{	
-		if(theMusicHandler.IsPlaying(m_sSceneMusic))
+	if(m_bFinishScene)
+	{
+		if(theMusicHandler.IsPlaying(m_sSceneMusic) && pTheSoundDevice->GetMusicPos() > m_pCurrentScene->GetEndMusic())
 		{
-			theMusicHandler.StopMusic(0.5f);
-		}
-		if(fTimeDelay <= 2.0f)
-		{
-			fTimeDelay += pTheApp->GetDeltaAppTime();			
-		}   
-		else
-		{
-			m_bFinishLevel = DJFALSE;
-		}
-		return;
+			theMusicHandler.StopMusic(0.0f);
+			m_bFinishScene = DJFALSE;
+		}	
 	}
 	else
 	{  
-		fTimeDelay = 0.0f;
 		if(!theMusicHandler.IsPlaying(m_sSceneMusic))
 		{
-			theMusicHandler.PlayMusic(m_sSceneMusic);
-		}
-	}
-	//////////////////////////////////////////////////////////////////////////////
-	// update player
-	g_pPlayer->Update(fDeltaTime);
-	//////////////////////////////////////////////////////////////////////////////
+			theMusicHandler.PlayMusic(m_sSceneMusic, DJFALSE);			
+		}	
+		//////////////////////////////////////////////////////////////////////////////
+		// update player
+		g_pPlayer->Update(fDeltaTime);
+		//////////////////////////////////////////////////////////////////////////////
 
-	//////////////////////////////////////////////////////////////////////////////
-	// update stick gold
-	if(m_pCurrentScene->IsStickGold() && !m_bFinishLevel)
-	{
-		m_pStickGold->Update(fDeltaTime);
-	}
-	//////////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////////////////
-	// update monkey cilivians
-	if(m_pCurrentScene->IsMonKeyCilivians())
-	{
-		DJLinkedListIter<MonkeyCivilians> iter(m_listMonkeyCivians);
-		MonkeyCivilians *pMC;  
-		while((pMC = iter.GetStep()))
+		//////////////////////////////////////////////////////////////////////////////
+		// update stick gold
+		if(m_pCurrentScene->IsStickGold() && !m_bFinishScene)
 		{
-			if(pMC->GetIDBeatsTime() == -1)
+			m_pStickGold->Update(fDeltaTime);
+		}
+		//////////////////////////////////////////////////////////////////////////////
+
+		//////////////////////////////////////////////////////////////////////////////
+		// update monkey cilivians
+		if(m_pCurrentScene->IsMonKeyCilivians())
+		{
+			DJLinkedListIter<MonkeyCivilians> iter(m_listMonkeyCivians);
+			MonkeyCivilians *pMC;  
+			while((pMC = iter.GetStep()))
 			{
-				DJWarning("Monkey cilivians %d invalid beats time", pMC->GetID());		
-				DJAssert((pMC->GetIDBeatsTime() != -1));
-			}
-			else
-			{
-				DJLinkedListIter<BeatsTime> iter2(m_listBeatsTime);
-				BeatsTime *pBT;
-				while((pBT = iter2.GetStep()))
+				if(pMC->GetIDBeatsTime() == -1)
 				{
-					if(pMC->GetIDBeatsTime() == pBT->GetID())
+					DJWarning("Monkey cilivians %d invalid beats time", pMC->GetID());		
+					DJAssert((pMC->GetIDBeatsTime() != -1));
+				}
+				else
+				{
+					DJLinkedListIter<BeatsTime> iter2(m_listBeatsTime);
+					BeatsTime *pBT;
+					while((pBT = iter2.GetStep()))
 					{
-						if(pTheSoundDevice->GetMusicPos() >= pBT->GetBeatsTime().e[0] && 
-							pTheSoundDevice->GetMusicPos() <= pBT->GetBeatsTime().e[1])
+						if(pMC->GetIDBeatsTime() == pBT->GetID())
 						{
-		 					pMC->EnableJump();
+							if(pTheSoundDevice->GetMusicPos() >= pBT->GetBeatsTime().e[0] && 
+								pTheSoundDevice->GetMusicPos() <= pBT->GetBeatsTime().e[1])
+							{
+		 						pMC->EnableJump();
+							}
 						}
 					}
-				}
-				pMC->Update(fDeltaTime, m_pStickGold->GetRectBoxHit());	
+					pMC->Update(fDeltaTime, m_pStickGold->GetRectBoxHit());	
 
-				// Reset level if monkey cilivians end is finish jump
-				if(pMC == m_listMonkeyCivians.GetLast() &&
-				   (m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_DIE ||
-				   m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_FINISH))
-				{
-					m_bFinishLevel = DJTRUE;			
-					Reset();			
+					// Reset level if monkey cilivians end is finish jump
+					if(pMC == m_listMonkeyCivians.GetLast() &&
+					   (m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_DIE ||
+					   m_listMonkeyCivians.GetLast()->GetState() == MonkeyCivilians::STATE_MC_FINISH))
+					{
+						Reset();
+						m_bFinishScene = DJTRUE;								
+					}
 				}
+				
+			}
+		}
+		//////////////////////////////////////////////////////////////////////////////
+
+		//////////////////////////////////////////////////////////////////////////////
+		// update specter
+		DJLinkedListIter<Specter> iterSpecter(m_listSpecter);
+		Specter* pSPEC;
+		while((pSPEC = iterSpecter.GetStep()))
+		{
+			if(pSPEC->GetType() == Specter::SPECTER_CENTIPEDE)
+			{
+				((Centipede*)pSPEC)->Update(fDeltaTime);
 			}
 			
-		}
+		};
+		//////////////////////////////////////////////////////////////////////////////
+
 	}
-	//////////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////////////////
-	// update specter
-	DJLinkedListIter<Centipede> iterSpecter(m_listSpecter);
-	Specter* pSPEC;
-	while((pSPEC = iterSpecter.GetStep()))
-	{
-		if(pSPEC->GetType() == Specter::SPECTER_CENTIPEDE)
-		{
-			((Centipede*)pSPEC)->Update(fDeltaTime);
-		}
-		
-	};
-	//////////////////////////////////////////////////////////////////////////////
-
-
 	g_fRestrictionBottom = 1024.0f;
 }
 
@@ -662,12 +661,30 @@ void Level::PrePaint()
 
 void Level::Reset()
 {
-	DJLinkedListIter<MonkeyCivilians> iter(m_listMonkeyCivians);
-	MonkeyCivilians *pMC;  
-	while((pMC = iter.GetStep()))
+	// Reset monkey cilivians
+	if(m_pCurrentScene->IsMonKeyCilivians())
 	{
-		pMC->Reset();  
-	} 	
+		DJLinkedListIter<MonkeyCivilians> iter(m_listMonkeyCivians);
+		MonkeyCivilians *pMC;  
+		while((pMC = iter.GetStep()))
+		{
+			pMC->Reset();  
+		}
+	}
+
+	// Reset Centipede-Rayghost
+	if(m_pCurrentScene->IsSpecter())
+	{
+		DJLinkedListIter<Specter> iterSpecter(m_listSpecter);
+		Specter* pSPEC;
+		while((pSPEC = iterSpecter.GetStep()))
+		{
+			if(pSPEC->GetType() == Specter::SPECTER_CENTIPEDE)
+			{
+				((Centipede*)pSPEC)->Reset();
+			}
+		}
+	}
 }
 
 ///

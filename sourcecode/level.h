@@ -103,6 +103,9 @@ protected:
 	// Scene camera zoom factor
 	float		m_fCameraZoom;
 
+	// End music value
+	float		m_fEndMusic;
+
 	// Player data
 	PlayerData	m_PlayerData;
 	djbool						m_bPlayer;
@@ -179,6 +182,9 @@ public:
 
 	// Get ID
 	DJString GetID() const {return m_sID;}
+
+	// Get end music value
+	djfloat GetEndMusic() const {return m_fEndMusic;}
 };
 /////////////////////////////////////////////////////////////////  
 
@@ -220,7 +226,7 @@ protected:
 	DJLinkedList<MonkeyCivilians>	m_listMonkeyCivians;
 
 	// List Specter
-	DJLinkedList<Centipede>			m_listSpecter;
+	DJLinkedList<Specter>			m_listSpecter;
 
 	// List beatstime
 	DJLinkedList<BeatsTime>			m_listBeatsTime;
@@ -235,7 +241,7 @@ protected:
 	djint32							m_nCurrentCity;
 
 	// Finish level
-	djbool							m_bFinishLevel;
+	djbool							m_bFinishScene;
 
 public:
 	// Constructor
@@ -262,6 +268,9 @@ public:
 	// Get current scene
 	LevelScene* GetCurrentScene() const {return m_pCurrentScene;}
 	void SetCurrentScene(LevelScene* pScene) {m_pCurrentScene = pScene;}
+
+	// Set finish scene
+	void SetFinishScene(djbool bFinish)	{if(!m_bFinishScene) m_bFinishScene = bFinish;}
 
 	void InitSceneMusic();
 };
