@@ -19,28 +19,137 @@
 // Author: Daniel Jeppsson
 // 
 /////////////////////////////////////////////////////////////////
-
-#include <djapp.h>
-#include <dj2d.h>
-
 #ifndef _MONKEYKINGAPP_H_
 #define _MONKEYKINGAPP_H_
+
+/////////////////////////////////////////////////////////////////
+// Engine Includes
+#include <djengine.h>
+#include <djapp.h>
+#include <dj2d.h>
+#include <djrenderdevice.h>
+#include <djrender.h>
+#include <djtagfile.h>
+#include <djmesh.h>
+#include <djuinode.h>
+#include <djosdatastorage.h>
+#include <djanimation.h>
+#include <djnodeanimator.h>
+#include <djskelanimator.h>
+#include <djservice.h>
+
+/////////////////////////////////////////////////////////////////
+// Game Includes 
 
 /////////////////////////////////////////////////////////////////
 DJ_FILE_START();
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
+// Game state
+enum
+{
+	GS_PRELOAD,
+	GS_PRELOGO,
+	GS_LOGO,
+	GS_LOAD_GAME,
+	GS_MENU,
+	GS_INGAME_MENU,
+	GS_LOAD_LEVEL,
+	GS_UNLOAD_LEVEL,
+	GS_GAMEOVER,
+	GS_INGAME,
+};
+/////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
-class DJMonkeyKingApplication : public DJApplication
+// Menu
+enum
+{
+	MENU_MAIN,
+	MENU_INGAME,
+	MENU_LEVEL_SELECT,
+	MENU_GAMEOVER,
+	MENU_HUD,
+	MENU_DEBUG,
+	MENU_COUNT,
+	MENU_INVALID
+};
+/////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////
+class DJMonkeyKingApplication : public DJApplication,  public DJUIEventListener
 {
 	IMPLEMENT_INTERFACE(MonkeyKingApplication, Application)
 
 protected:
 	djbool m_bInitialized;
-	djbool m_bGameLoaded;
+	
+	// Current game state
+	djint32				m_nGameState;
+	
+	// Last game state
+	djint32				m_nLastGameState;
+	
+	// Game state changed
+	djbool				m_bGameStateChanged;	
+	
+	// Timer in current game state
+	float				m_fStateTimer;
+	// Is game loaded
+	djbool				m_bGameIsLoaded;
+	
+	DJArray<djuint32>	m_menuStack;
 
+	// Menu nodes
+	DJUINode*			m_pMenus[MENU_COUNT];
+
+	// User wanted to go to pause menu	
+	djbool				m_bGotoPauseMenu;
+public:
+
+	// Paint prelogo state
+	void PaintPreLogo( );
+
+	// Paint logo state
+	void PaintLogo( );
+
+	// Paint load game
+	void PaintLoadGame( );
+
+	// Paint load level
+	void PaintLoadLevel( );
+
+	// Paint menu state
+	void PaintMenu( );
+
+	// Paint ingame state
+	void PaintIngame( );
+
+	// Update prelogo
+	void UpdatePreLogo();
+
+	// Update logo
+	void UpdateLogo();
+
+	// Update load game
+	void UpdateLoadGame();
+
+	// Update load level 
+	void UpdateLoadLevel();
+
+	// Update unload level state
+	void UpdateUnloadLevel();
+
+	// Update menu state
+	void UpdateMenu();
+
+	// Update ingame state
+	void UpdateIngame();
+
+   	djbool OnLoadLevel();
+	djbool OnUnLoadLevel();
 public:
 
 	/////////////////////////////////////////////////////////////////
@@ -69,6 +178,33 @@ public:
 	virtual djbool OnPaint( );
 
 	/////////////////////////////////////////////////////////////////
+	// Function
+	// Current game state
+	djint32 GetGameState() const {return m_nGameState;}
+
+	// Is menu on menu stack
+	djbool IsMenuOnStack(djuint32 uMenu);
+
+	// Goto menu
+	void GotoMenu(djuint32 uMenu, djbool bReplaceStack = DJFALSE, djbool bReplaceLast = DJFALSE);
+	
+	// Get current menu ID
+	djuint32 GetCurrentMenu()						{ if (m_menuStack.GetCurrentIndex()==0) return MENU_INVALID; return m_menuStack[m_menuStack.GetCurrentIndex()-1]; }
+	// Get last menu ID
+	djuint32 GetLastMenu()							{ if (m_menuStack.GetCurrentIndex()<=1) return MENU_INVALID; return m_menuStack[m_menuStack.GetCurrentIndex()-2]; }
+	// Pop menu from stack and goto that menu
+	djuint32 PopMenu();
+	// Goto menu
+	void GoBackToMenu(djuint32 uMenu);
+
+	void SetGotoPauseMenu(djbool bSet = DJTRUE)		{ m_bGotoPauseMenu = bSet; }
+
+	// Change game state
+	djbool GotoGameState(djint nState);
+	
+	/////////////////////////////////////////////////////////////////
+
+	/////////////////////////////////////////////////////////////////
 	// EVENT HANDLERS
 
 	// Touch begin callback
@@ -91,6 +227,9 @@ public:
 
 	// Handle incoming system event
 	virtual void OnMessage( djuint32 nMessage, djuint32 nParam1 = 0, djuint32 nParam2 = 0 );
+
+	// UI event callback
+	virtual djbool OnUIEvent(DJUINode *pNode, const DJUIEvent &ev);
 };
 /////////////////////////////////////////////////////////////////
 

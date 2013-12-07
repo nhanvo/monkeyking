@@ -23,12 +23,23 @@
 /////////////////////////////////////////////////////////////////
 // Engine Includes
 #include <djmodulemanager.h>
+#include <djsounddevice.h>
 #include <djostime.h>
-#include <dj2d.h>
-#include <dj2dutil.h>
-#include <djgamesounds.h>
+#include <djcamera.h>
+#include <djmesh.h>
 #include <djfont.h>
+#include <dj2dutil.h>
+#include <djeffectresourcemanager.h>
+#include <djlocalizer.h>
+#include <djgamesounds.h>
+#include <djvideo.h>
 #include <djdevicemanager.h>
+#include <djservice.h>
+#include <djscene.h>
+#include <djosthread.h>
+#include <djconsole.h>
+#include <djanalytics.h>
+#include <djuinode.h>
 
 /////////////////////////////////////////////////////////////////
 // Game Includes
@@ -127,6 +138,13 @@ djfloat					g_fRestrictionBottom	= 0.0f;
 djint32					g_SceneStart			= SCENE_CENTIPEDE_SPECTER;	
 
 djint32 g_nControls		= CONTROLS_TOUCH;
+
+// UI view port
+DJViewport				g_UIViewPort;
+djuint32				g_nHUDWidth				= 0;
+djuint32				g_nHUDHeight			= 0;
+
+
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
@@ -433,8 +451,22 @@ void LoadFinish()
 DJMonkeyKingApplication::DJMonkeyKingApplication()
 {
 	DJTrace("%s()", __FUNCTION__);
-	m_bGameLoaded = DJFALSE;
-	m_bInitialized = DJFALSE;
+	m_fDeltaFrameTime	= 0.0f;
+	m_fDeltaAppTime		= 0.0f;
+	m_fAppTimeScale		= 1.0f;
+	m_fAppTime			= 0.0f;
+	m_fFrameTime		= 0.0f;
+	m_dwFrameCount		= 0;
+
+	// allocate memory for menu 
+	djMemSet(m_pMenus, 0, sizeof(m_pMenus));
+
+	m_bGameIsLoaded		= DJFALSE;
+	m_bGotoPauseMenu	= DJFALSE;
+
+	m_nGameState		= GS_PRELOAD;
+	m_nLastGameState	= GS_PRELOAD;
+	m_fStateTimer		= 0.0f;
 }
 
 ///
@@ -449,8 +481,7 @@ DJMonkeyKingApplication::~DJMonkeyKingApplication()
 
 djresult DJMonkeyKingApplication::OnInit()
 {
-	DJTrace("%s()", __FUNCTION__);
-
+	DJTrace("%s()", __FUNCTION__);	  
 	if (m_bInitialized)
 	{
 		DJWarning("Trying to initialize the game multiple times!");
@@ -471,8 +502,17 @@ djresult DJMonkeyKingApplication::OnInit()
 	// Get size of screen and put in global variables
 	pTheRenderDevice->GetScreenSize(g_nScreenWidth, g_nScreenHeight);
 
+	// UI init
+	pTheUI = DJ_NEW(DJUI);
+	pTheUI->Init();
+	pTheUI->SetMultitouchEnabled(DJFALSE);
+	pTheUI->SetUIWidth(g_UIViewPort.GetWidth());
+	pTheUI->SetUIHeight(g_UIViewPort.GetHeight());
+	pTheUI->RegisterEventListener(this);
+
 	// Randomize random seed by using system time
 	djRandomSetSeed( (djuint32)(djGetSystemTimeFloat() * 65536.0f) );
+
 	
 	// Initialize sprite engine with the layers we want
 	if (!theSpriteEngine.Init(LAYER_COUNT))
@@ -480,6 +520,9 @@ djresult DJMonkeyKingApplication::OnInit()
 		DJError("Failed to initialize the sprite engine!");
 		return DJ_FAILURE;
 	}
+
+	// Effect resource manager 
+	theEffectResourceManager.Init();
 
 	// Load font
 	g_pFont = (DJFont*)theResourceManager.GetResource( "font", DJResource::TYPE_FONT );
@@ -522,6 +565,15 @@ djresult DJMonkeyKingApplication::OnInit()
 		return DJ_FAILURE;
 	}
 
+	/* ::TODO
+	theMusicHandler.SetGlobalMusicVolume(theUserStorage.m_storage.m_fMusicVolume);
+	pTheSoundDevice->ChangeVolumeGroup(0, theUserStorage.m_storage.m_fSoundVolume);
+	pTheSoundDevice->ChangeVolumeGroup(31, theUserStorage.m_storage.m_fMenuVolume);
+	pTheSoundDevice->ChangeVolumeGroup(1, theUserStorage.m_storage.m_fVoiceVolume);
+	g_nControls = theUserStorage.m_storage.m_nControls;
+	g_fControlSensitivity = theUserStorage.m_storage.m_fControlSensitivity*0.5f+0.5f;
+	*/
+
 	if (!OnLoad())
 	{
 		DJWarning("Failed to load game!");
@@ -542,11 +594,14 @@ djbool DJMonkeyKingApplication::OnLoad()
 {
 	DJTrace("%s()", __FUNCTION__);
 
-	if (m_bGameLoaded)
+	if (m_bGameIsLoaded)
 	{
-		DJWarning("Trying to load the game multiple times!");
-		return DJFALSE;
+		return DJTRUE;
 	}
+
+	/// ::TODO - Load menu system background animation cutscene
+	
+	/// ::TODO - Load simple filled rectangle drawing material
 
 	// Create camera
 	g_pCamera = DJ_NEW (Camera);
@@ -579,7 +634,48 @@ djbool DJMonkeyKingApplication::OnLoad()
 		}
 	}
 
-	m_bGameLoaded = DJTRUE;
+	// Load menu for menu system
+	m_pMenus[MENU_MAIN] = (DJUINode*)theResourceManager.GetResource("mainmenu", DJResource::TYPE_UINODE);
+	if (m_pMenus[MENU_MAIN])
+	{
+		m_pMenus[MENU_MAIN]->ShowNode(DJFALSE);
+		pTheUI->GetRootNode()->GetChildList().AddLast(m_pMenus[MENU_MAIN]);
+		m_pMenus[MENU_MAIN]->AddToParent(pTheUI->GetRootNode());
+	}
+
+	m_pMenus[MENU_LEVEL_SELECT] = (DJUINode*)theResourceManager.GetResource("level_select", DJResource::TYPE_UINODE);
+	if (m_pMenus[MENU_LEVEL_SELECT])
+	{
+		m_pMenus[MENU_LEVEL_SELECT]->ShowNode(DJFALSE);
+		pTheUI->GetRootNode()->GetChildList().AddLast(m_pMenus[MENU_LEVEL_SELECT]);
+		m_pMenus[MENU_LEVEL_SELECT]->AddToParent(pTheUI->GetRootNode());
+	}
+
+	m_pMenus[MENU_GAMEOVER] = (DJUINode*)theResourceManager.GetResource("game_over", DJResource::TYPE_UINODE);
+	if (m_pMenus[MENU_GAMEOVER])
+	{
+		m_pMenus[MENU_GAMEOVER]->ShowNode(DJFALSE);
+		pTheUI->GetRootNode()->GetChildList().AddLast(m_pMenus[MENU_GAMEOVER]);
+		m_pMenus[MENU_GAMEOVER]->AddToParent(pTheUI->GetRootNode());
+	}
+
+	m_pMenus[MENU_DEBUG] = (DJUINode*)theResourceManager.GetResource("debug", DJResource::TYPE_UINODE);
+	if (m_pMenus[MENU_DEBUG])
+	{
+		m_pMenus[MENU_DEBUG]->ShowNode(DJFALSE);
+		pTheUI->GetRootNode()->GetChildList().AddLast(m_pMenus[MENU_DEBUG]);
+		m_pMenus[MENU_DEBUG]->AddToParent(pTheUI->GetRootNode());
+	}
+
+	m_pMenus[MENU_INGAME] = (DJUINode*)theResourceManager.GetResource("ingame", DJResource::TYPE_UINODE);
+	if (m_pMenus[MENU_INGAME])
+	{
+		m_pMenus[MENU_INGAME]->ShowNode(DJFALSE);
+		pTheUI->GetRootNode()->GetChildList().AddLast(m_pMenus[MENU_INGAME]);
+		m_pMenus[MENU_INGAME]->AddToParent(pTheUI->GetRootNode());
+	}
+
+	m_bGameIsLoaded = DJTRUE;
 #ifdef _DEV
 
 		// Use to check collision
@@ -617,7 +713,7 @@ void DJMonkeyKingApplication::OnTerm()
 	theMusicHandler.Term();
 	djGameSoundsTerm();
 
-	m_bGameLoaded = DJFALSE;
+	m_bGameIsLoaded = DJFALSE;
 	m_bInitialized = DJFALSE;
 
 	// delete camera
@@ -634,11 +730,205 @@ void DJMonkeyKingApplication::OnTerm()
 
 ///
 
+djuint32 DJMonkeyKingApplication::PopMenu()
+{
+	djuint32 uCurrentMenu = GetCurrentMenu();
+	djuint32 uMenu	= GetLastMenu();
+	djuint32 uRet = m_menuStack.Pop();
+
+	// make menu want to go to is not MENU_RATE_APP or MENU_MB_YESNO
+	//while((uMenu == MENU_RATE_APP) || (uMenu == MENU_MB_YESNO))
+	//{
+	//	uMenu = GetLastMenu();
+	//	m_menuStack.Pop();
+	//}
+
+	if (uCurrentMenu != MENU_INVALID)
+		m_pMenus[uCurrentMenu]->EnableNode(DJFALSE);
+	if (uMenu != MENU_INVALID)
+	{
+		m_pMenus[uMenu]->EnableNode(DJTRUE);
+		m_pMenus[uMenu]->ShowNode(DJTRUE);
+	}
+
+	return uRet;
+}
+
+///
+
+void DJMonkeyKingApplication::GotoMenu(djuint32 uMenu, djbool bReplaceStack, djbool bReplaceLast)
+{
+	djuint32 uCurrentMenu = GetCurrentMenu();
+
+	if (bReplaceStack)
+	{
+		m_menuStack.SetCurrentIndex(0);
+	}
+	else if (bReplaceLast)
+	{
+		m_menuStack.Pop();
+	}
+
+	m_menuStack.Push(uMenu);
+	//m_uLastMenu = m_uCurrentMenu;
+	if (uCurrentMenu != MENU_INVALID)
+		m_pMenus[uCurrentMenu]->EnableNode(DJFALSE);
+	//m_uCurrentMenu = uMenu;
+	if (uMenu != MENU_INVALID)
+	{
+		if (m_pMenus[uMenu]->IsNodeVisible())
+		{
+			m_pMenus[uMenu]->ShowNode(DJFALSE);
+		}
+		m_pMenus[uMenu]->EnableNode(DJTRUE);
+		m_pMenus[uMenu]->ShowNode(DJTRUE);
+	}
+}
+
+///
+
+// Check if requested menu is already on stack
+djbool DJMonkeyKingApplication::IsMenuOnStack(djuint32 uMenu)
+{
+	for (int q=0; q<m_menuStack.GetCurrentIndex(); q++)
+	{
+		if (m_menuStack[q] == uMenu)
+		{
+			return DJTRUE;
+		}
+	}
+	return DJFALSE;
+}
+
+///
+
+// Go back on stack to requested menu
+void DJMonkeyKingApplication::GoBackToMenu(djuint32 uMenu)
+{
+	djuint32 uCurrentMenu = GetCurrentMenu();
+
+	djbool bFound = DJFALSE;
+	for (int q=m_menuStack.GetCurrentIndex()-1; q>=0; q--)
+	{
+		if (m_menuStack[q] == uMenu)
+		{
+			m_menuStack.SetCurrentIndex(q+1);
+			bFound = DJTRUE;
+			break;
+		}
+	}
+	if (!bFound)
+	{
+		m_menuStack.SetCurrentIndex(0);
+		m_menuStack.Push(uMenu);
+	}
+
+	if (uCurrentMenu != MENU_INVALID)
+		m_pMenus[uCurrentMenu]->EnableNode(DJFALSE);
+	if (uMenu != MENU_INVALID)
+	{
+		if (m_pMenus[uMenu]->IsNodeVisible())
+		{
+			m_pMenus[uMenu]->ShowNode(DJFALSE);
+		}
+		m_pMenus[uMenu]->EnableNode(DJTRUE);
+		m_pMenus[uMenu]->ShowNode(DJTRUE);
+	}
+}
+
+///
+
+djbool DJMonkeyKingApplication::GotoGameState(djint nState)
+{
+	djbool bRet = (nState != nState);
+	// deactive old state
+	switch(m_nGameState)
+	{
+		case GS_LOAD_LEVEL:
+		case GS_INGAME:
+		case GS_LOAD_GAME:
+		case GS_MENU:
+		case GS_UNLOAD_LEVEL:
+		case GS_GAMEOVER:
+		{
+			if(m_pMenus[GetCurrentMenu()])
+			{
+				m_pMenus[GetCurrentMenu()]->EnableNode(DJFALSE);				
+			}
+		}	
+		break;
+	};
+	if(pTheUI)
+	{
+		pTheUI->SetUIWidth(g_UIViewPort.GetWidth());
+		pTheUI->SetUIHeight(g_UIViewPort.GetHeight());
+	}
+
+	// active new state
+	switch(m_nGameState)
+	{
+		case GS_LOAD_LEVEL:
+		case GS_LOAD_GAME:
+		case GS_UNLOAD_LEVEL:
+		{
+			/// TODO:: Load game 
+		}
+		break;
+
+		case GS_MENU:
+		{
+			if(IsMenuOnStack(MENU_MAIN) && (GetCurrentMenu() != MENU_MAIN))
+			{
+				m_pMenus[MENU_MAIN]->EnableNode(DJFALSE);
+				if(m_pMenus[MENU_MAIN]->IsNodeVisible())
+				{
+					m_pMenus[MENU_MAIN]->ShowNode(DJFALSE);
+				}
+				m_pMenus[GetCurrentMenu()]->ShowNode(DJTRUE);
+				m_pMenus[GetCurrentMenu()]->EnableNode(DJTRUE);
+			}
+		}
+		break;
+
+		case GS_INGAME_MENU:
+		{
+			GotoMenu(MENU_INGAME);
+			m_pMenus[GetCurrentMenu()]->ShowNode(DJTRUE);
+			m_pMenus[GetCurrentMenu()]->EnableNode(DJTRUE);
+		}
+		break;
+
+		case GS_GAMEOVER:
+		{
+			pTheUI->SetUIWidth(g_nHUDWidth);
+			pTheUI->SetUIHeight(g_nHUDHeight);
+			GotoMenu(MENU_GAMEOVER);
+			m_pMenus[GetCurrentMenu()]->ShowNode(DJTRUE);
+			m_pMenus[GetCurrentMenu()]->EnableNode(DJTRUE);
+		}
+		break;
+
+		case GS_INGAME:
+		{
+			pTheUI->SetUIWidth(g_nHUDWidth);
+			pTheUI->SetUIHeight(g_nHUDHeight);
+			GotoMenu(MENU_HUD);
+			m_pMenus[GetCurrentMenu()]->ShowNode(DJTRUE);
+			m_pMenus[GetCurrentMenu()]->EnableNode(DJTRUE);
+		}
+		break;
+	}
+	return bRet;
+}
+
+///
+
 void DJMonkeyKingApplication::OnUpdate()
 {
 	DJTrace("%s",__FUNCTION__); 
 
 	SetAppTimeScale(g_fGameTimeScale);
+
 	// Deactivate sound if we are minimized or hidden
 	if (theDeviceManager.IsMinimized() || theDeviceManager.IsHidden())
 	{
@@ -655,6 +945,53 @@ void DJMonkeyKingApplication::OnUpdate()
 	// Update sprite engine
 	theSpriteEngine.OnUpdate();
 
+	if(pTheUI)
+	{
+		pTheUI->OnUpdate();
+	}
+
+	switch(m_nGameState)
+	{
+		case GS_PRELOAD:
+#ifdef USE_PRELOGO
+			GotoGameState(GS_PRELOGO);
+#else    // USE_PRELOGO
+			GotoGameState(GS_LOGO);
+#endif	 // USE_PRELOGO
+		break;
+
+		case GS_PRELOGO:
+			UpdatePreLogo();
+		break;
+
+		case GS_LOGO:
+			UpdateLogo();
+		break;
+
+		case GS_LOAD_GAME:
+			UpdateLoadGame();
+		break;
+
+		case GS_LOAD_LEVEL:
+			UpdateLoadLevel();
+		break;
+
+		case GS_UNLOAD_LEVEL:
+			UpdateUnloadLevel();
+		break;
+
+		case GS_MENU:
+		case GS_INGAME_MENU:
+			UpdateMenu();
+		break;
+
+		case GS_GAMEOVER:
+		case GS_INGAME:
+			UpdateIngame();
+		break;
+
+	}
+
 	// Update level 
 	if (!g_pLevelManager->Update(m_fDeltaAppTime))
 		return;
@@ -664,33 +1001,52 @@ void DJMonkeyKingApplication::OnUpdate()
 
 djbool DJMonkeyKingApplication::OnPaint()
 {
-	//DJTrace(__FUNCTION__"()");
+	DJTrace(__FUNCTION__"()");
+	djuint32 rsw, rsh;
+	pTheRenderDevice->GetScreenSize(rsw, rsh);
+	pTheRenderDevice->SetViewport(DJViewport(rsw/2-g_nScreenWidth/2, rsh/2 - g_nScreenHeight/2, g_nScreenWidth, g_nScreenHeight));
 
-	// Set the clear color
-	pTheRenderDevice->SetClearColor(DJColor(1,0,0,0));
-	// Clear the screen
-	pTheRenderDevice->Clear(DJRenderDevice::flagClearAll);
-	// Disable the depth buffer (no need for it in 2D games usually)
-	pTheRenderDevice->EnableZBuffer(0);
-	
-	// Set render context
-	DJ2DRenderContext rc;
-	rc.m_uFlags = 0;
-	rc.m_cModColor = DJColor(1,1,1,1);
-	rc.m_cAddColor = DJColor(0,0,0,0);
-	rc.m_mLayerTransform = DJMatrix2D::Identity();
-	rc.m_pLayer = NULL;
-	rc.m_mTransform = DJMatrix2D::Identity();
+	if(m_bQuit)
+	{
+		pTheRenderDevice->SetClearColor(DJColor(0.,0,0,1));
+		pTheRenderDevice->Clear(DJRenderDevice::flagClearAll);
+		return DJTRUE;
+	}
 
-	// Render sprites and all layers
-	theSpriteEngine.OnPaint(rc);
+	pTheRenderDevice->SetModColor(DJColor(1,1,1,1));
+	switch(m_nGameState)
+	{
+		case GS_PRELOAD:
+		break;
+		case GS_PRELOGO:
+			PaintPreLogo();
+		break;
+		case GS_LOGO:
+			PaintLogo();
+		break;
+		case GS_LOAD_GAME:
+			PaintLoadGame();
+		break;
+		case GS_LOAD_LEVEL:
+		case GS_UNLOAD_LEVEL:
+			PaintLoadLevel();
+		break;
+		case GS_MENU:
+			PaintMenu();
+		break;
+		case GS_INGAME_MENU:
+			PaintMenu();
+		break;
+		case GS_GAMEOVER:
+		case GS_INGAME:
+			PaintIngame();
+		break;	
+	};
 
-	// Setup screen for rendering text
-	pTheRenderDevice->SetViewTransform(DJMatrix::Identity());
-	pTheRenderDevice->SetPerspectiveOrtho(0,0,(float)g_nScreenWidth,(float)g_nScreenHeight,0.0f,100.0f);
 	g_pFont->DrawString("Monkey King Rhythm\nDemo Version", DJVector3(10,10,0), DJVector2(32,32), 0xFFFFFFFF);
 	g_pPlayer->Paint();
 	g_pLevelManager->GetCurrentLevel()->PrePaint();
+
 	return DJTRUE;
 }
 
@@ -886,6 +1242,116 @@ void DJMonkeyKingApplication::OnMessage(djuint32 nMessage, djuint32 nParam1, dju
 	//DJTrace(__FUNCTION__"()");
 	DJApplication::OnMessage(nMessage, nParam1, nParam2);
 }
+
+///
+djbool DJMonkeyKingApplication::OnUIEvent(DJUINode *pNode, const DJUIEvent &ev)
+{
+	return DJTRUE;
+}
+
+///
+
+void DJMonkeyKingApplication::PaintPreLogo()
+{
+
+}
+
+/// 
+
+void DJMonkeyKingApplication::PaintLogo()
+{
+
+}
+
+///
+
+void DJMonkeyKingApplication::PaintLoadGame()
+{
+
+}
+
+///
+
+void DJMonkeyKingApplication::PaintLoadLevel()
+{
+
+}
+
+///
+
+void DJMonkeyKingApplication::PaintMenu()
+{
+
+}
+
+/// 
+
+void DJMonkeyKingApplication::PaintIngame()
+{
+
+}
+
+///
+
+void DJMonkeyKingApplication::UpdatePreLogo()
+{
+
+}
+
+///
+
+void DJMonkeyKingApplication::UpdateLogo()
+{
+
+}
+
+///
+
+void DJMonkeyKingApplication::UpdateLoadGame()
+{
+
+}
+
+/// 
+void DJMonkeyKingApplication::UpdateLoadLevel()
+{
+
+}
+
+///
+void DJMonkeyKingApplication::UpdateUnloadLevel()
+{
+
+}
+
+///
+
+void DJMonkeyKingApplication::UpdateMenu()
+{
+
+}
+
+/// 
+
+void DJMonkeyKingApplication::UpdateIngame()
+{
+
+}
+
+///
+
+djbool DJMonkeyKingApplication::OnLoadLevel()
+{
+	return DJTRUE;
+}
+
+///
+
+djbool DJMonkeyKingApplication::OnUnLoadLevel()
+{
+	return DJTRUE;
+}
+
 // Application class
 /////////////////////////////////////////////////////////////////
 
