@@ -1,0 +1,19 @@
+UINODE "ItemImage"
+{
+	CLASS	"MonkeyKing" 	"LevelUINode" 
+	
+	LEVEL 0
+	
+	TEXT_OFFSET	[0 0]	
+	
+	POS	[0 0]
+	SIZE [256 128]	
+	ALIGN HCENTER VCENTER
+	ATTACH HCENTER VCENTER
+	
+	STYLE	scorebg			"scorebg"	
+	STYLE 	diffbg			"diffbg"
+	# Styles
+	STYLE 	normal 			"imagetext"
+	STYLE 	down 			"imagetext2"
+}

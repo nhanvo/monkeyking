@@ -27,24 +27,10 @@ enum
 	CITY_COUNT,
 };
 
-/////////////////////////////////////////////////////////////////
-// Layer enum
-enum
-{
-	// Layer for background image
-	LAYER_BACKGROUND	= 0,
-	// Layer for our sprites
-	LAYER_SPRITES,
-	// Layer for overlay and UI
-	LAYER_OVERLAY,
-
-#ifdef _DEV
-	LAYER_BOUNDING_BOX,
-#endif //_DEV
-
-	// Number of layers
-	LAYER_COUNT,
-};
+// UI width
+#define UI_DESIGN_WIDTH				1024
+// UI height
+#define UI_DESIGN_HEIGHT			575
 
 /////////////////////////////////////////////////////////////////
 // Scene id
@@ -70,6 +56,18 @@ enum
 enum
 {
 	CONTROLS_TOUCH,	
+};
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
+// Level
+enum
+{
+	LEVEL_1,
+	LEVEL_2,
+	LEVEL_3,
+
+	LEVEL_COUNT
 };
 /////////////////////////////////////////////////////////////////
 

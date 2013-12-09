@@ -282,7 +282,7 @@ class LevelManager
 {
 protected:
 	Level*			m_pCurrentLevel;
-	djint32		m_nSceneID;
+	djint32			m_nSceneID;
 public:
 	LevelManager();
 	~LevelManager();

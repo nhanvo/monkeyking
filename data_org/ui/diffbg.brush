@@ -1,0 +1,8 @@
+BRUSH
+{
+	TEXT_ALIGN	HCENTER VCENTER
+	TEXT_ATTACH	TOP LEFT
+	TEXT_COLOR	[255 255 255 255]
+	#FRAME 	"ui/menuselectlevel" "button_loverlay" 0	
+	FONT 		"font" [32 32]
+}

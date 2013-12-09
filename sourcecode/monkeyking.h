@@ -46,6 +46,30 @@ DJ_FILE_START();
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
+// Layer enum
+enum
+{
+	LAYER_BACKGROUND = 0,
+	LAYER_BACKGROUND_1,
+	LAYER_BACKGROUND_2,
+	LAYER_UNDERLAY,
+	LAYER_SHOTS,
+	LAYER_BACKGROUND_OVERLAY,
+	LAYER_SPRITES,
+	LAYER_EXPLOSIONS,
+	LAYER_OVERLAY,
+	LAYER_OVERLAY2,
+	LAYER_MENU,
+	LAYER_HUD,
+	LAYER_DEBUG,
+#ifdef _DEV
+	LAYER_BOUNDING_BOX,
+#endif //_DEV
+
+	LAYER_COUNT,
+};
+
+/////////////////////////////////////////////////////////////////
 // Game state
 enum
 {

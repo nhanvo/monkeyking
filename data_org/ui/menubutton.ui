@@ -1,0 +1,10 @@
+UINODE "MenuButton"
+{
+	CLASS	"djengine" 	"ButtonUINode"
+
+	STYLE 	normal 			"button_normal"
+	STYLE 	disabled 		"button_disabled"
+	STYLE 	focused 		"button_focused"
+	STYLE 	down 			"button_down"	
+	FLAGS	AUTOEXPAND
+}

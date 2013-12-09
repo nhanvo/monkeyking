@@ -1,0 +1,7 @@
+BRUSH
+{
+	TEXT_ALIGN	TOP LEFT
+	TEXT_COLOR	[1 1 1 1]
+	FONT 		"font"	[32 32]
+	COLOR		[1 1 1 1]
+}

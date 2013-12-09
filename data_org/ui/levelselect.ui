@@ -1,0 +1,27 @@
+UINODE "LevelSelectMenu"
+{
+	CLASS "MonkeyKing" "LevelSelectMenuPageUINode"
+	STYLE normal "page"
+	POS  [0 0]
+	SIZE [-1 -1] # Will be replaced with UI view size
+	ALIGN TOP LEFT
+	ATTACH TOP LEFT
+	EVENT OnShow "SHOW_MENU"
+
+	UINODE "level1"
+	{
+		LEVEL 267
+		#UINODE "levelimage"	
+		CLASS "djengine" "ButtonUINode"
+		STYLE normal	"scorebg"
+		STYLE down		"diffbg"
+		FRAMESTYLE 	normal	"ui/menuselectlevel" "button_default" 0	
+		FRAMESTYLE 	down 	"ui/menuselectlevel" "button_default" 0	
+		POS		[100 100]	
+		SIZE 	[203 62]	
+		TEXT	"C1_L01_MISSION"
+		ALIGN	HCENTER VCENTER
+		ATTACH	HCENTER VCENTER
+		EVENT 	OnClicked "LEVEL1"
+	}
+}

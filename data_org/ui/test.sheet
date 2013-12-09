@@ -1,0 +1,9 @@
+SHEET
+{
+	FILE "ui/menuselectlevel.png" [512 512]
+	
+	GROUP "default"
+	{
+		FRAME [ 201 14] [203 62] [0 0]		#default	 
+	}
+}
