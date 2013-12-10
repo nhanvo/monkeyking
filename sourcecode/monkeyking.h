@@ -129,6 +129,8 @@ protected:
 	// Menu nodes
 	DJUINode*			m_pMenus[MENU_COUNT];
 
+	DJUINode*			m_pMenuTest;
+
 	// User wanted to go to pause menu	
 	djbool				m_bGotoPauseMenu;
 public:

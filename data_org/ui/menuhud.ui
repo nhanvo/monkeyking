@@ -1,0 +1,22 @@
+UINODE "HUDMenu"
+{
+	CLASS "Monkeyking" "HUDUINode"
+	STYLE 	normal "page"
+	POS 	[0 0]
+	SIZE 	[-1 -1] # Will be replaced with UI view size
+	ALIGN 	TOP LEFT
+	ATTACH 	TOP LEFT
+	FLAGS 	UNCLICKABLE
+
+	UINODE "pause"
+	{
+		UINODE "menubutton"
+		STYLEFRAME normal	"ui/ui" "hud_pause" 0
+		STYLEFRAME down		"ui/ui" "hud_pause" 0
+		POS [10 10]
+		ALIGN TOP LEFT
+		ATTACH TOP LEFT
+		CLICK_BORDER 60 60 80 80
+		EVENT OnClicked "CLICK_PAUSE"
+	}
+}

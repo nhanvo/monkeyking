@@ -32,14 +32,20 @@
 // Game Includes
 #include "menumain.h"
 #include "monkeyking.h"
+#include "level.h"
 
 /////////////////////////////////////////////////////////////////
 DJ_FILE_START();
 /////////////////////////////////////////////////////////////////
+extern LevelManager*	g_pLevelManager;
+extern djuint32			g_nScreenWidth;
+extern djuint32			g_nScreenHeight;
+extern djuint32			g_uSceneStart;
 
 /////////////////////////////////////////////////////////////////
 DJMainMenuPageUINode::DJMainMenuPageUINode()
 {
+	SetClickable(DJTRUE);
 }
 
 ///
@@ -75,9 +81,24 @@ djint32 DJMainMenuPageUINode::Build()
 
 void DJMainMenuPageUINode::OnPaint(const DJ2DRenderContext &rc)
 {
-	DJVector2 vPos = GetPosition();
-	vPos += djStepToDesiredVector2(vPos, DJVector2(0,0), 1000.0f) * 0.1f;
-	SetPosition(vPos);
+	if(!IsNodeVisible())
+		return;
+	if(IsNodeEnabled())
+	{
+		DJVector2 vPos = GetPosition();
+		vPos += djStepToDesiredVector2(vPos, DJVector2(0,0), 1000.0f) * 0.1f;
+		SetPosition(vPos);
+	}
+	else
+	{
+	    DJVector2 vPos = GetPosition();
+		vPos += djStepToDesiredVector2(vPos, DJVector2(g_nScreenWidth,0), 1000.0f) * 0.1f;
+		SetPosition(vPos);
+		if(vPos.x() >= g_nScreenWidth - 10.0f)
+		{
+			ShowNode(DJFALSE);
+		}
+	}
 	DJPageUINode::OnPaint(rc);
 }
 
@@ -88,7 +109,7 @@ void DJMainMenuPageUINode::OnShowNode(djbool bShow, djbool bParentChanged)
 	DJPageUINode::OnShowNode(bShow, bParentChanged);
 	if (bShow)
 	{
-		SetPosition(DJVector2(854,0));
+		SetPosition(DJVector2(g_nScreenWidth,0));
 	}
 }
 
@@ -106,21 +127,19 @@ djbool DJMainMenuPageUINode::OnUIEvent(DJUINode *pNode, const DJUIEvent &ev)
 {
 	if (ev.m_uEventID == pTheUI->EVENTID_ON_CLICKED)
 	{
-		/*if (ev.m_uStateID == pTheUI->GetStateID("START"))
+		if (ev.m_uStateID == pTheUI->GetStateID("CLICK_LEVEL_1"))
 		{
-			((DJTutorial4Application*)pTheApp)->GotoGameState(GS_LOAD_LEVEL);
+			g_uSceneStart = SCENE_FRUIT_MOUNTAIN;	
+			((DJMonkeyKingApplication*)pTheApp)->GotoGameState(GS_LOAD_LEVEL);
+			return DJTRUE;
+		} 	
+		else if(ev.m_uStateID == pTheUI->GetStateID("CLICK_LEVEL_2"))
+		{
+			g_uSceneStart = SCENE_CENTIPEDE_SPECTER;
+			((DJMonkeyKingApplication*)pTheApp)->GotoGameState(GS_LOAD_LEVEL);
 			return DJTRUE;
 		}
-		if (ev.m_uStateID == pTheUI->GetStateID("CREDITS"))
-		{
-			((DJTutorial4Application*)pTheApp)->GotoGameState(GS_CREDITS);
-			return DJTRUE;
-		}
-		if (ev.m_uStateID == pTheUI->GetStateID("QUIT"))
-		{
-			((DJTutorial4Application*)pTheApp)->m_bQuit = DJTRUE;
-			return DJTRUE;
-		}*/
+
 	}
 	return DJFALSE;
 }

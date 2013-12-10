@@ -7,14 +7,92 @@ UINODE "MainMenu"
 	ALIGN TOP LEFT
 	ATTACH TOP LEFT
 
-	UINODE "Button1"
+	UINODE "Level_01"
 	{
 		UINODE	"menubutton"
-		POS 	[512 384]
-		TEXT	"MAINMENU_ADD_SCORE"
-		STYLEFRAME normal	"ui/menuselectlevel" "button_default" 0
-		STYLEFRAME down		"ui/menuselectlevel" "button_default" 0
+		POS 	[124 248]
+		#TEXT	"TEXT_LEVEL_01"
+		STYLEFRAME normal	"ui/ui" "level_1" 0
+		STYLEFRAME down		"ui/ui" "level_1" 0
 		ALIGN 	HCENTER VCENTER		
-		EVENT 	OnClicked "ADD_SCORE"
+		EVENT 	OnClicked "CLICK_LEVEL_1"
 	}	
+
+	UINODE "Level_02"
+	{
+		UINODE	"menubutton"
+		POS 	[350 248]
+		#TEXT	"TEXT_LEVEL_02"
+		STYLEFRAME normal	"ui/ui" "level_2" 0
+		STYLEFRAME down		"ui/ui" "level_2" 0
+		ALIGN 	HCENTER VCENTER		
+		EVENT 	OnClicked "CLICK_LEVEL_2"
+	}
+
+	UINODE "Level_03"
+	{
+		UINODE	"menubutton"
+		POS 	[578 248]
+		#TEXT	"TEXT_LEVEL_03"
+		STYLEFRAME normal	"ui/ui" "level_lock" 0
+		STYLEFRAME down		"ui/ui" "level_lock" 0
+		ALIGN 	HCENTER VCENTER		
+		EVENT 	OnClicked "CLICK_LEVEL_3"
+	}
+
+	UINODE "Level_04"
+	{
+		UINODE	"menubutton"
+		POS 	[800 248]
+		#TEXT	"TEXT_LEVEL_04"
+		STYLEFRAME normal	"ui/ui" "level_lock" 0
+		STYLEFRAME down		"ui/ui" "level_lock" 0
+		ALIGN 	HCENTER VCENTER		
+		EVENT 	OnClicked "CLICK_LEVEL_4"
+	}
+
+	UINODE "Level_05"
+	{
+		UINODE	"menubutton"
+		POS 	[124 520]
+		#TEXT	"TEXT_LEVEL_04"
+		STYLEFRAME normal	"ui/ui" "level_lock" 0
+		STYLEFRAME down		"ui/ui" "level_lock" 0
+		ALIGN 	HCENTER VCENTER		
+		EVENT 	OnClicked "CLICK_LEVEL_5"
+	}
+
+	UINODE "Level_06"
+	{
+		UINODE	"menubutton"
+		POS 	[350 520]
+		#TEXT	"TEXT_LEVEL_04"
+		STYLEFRAME normal	"ui/ui" "level_lock" 0
+		STYLEFRAME down		"ui/ui" "level_lock" 0
+		ALIGN 	HCENTER VCENTER		
+		EVENT 	OnClicked "CLICK_LEVEL_6"
+	}
+
+	UINODE "Level_07"
+	{
+		UINODE	"menubutton"
+		POS 	[578 520]
+		#TEXT	"TEXT_LEVEL_04"
+		STYLEFRAME normal	"ui/ui" "level_lock" 0
+		STYLEFRAME down		"ui/ui" "level_lock" 0
+		ALIGN 	HCENTER VCENTER		
+		EVENT 	OnClicked "CLICK_LEVEL_7"
+	}
+
+	UINODE "Level_08"
+	{
+		UINODE	"menubutton"
+		POS 	[800 520]
+		#TEXT	"TEXT_LEVEL_04"
+		STYLEFRAME normal	"ui/ui" "level_lock" 0
+		STYLEFRAME down		"ui/ui" "level_lock" 0
+		ALIGN 	HCENTER VCENTER		
+		EVENT 	OnClicked "CLICK_LEVEL_8"
+	}
+
 }

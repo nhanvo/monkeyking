@@ -52,6 +52,7 @@
 #include "musichandler.h"
 #include "menulevelselect.h"
 #include "menumain.h"
+#include "menuhud.h"
 
 /////////////////////////////////////////////////////////////////
 // Name of the game module
@@ -102,6 +103,7 @@ ENUMERATE_INTERFACE(MonkeyKingApplication)
 ENUMERATE_INTERFACE(LevelUINode)
 ENUMERATE_INTERFACE(LevelSelectMenuPageUINode)
 ENUMERATE_INTERFACE(MainMenuPageUINode)
+ENUMERATE_INTERFACE(HUDUINode)
 END_ENUMERATE_INTERFACE()
 /////////////////////////////////////////////////////////////////
 
@@ -111,6 +113,7 @@ CREATE_INTERFACE(MonkeyKingApplication)
 CREATE_INTERFACE(LevelUINode)
 CREATE_INTERFACE(LevelSelectMenuPageUINode)
 CREATE_INTERFACE(MainMenuPageUINode)
+CREATE_INTERFACE(HUDUINode)
 END_CREATE_INTERFACE()
 /////////////////////////////////////////////////////////////////
 
@@ -120,6 +123,7 @@ REGISTER_INTERFACE(LevelUINode)
 REGISTER_INTERFACE(LevelSelectMenuPageUINode)
 REGISTER_INTERFACE(MonkeyKingApplication)
 REGISTER_INTERFACE(MainMenuPageUINode)
+REGISTER_INTERFACE(HUDUINode)
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
@@ -146,7 +150,8 @@ DJColor					g_cModColor(1,1,1,1);
 djfloat					g_fRestrictionBottom	= 0.0f;
 
 // Scene is start
-djint32					g_SceneStart			= SCENE_CENTIPEDE_SPECTER;	
+djuint32				g_uSceneStart			= SCENE_FRUIT_MOUNTAIN;	
+djbool					g_bGamePause			= DJFALSE;			
 
 djint32 g_nControls		= CONTROLS_TOUCH;
 
@@ -480,6 +485,8 @@ DJMonkeyKingApplication::DJMonkeyKingApplication()
 	m_nGameState		= GS_PRELOAD;
 	m_nLastGameState	= GS_PRELOAD;
 	m_fStateTimer		= 0.0f;
+
+	m_pMenuTest			= NULL;
 }
 
 ///
@@ -703,12 +710,7 @@ djbool DJMonkeyKingApplication::OnLoad()
 	{
 		DJError("Failed to initialize level manager!");
 		return DJFALSE;
-	}
-	else
-	{
-		// Scene ID get from menu select scene
-		g_pLevelManager->SetSceneID(g_SceneStart);
-	} 
+	}  	
 
 	// Load menu for menu system
 	m_pMenus[MENU_MAIN] = (DJUINode*)theResourceManager.GetResource("menumain", DJResource::TYPE_UINODE);
@@ -719,15 +721,15 @@ djbool DJMonkeyKingApplication::OnLoad()
 		m_pMenus[MENU_MAIN]->AddToParent(pTheUI->GetRootNode());
 	}
 
-	m_pMenus[MENU_LEVEL_SELECT] = (DJUINode*)theResourceManager.GetResource("levelselect", DJResource::TYPE_UINODE);
-	if (m_pMenus[MENU_LEVEL_SELECT])
+	m_pMenus[MENU_HUD] = (DJUINode*)theResourceManager.GetResource("menuhud", DJResource::TYPE_UINODE);
+	if (m_pMenus[MENU_HUD])
 	{
-		m_pMenus[MENU_LEVEL_SELECT]->ShowNode(DJFALSE);
-		pTheUI->GetRootNode()->GetChildList().AddLast(m_pMenus[MENU_LEVEL_SELECT]);
-		m_pMenus[MENU_LEVEL_SELECT]->AddToParent(pTheUI->GetRootNode());
+		m_pMenus[MENU_HUD]->ShowNode(DJFALSE);
+		pTheUI->GetRootNode()->GetChildList().AddLast(m_pMenus[MENU_HUD]);
+		m_pMenus[MENU_HUD]->AddToParent(pTheUI->GetRootNode());
 	}
 
-	m_pMenus[MENU_GAMEOVER] = (DJUINode*)theResourceManager.GetResource("game_over", DJResource::TYPE_UINODE);
+	/*m_pMenus[MENU_GAMEOVER] = (DJUINode*)theResourceManager.GetResource("game_over", DJResource::TYPE_UINODE);
 	if (m_pMenus[MENU_GAMEOVER])
 	{
 		m_pMenus[MENU_GAMEOVER]->ShowNode(DJFALSE);
@@ -749,7 +751,7 @@ djbool DJMonkeyKingApplication::OnLoad()
 		m_pMenus[MENU_INGAME]->ShowNode(DJFALSE);
 		pTheUI->GetRootNode()->GetChildList().AddLast(m_pMenus[MENU_INGAME]);
 		m_pMenus[MENU_INGAME]->AddToParent(pTheUI->GetRootNode());
-	}
+	}*/
 
 	m_bGameIsLoaded = DJTRUE;
 #ifdef _DEV
@@ -934,7 +936,7 @@ djbool DJMonkeyKingApplication::GotoGameState(djint nState)
 		{
 			if(m_pMenus[GetCurrentMenu()])
 			{
-				m_pMenus[GetCurrentMenu()]->EnableNode(DJFALSE);				
+				m_pMenus[GetCurrentMenu()]->EnableNode(DJFALSE);
 			}
 		}	
 		break;
@@ -958,16 +960,9 @@ djbool DJMonkeyKingApplication::GotoGameState(djint nState)
 
 		case GS_MENU:
 		{
-			if(IsMenuOnStack(MENU_MAIN) && (GetCurrentMenu() != MENU_MAIN))
-			{
-				m_pMenus[MENU_MAIN]->EnableNode(DJFALSE);
-				if(m_pMenus[MENU_MAIN]->IsNodeVisible())
-				{
-					m_pMenus[MENU_MAIN]->ShowNode(DJFALSE);
-				}
-				m_pMenus[GetCurrentMenu()]->ShowNode(DJTRUE);
-				m_pMenus[GetCurrentMenu()]->EnableNode(DJTRUE);
-			}
+			GotoMenu(MENU_MAIN);
+			m_pMenus[GetCurrentMenu()]->ShowNode(DJTRUE);
+			m_pMenus[GetCurrentMenu()]->EnableNode(DJTRUE);
 		}
 		break;
 
@@ -1079,18 +1074,9 @@ void DJMonkeyKingApplication::OnUpdate()
 djbool DJMonkeyKingApplication::OnPaint()
 {
 	DJTrace(__FUNCTION__"()");
-	djuint32 rsw, rsh;
-	pTheRenderDevice->GetScreenSize(rsw, rsh);
-	pTheRenderDevice->SetViewport(DJViewport(rsw/2-g_nScreenWidth/2, rsh/2 - g_nScreenHeight/2, g_nScreenWidth, g_nScreenHeight));
-
-	if(m_bQuit)
-	{
-		pTheRenderDevice->SetClearColor(DJColor(0.,0,0,1));
-		pTheRenderDevice->Clear(DJRenderDevice::flagClearAll);
-		return DJTRUE;
-	}
-
+	 	
 	pTheRenderDevice->SetModColor(DJColor(1,1,1,1));
+	djuint32 n = GetCurrentMenu();
 	switch(m_nGameState)
 	{
 		case GS_PRELOAD:
@@ -1153,11 +1139,14 @@ djint32 g_nTouchOwners[16] =  {
 djint32 DJMonkeyKingApplication::OnTouchBegin(djint32 nDevice, djint32 nID, float x, float y)
 {
 	DJInfo("Touch Begin: %d %.2f %.2f", nID, x, y);
-	djint32 nRet = 0;
 	djint32 sx,sy,sw,sh;
     pTheRenderDevice->GetViewportSize(sx,sy,sw,sh);
     x = ((float)x-(float)sx);
     y = ((float)y-(float)sy);
+
+	djint32 nRet = DJApplication::OnTouchBegin(nDevice, nID, x, y);
+	if(nRet)
+		return 1;
 	
 	if (g_nTouchOwners[nID] != TOUCHOWNER_INVALID)
 	{
@@ -1165,20 +1154,23 @@ djint32 DJMonkeyKingApplication::OnTouchBegin(djint32 nDevice, djint32 nID, floa
 	}
 	g_nTouchOwners[nID] = TOUCHOWNER_INVALID;
 
-	if(!nRet)
+	if(m_nGameState == GS_INGAME)
 	{
-		if(g_pPlayer)
+		if(!nRet)
 		{
-			nRet = g_pPlayer->OnTouchBegin(nDevice, nID,x,y);
-			if(nRet)
-				g_nTouchOwners[nID] == TOUCHOWNER_PLAYER;
+			if(g_pPlayer)
+			{
+				nRet = g_pPlayer->OnTouchBegin(nDevice, nID,x,y);
+				if(nRet)
+					g_nTouchOwners[nID] == TOUCHOWNER_PLAYER;
+			}
 		}
-	}
 
-	
-	if(g_pLevelManager->GetCurrentLevel()->GetCurrentScene()->IsStickGold())
-	{
-		g_pLevelManager->GetCurrentLevel()->GetStickGold()->OnTouchBegin(nDevice, nID,x,y);
+		
+		if(g_pLevelManager->GetCurrentLevel()->GetCurrentScene()->IsStickGold())
+		{
+			g_pLevelManager->GetCurrentLevel()->GetStickGold()->OnTouchBegin(nDevice, nID,x,y);
+		}
 	}
     
 	return 0;
@@ -1190,9 +1182,12 @@ djint32 DJMonkeyKingApplication::OnTouchMove(djint32 nDevice, djint32 nID, float
 {
 	DJInfo("Touch Move: %d %.2f %.2f", nDevice, nID, x, y);
 
+	djint32 nRet = DJApplication::OnTouchMove(nDevice, nID, x, y);
+	if(nRet)
+		return 1;
+
 	if(g_nTouchOwners[nID] == TOUCHOWNER_INVALID)
-		return 0;
-	djint32 nRet = 0;
+		return 0;		
 	if(g_nTouchOwners[nID] == TOUCHOWNER_APP)
 	{
 		if(!nRet)
@@ -1217,7 +1212,9 @@ djint32 DJMonkeyKingApplication::OnTouchEnd(djint32 nDevice, djint32 nID, float 
 {
 	DJInfo("Touch End: %d %.2f %.2f",nDevice, nID, x, y);
 
-	djint32 nRet = 0;
+	djint32 nRet = DJApplication::OnTouchEnd(nDevice, nID, x, y);
+	if(nRet)
+		return 1;
 	if(g_nTouchOwners[nID] == TOUCHOWNER_PLAYER)
 	{
 		if(g_pPlayer)
@@ -1318,7 +1315,11 @@ void DJMonkeyKingApplication::OnMessage(djuint32 nMessage, djuint32 nParam1, dju
 ///
 djbool DJMonkeyKingApplication::OnUIEvent(DJUINode *pNode, const DJUIEvent &ev)
 {
-	return DJTRUE;
+	if (ev.m_uEventID == pTheUI->EVENTID_ON_CLICKED)
+	{
+		//DJAssert(DJFALSE);
+	}
+	return DJFALSE;
 }
 
 ///
@@ -1346,63 +1347,85 @@ void DJMonkeyKingApplication::PaintLoadGame()
 
 void DJMonkeyKingApplication::PaintLoadLevel()
 {
+	pTheRenderDevice->SetViewTransform(DJMatrix::Identity());
+	pTheRenderDevice->SetPerspectiveOrtho(0,0,1024.0f,1024.0f*(float)g_nScreenHeight/(float)g_nScreenWidth,0.0f,100.0f);
 
+	// Set the clear color
+	pTheRenderDevice->SetClearColor(DJColor(0.1f,0.1f,0.1f,0));
+	// Clear the screen
+	pTheRenderDevice->Clear(DJRenderDevice::flagClearAll);
+	// Disable the depth buffer (no need for it in 2D games usually)
+	//pTheRenderDevice->EnableZBuffer(0);
+	
+	// Set render context
+	DJ2DRenderContext rc;
+	rc.m_uFlags = 0;
+	rc.m_cModColor = DJColor(1,1,1,1);
+	rc.m_cAddColor = DJColor(0,0,0,0);
+	rc.m_mLayerTransform = DJMatrix2D::Identity();
+	rc.m_pLayer = NULL;
+	rc.m_mTransform = DJMatrix2D::Identity();
+	theSpriteEngine.OnPaint(rc);
+	pTheUI->OnPaint(rc);
 }
 
 ///
 
 void DJMonkeyKingApplication::PaintMenu()
 {
-	pTheRenderDevice->SetViewTransform(DJMatrix::Translate(DJVector3(0, 0, 0)));
-	pTheRenderDevice->SetPerspectiveOrtho(0,0,(float)UI_DESIGN_WIDTH,(float)UI_DESIGN_HEIGHT,0.0f,100.0f);
+	pTheRenderDevice->SetViewTransform(DJMatrix::Identity());
+	pTheRenderDevice->SetPerspectiveOrtho(0,0,1024.0f,1024.0f*(float)g_nScreenHeight/(float)g_nScreenWidth,0.0f,100.0f);
 
-	static float fCol = 1.0f;
-	//if ((GetCurrentMenu() == MENU_MB_YESNO && m_pMenus[MENU_MB_YESNO]->IsNodeEnabled()) ||
-	//	(GetCurrentMenu() == MENU_RATE_APP && m_pMenus[MENU_RATE_APP]->IsNodeEnabled()))
-	//	fCol += djStepToDesiredValue(fCol, 0.05f, 0.5f)*0.1f;
-	//else
-		fCol += djStepToDesiredValue(fCol, 1.0f, 0.5f)*0.1f;
-
-	DJColor cCol(fCol,fCol,fCol,1);
-	//PaintMenuBackground(DJTRUE, DJFALSE, &cCol);
-
-	pTheRenderDevice->SetViewTransform(DJMatrix::Translate(DJVector3(0, 0, 0)));
-	pTheRenderDevice->SetPerspectiveOrtho(0,0,(float)UI_DESIGN_WIDTH,(float)UI_DESIGN_HEIGHT,0.0f,100.0f);
-	//pTheRenderDevice->SetViewport(DJViewport(0,0,(float)UI_DESIGN_WIDTH,(float)UI_DESIGN_HEIGHT));
-
+	// Set the clear color
+	pTheRenderDevice->SetClearColor(DJColor(0.1f,0.1f,0.1f,0));
+	// Clear the screen
+	pTheRenderDevice->Clear(DJRenderDevice::flagClearAll);
+	// Disable the depth buffer (no need for it in 2D games usually)
+	//pTheRenderDevice->EnableZBuffer(0);
+	
+	// Set render context
 	DJ2DRenderContext rc;
 	rc.m_uFlags = 0;
-	rc.m_cModColor = DJColor(fCol,fCol,fCol,fCol);
+	rc.m_cModColor = DJColor(1,1,1,1);
 	rc.m_cAddColor = DJColor(0,0,0,0);
 	rc.m_mLayerTransform = DJMatrix2D::Identity();
 	rc.m_pLayer = NULL;
 	rc.m_mTransform = DJMatrix2D::Identity();
-
-	//pTheRenderDevice->EnableZBuffer(0);
-	//pTheRenderDevice->Clear(DJRenderDevice::flagClearZ);
-
-	// Render debug
-	pTheRenderDevice->SetViewTransform(DJMatrix::Translate(DJVector3(0, 0, 0)));
-	pTheRenderDevice->SetPerspectiveOrtho(0,0,(float)g_nScreenWidth,(float)g_nScreenHeight,0.0f,100.0f);
-	rc.m_cModColor = DJColor(1,1,1,1);
-	rc.m_pViewport = NULL;
 	theSpriteEngine.OnPaint(rc);
-
-	// Render UI
-	pTheRenderDevice->SetViewTransform(DJMatrix::Translate(DJVector3(0, 0, 0)));
-	pTheRenderDevice->SetPerspectiveOrtho(0,0,(float)g_UIViewport.GetWidth(),(float)g_UIViewport.GetHeight(),0.0f,100.0f);
-	rc.m_pViewport = &g_UIViewport;
 	pTheUI->OnPaint(rc);
-	rc.m_pViewport = NULL;	 
 }
 
 /// 
 
 void DJMonkeyKingApplication::PaintIngame()
 {
-	g_pFont->DrawString("Monkey King Rhythm\nDemo Version", DJVector3(10,10,0), DJVector2(32,32), 0xFFFFFFFF);
-	g_pPlayer->Paint();
-	g_pLevelManager->GetCurrentLevel()->PrePaint();
+	// Paint UI
+	pTheRenderDevice->SetViewTransform(DJMatrix::Identity());
+	pTheRenderDevice->SetPerspectiveOrtho(0,0,1024.0f,1024.0f*(float)g_nScreenHeight/(float)g_nScreenWidth,0.0f,100.0f);
+
+	// Set the clear color
+	pTheRenderDevice->SetClearColor(DJColor(0.1f,0.1f,0.1f,0));
+	// Clear the screen
+	pTheRenderDevice->Clear(DJRenderDevice::flagClearAll);
+	// Disable the depth buffer (no need for it in 2D games usually)
+	//pTheRenderDevice->EnableZBuffer(0);
+	
+	// Set render context
+	DJ2DRenderContext rc;
+	rc.m_uFlags = 0;
+	rc.m_cModColor = DJColor(1,1,1,1);
+	rc.m_cAddColor = DJColor(0,0,0,0);
+	rc.m_mLayerTransform = DJMatrix2D::Identity();
+	rc.m_pLayer = NULL;
+	rc.m_mTransform = DJMatrix2D::Identity();
+	theSpriteEngine.OnPaint(rc);
+	pTheUI->OnPaint(rc);
+
+	// Paint game play
+	//g_pFont->DrawString("Monkey King Rhythm\nDemo Version", DJVector3(10,10,0), DJVector2(32,32), 0xFFFFFFFF);
+	//g_pPlayer->Paint();
+	//g_pLevelManager->GetCurrentLevel()->PrePaint();
+	
 }
 
 ///
@@ -1427,24 +1450,26 @@ void DJMonkeyKingApplication::UpdateLoadGame()
 	{
 		DJWarning("Failed to load game!");		
 	}
-	GotoMenu(MENU_MAIN);
 	GotoGameState(GS_MENU);
 }
 
 /// 
 void DJMonkeyKingApplication::UpdateLoadLevel()
-{
-	// Load level
-	if (g_pLevelManager->GetCurrentLevel() == NULL)
+{		
+	if(g_pLevelManager)
 	{
-		if (!g_pLevelManager->LoadLevel("levels/level01.level"))
+		// Set scene
+		g_pLevelManager->SetSceneID(g_uSceneStart);
+
+		// Load level
+		if (g_pLevelManager->GetCurrentLevel() == NULL)
 		{
-			DJWarning("Load level not finish");
-			DJAssert(DJFALSE);
-		}
-		else
-		{
-			GotoGameState(GS_INGAME);
+			if (!g_pLevelManager->LoadLevel("levels/level01.level"))
+			{
+				DJWarning("Load level not finish");
+				DJAssert(DJFALSE);
+			}
+			GotoGameState(GS_INGAME);		
 		}
 	}
 }
@@ -1467,6 +1492,10 @@ void DJMonkeyKingApplication::UpdateMenu()
 
 void DJMonkeyKingApplication::UpdateIngame()
 {	
+	if(g_bGamePause)
+	{
+		return;
+	}
 	// Update level 
 	if (!g_pLevelManager->Update(m_fDeltaAppTime))
 	{

@@ -1,0 +1,33 @@
+
+UI.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+hud_pause
+  rotate: false
+  xy: 2, 2
+  size: 58, 46
+  orig: 64, 64
+  offset: 3, 11
+  index: -1
+level_1
+  rotate: false
+  xy: 154, 50
+  size: 145, 150
+  orig: 150, 150
+  offset: 5, 0
+  index: -1
+level_2
+  rotate: false
+  xy: 301, 50
+  size: 145, 150
+  orig: 150, 150
+  offset: 5, 0
+  index: -1
+level_lock
+  rotate: false
+  xy: 2, 50
+  size: 150, 150
+  orig: 150, 150
+  offset: 0, 0
+  index: -1
