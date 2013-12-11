@@ -12,8 +12,10 @@ UINODE "MainMenu"
 		UINODE	"menubutton"
 		POS 	[124 248]
 		#TEXT	"TEXT_LEVEL_01"
-		STYLEFRAME normal	"ui/ui" "level_1" 0
-		STYLEFRAME down		"ui/ui" "level_1" 0
+		STYLEFRAME normal		"ui/ui" "level_1" 0
+		STYLEFRAME down			"ui/ui" "level_1" 0
+		STYLEFRAME disabled		"ui/ui" "level_1" 0
+		STYLEFRAME focused		"ui/ui" "level_1" 0
 		ALIGN 	HCENTER VCENTER		
 		EVENT 	OnClicked "CLICK_LEVEL_1"
 	}	
@@ -23,8 +25,10 @@ UINODE "MainMenu"
 		UINODE	"menubutton"
 		POS 	[350 248]
 		#TEXT	"TEXT_LEVEL_02"
-		STYLEFRAME normal	"ui/ui" "level_2" 0
-		STYLEFRAME down		"ui/ui" "level_2" 0
+		STYLEFRAME normal		"ui/ui" "level_2" 0
+		STYLEFRAME down			"ui/ui" "level_2" 0
+		STYLEFRAME disabled		"ui/ui" "level_2" 0
+		STYLEFRAME focused		"ui/ui" "level_2" 0
 		ALIGN 	HCENTER VCENTER		
 		EVENT 	OnClicked "CLICK_LEVEL_2"
 	}
@@ -34,8 +38,10 @@ UINODE "MainMenu"
 		UINODE	"menubutton"
 		POS 	[578 248]
 		#TEXT	"TEXT_LEVEL_03"
-		STYLEFRAME normal	"ui/ui" "level_lock" 0
-		STYLEFRAME down		"ui/ui" "level_lock" 0
+		STYLEFRAME normal		"ui/ui" "level_lock" 0
+		STYLEFRAME down			"ui/ui" "level_lock" 0
+		STYLEFRAME disabled		"ui/ui" "level_lock" 0
+		STYLEFRAME focused		"ui/ui" "level_lock" 0		
 		ALIGN 	HCENTER VCENTER		
 		EVENT 	OnClicked "CLICK_LEVEL_3"
 	}
@@ -47,6 +53,8 @@ UINODE "MainMenu"
 		#TEXT	"TEXT_LEVEL_04"
 		STYLEFRAME normal	"ui/ui" "level_lock" 0
 		STYLEFRAME down		"ui/ui" "level_lock" 0
+		STYLEFRAME disabled		"ui/ui" "level_lock" 0
+		STYLEFRAME focused		"ui/ui" "level_lock" 0
 		ALIGN 	HCENTER VCENTER		
 		EVENT 	OnClicked "CLICK_LEVEL_4"
 	}
@@ -58,6 +66,8 @@ UINODE "MainMenu"
 		#TEXT	"TEXT_LEVEL_04"
 		STYLEFRAME normal	"ui/ui" "level_lock" 0
 		STYLEFRAME down		"ui/ui" "level_lock" 0
+		STYLEFRAME disabled		"ui/ui" "level_lock" 0
+		STYLEFRAME focused		"ui/ui" "level_lock" 0
 		ALIGN 	HCENTER VCENTER		
 		EVENT 	OnClicked "CLICK_LEVEL_5"
 	}
@@ -69,6 +79,8 @@ UINODE "MainMenu"
 		#TEXT	"TEXT_LEVEL_04"
 		STYLEFRAME normal	"ui/ui" "level_lock" 0
 		STYLEFRAME down		"ui/ui" "level_lock" 0
+		STYLEFRAME disabled		"ui/ui" "level_lock" 0
+		STYLEFRAME focused		"ui/ui" "level_lock" 0
 		ALIGN 	HCENTER VCENTER		
 		EVENT 	OnClicked "CLICK_LEVEL_6"
 	}
@@ -80,6 +92,8 @@ UINODE "MainMenu"
 		#TEXT	"TEXT_LEVEL_04"
 		STYLEFRAME normal	"ui/ui" "level_lock" 0
 		STYLEFRAME down		"ui/ui" "level_lock" 0
+		STYLEFRAME disabled		"ui/ui" "level_lock" 0
+		STYLEFRAME focused		"ui/ui" "level_lock" 0
 		ALIGN 	HCENTER VCENTER		
 		EVENT 	OnClicked "CLICK_LEVEL_7"
 	}
@@ -91,6 +105,8 @@ UINODE "MainMenu"
 		#TEXT	"TEXT_LEVEL_04"
 		STYLEFRAME normal	"ui/ui" "level_lock" 0
 		STYLEFRAME down		"ui/ui" "level_lock" 0
+		STYLEFRAME disabled		"ui/ui" "level_lock" 0
+		STYLEFRAME focused		"ui/ui" "level_lock" 0
 		ALIGN 	HCENTER VCENTER		
 		EVENT 	OnClicked "CLICK_LEVEL_8"
 	}

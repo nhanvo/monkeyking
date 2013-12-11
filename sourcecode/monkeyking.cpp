@@ -1074,9 +1074,6 @@ void DJMonkeyKingApplication::OnUpdate()
 djbool DJMonkeyKingApplication::OnPaint()
 {
 	DJTrace(__FUNCTION__"()");
-	 	
-	pTheRenderDevice->SetModColor(DJColor(1,1,1,1));
-	djuint32 n = GetCurrentMenu();
 	switch(m_nGameState)
 	{
 		case GS_PRELOAD:
@@ -1092,7 +1089,9 @@ djbool DJMonkeyKingApplication::OnPaint()
 		break;
 		case GS_LOAD_LEVEL:
 		case GS_UNLOAD_LEVEL:
+		{	
 			PaintLoadLevel();
+		}
 		break;
 		case GS_MENU:
 			PaintMenu();
@@ -1348,51 +1347,63 @@ void DJMonkeyKingApplication::PaintLoadGame()
 void DJMonkeyKingApplication::PaintLoadLevel()
 {
 	pTheRenderDevice->SetViewTransform(DJMatrix::Identity());
-	pTheRenderDevice->SetPerspectiveOrtho(0,0,1024.0f,1024.0f*(float)g_nScreenHeight/(float)g_nScreenWidth,0.0f,100.0f);
+	pTheRenderDevice->SetPerspectiveOrtho(0,0,(float)UI_DESIGN_WIDTH,(float)UI_DESIGN_HEIGHT,0.0f,100.0f);
 
-	// Set the clear color
-	pTheRenderDevice->SetClearColor(DJColor(0.1f,0.1f,0.1f,0));
-	// Clear the screen
-	pTheRenderDevice->Clear(DJRenderDevice::flagClearAll);
-	// Disable the depth buffer (no need for it in 2D games usually)
-	//pTheRenderDevice->EnableZBuffer(0);
-	
 	// Set render context
 	DJ2DRenderContext rc;
 	rc.m_uFlags = 0;
-	rc.m_cModColor = DJColor(1,1,1,1);
+	if(m_nGameState == GS_UNLOAD_LEVEL)
+	{
+		rc.m_cModColor = DJColor(1, 1, 1, 1);
+	}
+	else
+	{
+		/// TODO::
+	}
 	rc.m_cAddColor = DJColor(0,0,0,0);
 	rc.m_mLayerTransform = DJMatrix2D::Identity();
 	rc.m_pLayer = NULL;
 	rc.m_mTransform = DJMatrix2D::Identity();
-	theSpriteEngine.OnPaint(rc);
+
+	// Render UI
+	pTheRenderDevice->SetViewTransform(DJMatrix::Translate(DJVector3(0, 0,0)));
+	pTheRenderDevice->SetPerspectiveOrtho(0,0,(float)g_UIViewport.GetWidth(),(float)g_UIViewport.GetHeight(), 0.0f, 100.0f);
+	rc.m_pViewport = &g_UIViewport;
 	pTheUI->OnPaint(rc);
-}
+	rc.m_pViewport = NULL;
+
+	// Render debug
+	pTheRenderDevice->SetViewTransform(DJMatrix::Translate(DJVector3(0,0,0)));
+	pTheRenderDevice->SetPerspectiveOrtho(0,0,(float)g_nScreenWidth, (float)g_nScreenHeight, 0.0f, 100.0f);
+	rc.m_cModColor = DJColor(1,1,1,1);
+	rc.m_pViewport = NULL;
+	theSpriteEngine.OnPaint(rc, LAYER_BACKGROUND, LAYER_BACKGROUND_2);
+}	
 
 ///
 
 void DJMonkeyKingApplication::PaintMenu()
 {
 	pTheRenderDevice->SetViewTransform(DJMatrix::Identity());
-	pTheRenderDevice->SetPerspectiveOrtho(0,0,1024.0f,1024.0f*(float)g_nScreenHeight/(float)g_nScreenWidth,0.0f,100.0f);
-
+	pTheRenderDevice->SetPerspectiveOrtho(0,0,(float)UI_DESIGN_WIDTH,(float)UI_DESIGN_HEIGHT,0.0f,100.0f);
 	// Set the clear color
-	pTheRenderDevice->SetClearColor(DJColor(0.1f,0.1f,0.1f,0));
+	pTheRenderDevice->SetClearColor(DJColor(0.1f,0.1f,0.1f,0));	
 	// Clear the screen
 	pTheRenderDevice->Clear(DJRenderDevice::flagClearAll);
-	// Disable the depth buffer (no need for it in 2D games usually)
-	//pTheRenderDevice->EnableZBuffer(0);
-	
-	// Set render context
+	pTheRenderDevice->EnableZBuffer(0);
+
 	DJ2DRenderContext rc;
 	rc.m_uFlags = 0;
-	rc.m_cModColor = DJColor(1,1,1,1);
+	rc.m_cModColor = DJColor(1, 1, 1, 1);
 	rc.m_cAddColor = DJColor(0,0,0,0);
 	rc.m_mLayerTransform = DJMatrix2D::Identity();
 	rc.m_pLayer = NULL;
 	rc.m_mTransform = DJMatrix2D::Identity();
-	theSpriteEngine.OnPaint(rc);
+
+
+	rc.m_pViewport = &g_UIViewport;
 	pTheUI->OnPaint(rc);
+	rc.m_pViewport = NULL; 
 }
 
 /// 
@@ -1469,7 +1480,10 @@ void DJMonkeyKingApplication::UpdateLoadLevel()
 				DJWarning("Load level not finish");
 				DJAssert(DJFALSE);
 			}
-			GotoGameState(GS_INGAME);		
+			else
+			{
+				GotoGameState(GS_INGAME);		
+			}
 		}
 	}
 }
@@ -1477,7 +1491,12 @@ void DJMonkeyKingApplication::UpdateLoadLevel()
 ///
 void DJMonkeyKingApplication::UpdateUnloadLevel()
 {
-
+	if(g_pLevelManager->IsLevelLoaded() && g_pLevelManager->GetCurrentLevel() != NULL)
+	{
+		g_pLevelManager->UnloadLevel();
+		GotoMenu(MENU_MAIN);
+		GotoGameState(GS_MENU);
+	}
 }
 
 ///

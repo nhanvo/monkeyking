@@ -220,7 +220,7 @@ protected:
 	DJLinkedList<LevelScene>		m_scenes;
 
 	// Stick gold 
-	StickGold*			m_pStickGold;
+	StickGold*						m_pStickGold;
 
 	// List monkey civinians
 	DJLinkedList<MonkeyCivilians>	m_listMonkeyCivians;
@@ -283,6 +283,9 @@ class LevelManager
 protected:
 	Level*			m_pCurrentLevel;
 	djint32			m_nSceneID;
+
+	// Level loaded
+	djbool			m_bLevelLoaded;
 public:
 	LevelManager();
 	~LevelManager();
@@ -298,6 +301,9 @@ public:
 	// Get and Set scene id
 	void SetSceneID(djint32 nSceneID)	{m_nSceneID = nSceneID;}
 	djint32 GetSceneID() const {return m_nSceneID;}
+
+	// Level is loaded
+	djbool	IsLevelLoaded()		{return m_bLevelLoaded;}
 
 };
 // End level manager

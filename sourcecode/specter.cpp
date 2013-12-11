@@ -394,7 +394,7 @@ void RaysGhost::Update(djfloat fDeltaTime)
 
 void RaysGhost::Term()
 {
-	
+	m_listSkeletonAnimNode.Clear();	
 }
 
 ///
@@ -683,7 +683,15 @@ void Centipede::Update(djfloat fDeltaTime)
 
 void Centipede::Term()
 {
+	if(m_pSkeletonNode)
+	{
+		theSpriteEngine.RemoveNode(m_pSkeletonNode);
+		theSpriteEngine.RemoveActiveNode(m_pSkeletonNode);
+		DJ_SAFE_DELETE(m_pSkeletonNode);
+	}
 
+	m_listRayGhost.Clear();
+	m_listBeatsTime.Clear();
 }
 
 /// Init rayghost
@@ -695,7 +703,7 @@ void Centipede::SetListRayGhost(DJLinkedList<RaysGhost> &listRayGhost)
 
 /// Init beats time
 
-void Centipede::SetListBeatsTime(DJLinkedList<BeatsTime> listBeatsTime)
+void Centipede::SetListBeatsTime(DJLinkedList<BeatsTime> &listBeatsTime)
 {
 	listBeatsTime.CopyTo(m_listBeatsTime);
 }

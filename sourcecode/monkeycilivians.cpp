@@ -243,6 +243,12 @@ void MonkeyCivilians::Update(djfloat fDeltaTime,const DJRECT& box)
 ///
 void MonkeyCivilians::Term()
 {
+	if(m_pSkeletonNode)
+	{
+		theSpriteEngine.RemoveNode(m_pSkeletonNode);
+		theSpriteEngine.RemoveActiveNode(m_pSkeletonNode);
+		DJ_SAFE_DELETE(m_pSkeletonNode);
+	}
 }
 ///
 ///	Move object delta distance

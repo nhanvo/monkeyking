@@ -194,7 +194,12 @@ djbool Player::Update(djfloat fDeltaTime)
 
 void Player::Term()
 {
-
+	if(m_pSkeletonNode)
+	{
+		theSpriteEngine.RemoveNode(m_pSkeletonNode);
+		theSpriteEngine.RemoveActiveNode(m_pSkeletonNode);
+		DJ_SAFE_DELETE(m_pSkeletonNode);
+	}	
 }
 
 ///
@@ -418,7 +423,12 @@ void StickGold::Update(djfloat fDeltaTime)
 ///
 void StickGold::Term()
 {
-
+	if(m_pSkeletonNode)
+	{
+		theSpriteEngine.RemoveNode(m_pSkeletonNode);
+		theSpriteEngine.RemoveActiveNode(m_pSkeletonNode);
+		DJ_SAFE_DELETE(m_pSkeletonNode);
+	}
 }  
 
 ///

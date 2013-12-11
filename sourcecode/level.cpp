@@ -514,8 +514,7 @@ djbool Level::Init(const char* szLevelFile, djint32 nSceneID)
 						pSPE->SetListRayGhost(listRayGhost); 
 
 						DJAssert(m_listBeatsTime.GetLength() != 0);
-						pSPE->SetListBeatsTime(m_listBeatsTime);
-
+						pSPE->SetListBeatsTime(m_listBeatsTime); 						
 						((Centipede*)pSPE)->Init(pSD->nType, pSD->vPosition);
 					}
 					break;
@@ -551,13 +550,31 @@ djbool Level::Init(const char* szLevelFile, djint32 nSceneID)
 
 void Level::Term()
 {
+	// Clear scene
 	m_scenes.Clear(DJTRUE);
-	m_pCurrentScene = NULL;
-	//DJ_SAFE_DELETE(m_pLevelBackground);
+
+	// Clear beatime
+	m_listBeatsTime.Clear(DJTRUE);
+
+	// Clear monkey cilivians
+	m_listMonkeyCivians.Clear(DJTRUE);
+
+	// Clear specter
+	m_listSpecter.Clear(DJTRUE);
+
+	if(m_pStickGold)
+	{
+		DJ_SAFE_DELETE(m_pStickGold);
+	}
+	m_pCurrentScene = NULL;		
+	//if(g_pPlayer)
+	//{
+	//	g_pPlayer->Reset();
+	//}
+
 }
 
 ///
-static float fTimeDelay = 0.0f;
 
 void Level::Update(float fDeltaTime)
 { 
@@ -721,6 +738,7 @@ LevelManager::LevelManager()
 {
 	m_pCurrentLevel = NULL;	
 	m_nSceneID = 0;
+	m_bLevelLoaded = DJFALSE;
 }
 
 ///
@@ -754,13 +772,14 @@ djbool LevelManager::Update(float fDeltaTime)
 
 void LevelManager::Term()
 {
-	DJ_SAFE_DELETE(m_pCurrentLevel);
+	//DJ_SAFE_DELETE(m_pCurrentLevel);
 }
 
 ///
 
 djbool LevelManager::LoadLevel(const char* szLevelFile)
 {
+	m_bLevelLoaded = DJFALSE;
 	m_pCurrentLevel  = DJ_NEW(Level);
 	if(m_pCurrentLevel == NULL || !m_pCurrentLevel->Init(szLevelFile, m_nSceneID))
 	{
@@ -768,6 +787,8 @@ djbool LevelManager::LoadLevel(const char* szLevelFile)
 		DJ_SAFE_DELETE(m_pCurrentLevel);
 		return DJFALSE;
 	}
+	m_bLevelLoaded = DJTRUE;
+	
 	return DJTRUE;
 }
 
@@ -775,6 +796,21 @@ djbool LevelManager::LoadLevel(const char* szLevelFile)
 
 djbool LevelManager::UnloadLevel()
 {
+	if(m_pCurrentLevel != NULL)
+	{
+		m_pCurrentLevel->Term();
+		DJ_SAFE_DELETE(m_pCurrentLevel);
+		m_bLevelLoaded = DJFALSE;
+
+		if(g_pPlayer)
+		{
+			g_pPlayer->Term();
+			DJ_SAFE_DELETE(g_pPlayer);
+		}
+
+		return DJTRUE;
+	} 
+	m_bLevelLoaded = DJFALSE;
 	return DJTRUE;
 }
 

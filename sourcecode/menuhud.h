@@ -22,9 +22,9 @@ DJ_FILE_START();
 /////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
-class DJHUDUINode : public DJUINode
+class DJHUDUINode : public DJPageUINode
 {
-	IMPLEMENT_INTERFACE(HUDUINode, UINode)
+	IMPLEMENT_INTERFACE(HUDUINode, PageUINode)
 public:
 	/// Constructor
 	DJHUDUINode();

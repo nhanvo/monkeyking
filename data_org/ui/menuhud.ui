@@ -5,18 +5,33 @@ UINODE "HUDMenu"
 	POS 	[0 0]
 	SIZE 	[-1 -1] # Will be replaced with UI view size
 	ALIGN 	TOP LEFT
-	ATTACH 	TOP LEFT
-	FLAGS 	UNCLICKABLE
+	ATTACH 	TOP LEFT	
 
 	UINODE "pause"
 	{
 		UINODE "menubutton"
 		STYLEFRAME normal	"ui/ui" "hud_pause" 0
 		STYLEFRAME down		"ui/ui" "hud_pause" 0
+		STYLEFRAME disabled	"ui/ui" "hud_pause" 0
+		STYLEFRAME focused	"ui/ui" "hud_pause" 0
 		POS [10 10]
 		ALIGN TOP LEFT
 		ATTACH TOP LEFT
 		CLICK_BORDER 60 60 80 80
 		EVENT OnClicked "CLICK_PAUSE"
+	}
+
+	UINODE "exit"
+	{
+		UINODE "menubutton"
+		STYLEFRAME normal	"ui/ui" "hud_exit" 0
+		STYLEFRAME down		"ui/ui" "hud_exit" 0
+		STYLEFRAME disabled	"ui/ui" "hud_exit" 0
+		STYLEFRAME focused	"ui/ui" "hud_exit" 0
+		POS [-10 10]
+		ALIGN TOP RIGHT
+		ATTACH TOP RIGHT
+		CLICK_BORDER 60 60 80 80
+		EVENT OnClicked "CLICK_EXIT"
 	}
 }

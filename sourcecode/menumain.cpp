@@ -82,23 +82,29 @@ djint32 DJMainMenuPageUINode::Build()
 void DJMainMenuPageUINode::OnPaint(const DJ2DRenderContext &rc)
 {
 	if(!IsNodeVisible())
-		return;
-	if(IsNodeEnabled())
 	{
-		DJVector2 vPos = GetPosition();
+		return;	
+	}
+
+	DJVector2 vPos = GetPosition();
+	if(IsNodeEnabled())
+	{		
 		vPos += djStepToDesiredVector2(vPos, DJVector2(0,0), 1000.0f) * 0.1f;
-		SetPosition(vPos);
 	}
 	else
 	{
-	    DJVector2 vPos = GetPosition();
 		vPos += djStepToDesiredVector2(vPos, DJVector2(g_nScreenWidth,0), 1000.0f) * 0.1f;
-		SetPosition(vPos);
-		if(vPos.x() >= g_nScreenWidth - 10.0f)
-		{
-			ShowNode(DJFALSE);
-		}
 	}
+
+	if(vPos.x() + GetOrgPosition().x() >= g_nScreenWidth - 20.0f)
+	{
+		ShowNode(DJFALSE);
+	}
+	else
+	{
+		SetPosition(vPos);
+	}
+
 	DJPageUINode::OnPaint(rc);
 }
 
@@ -127,18 +133,20 @@ djbool DJMainMenuPageUINode::OnUIEvent(DJUINode *pNode, const DJUIEvent &ev)
 {
 	if (ev.m_uEventID == pTheUI->EVENTID_ON_CLICKED)
 	{
+		///////////////////////////////////////////////////////////////////////
+		// Select scene
 		if (ev.m_uStateID == pTheUI->GetStateID("CLICK_LEVEL_1"))
 		{
 			g_uSceneStart = SCENE_FRUIT_MOUNTAIN;	
-			((DJMonkeyKingApplication*)pTheApp)->GotoGameState(GS_LOAD_LEVEL);
-			return DJTRUE;
 		} 	
 		else if(ev.m_uStateID == pTheUI->GetStateID("CLICK_LEVEL_2"))
 		{
-			g_uSceneStart = SCENE_CENTIPEDE_SPECTER;
-			((DJMonkeyKingApplication*)pTheApp)->GotoGameState(GS_LOAD_LEVEL);
-			return DJTRUE;
+			g_uSceneStart = SCENE_CENTIPEDE_SPECTER;			
 		}
+		((DJMonkeyKingApplication*)pTheApp)->GotoGameState(GS_LOAD_LEVEL);
+		return DJTRUE;
+		// end select scene
+		///////////////////////////////////////////////////////////////////////
 
 	}
 	return DJFALSE;

@@ -90,6 +90,19 @@ protected:
 		DJ2DSkeletonNode*	s_pSkeletonNode;
 		djfloat				s_fTimeFinishAnim;
 	    djfloat				s_fTimeDuration;
+		SkeletonAnimNode()
+		{
+		
+		}
+		~SkeletonAnimNode()
+		{
+			if(s_pSkeletonNode)
+			{
+				theSpriteEngine.RemoveNode(s_pSkeletonNode);
+				theSpriteEngine.RemoveActiveNode(s_pSkeletonNode);
+				DJ_SAFE_DELETE(s_pSkeletonNode);
+			}
+		}	
 	};
 	DJLinkedList<SkeletonAnimNode>	m_listSkeletonAnimNode;	
 	DJRECT		*m_pRectHitBox;
@@ -219,7 +232,7 @@ public:
 	DJLinkedList<RaysGhost>& GetListRayGhost() {return m_listRayGhost;}
 
 	// Set beats time for rayghost and centipede
-	void SetListBeatsTime(DJLinkedList<BeatsTime> listBeatsTime);
+	void SetListBeatsTime(DJLinkedList<BeatsTime> &listBeatsTime);
 	DJLinkedList<BeatsTime>& GetListBeatsTime() {return m_listBeatsTime;}
 
 	// Set and get state
